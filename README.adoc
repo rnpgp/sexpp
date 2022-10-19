@@ -1,7 +1,7 @@
 # SEXP---(S-expressions)
 
 S-expressions are a data structure for representing complex data. They are a variation on LISP S-expressions. (Lisp was invented by John McCarthy).
-We have adapted S-expressions for use in SDSI (http://theory.lcs.mit.edu/~cis/sdsi.html) and SPKI(http://world.std.com/~cme/html/spki.html). The work reported here is, however, application-independent. (That is, we will use S-expressions in the SPKI/SDSI work, but have developed it and presented it in an application-independent manner, so that others may most easily consider adopting it for other applications.)
+We have adapted S-expressions for use in http://theory.lcs.mit.edu/~cis/sdsi.html[SDSI] and http://world.std.com/~cme/html/spki.html[SPKI]. The work reported here is, however, application-independent. (That is, we will use S-expressions in the SPKI/SDSI work, but have developed it and presented it in an application-independent manner, so that others may most easily consider adopting it for other applications.)
 
 SDSI has been developed by Professors Ronald L. Rivest (https://people.csail.mit.edu/rivest/index.html) and Butler Lampson of MIT's Laboratory for Computer Science(http://www.lcs.mit.edu/), members of LCS's Cryptography and Information Security (http://theory.lcs.mit.edu/~cis) research group.
 
