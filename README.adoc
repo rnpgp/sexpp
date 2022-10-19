@@ -15,18 +15,20 @@ We are currently merging the designs to form SPKI/SDSI 2.0. This design will use
 
 https://people.csail.mit.edu/rivest/Sexp.txt[SEXP 1.0 guide(text)]
 
-C code
+## C code
 
 The following code reads and parses S-expressions. It also prints out the S-expressions in a variety of formats. (Note that most applications will not need anything but the simple canonical and transport formats; the code here is considerably more complex because it also supports the advanced format, both for input and for output.) The "sexp-main" program also contains some documentation on running the program. (Or just type "sexp -h" to get the help print-out.) The code is available under the "MIT License" (open source).
 
-sexp.h
-sexp-basic.c
-sexp-input.c
-sexp-output.c
-sexp-main.c
+- sexp.h
+- sexp-basic.c
+- sexp-input.c
+- exp-output.c
+- sexp-main.c
+
 Here are some sample inputs and outputs (warning: while these look like SDSI/SPKI files, they are only approximations).
 
-canonical
-transport
-advanced
-Last updated 5/4/1997 by Ronald L. Rivest
+- canonical (sexp-sample-c)
+- transport (sexp-sample-b)
+- advanced  (sexp-sample-a)
+
+_Last updated 5/4/1997 by Ronald L. Rivest_
