@@ -4,7 +4,6 @@
  */
 
 #include <stdio.h>
-#include <malloc.h>
 #include "sexp.h"
 
 /**************************************/
