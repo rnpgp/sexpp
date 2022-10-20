@@ -31,4 +31,8 @@ Here are some sample inputs and outputs (warning: while these look like SDSI/SPK
 - transport (sexp-sample-b)
 - advanced  (sexp-sample-a)
 
-_Last updated 5/4/1997 by Ronald L. Rivest_
+## Building
+- mkdir build
+- cd build
+- cmake ..
+- cmake --build .

@@ -1,0 +1,8 @@
+### CMake and build artifacts ###
+/CMakeFiles
+/build
+CMakeCache.txt
+CMakeScripts
+Makefile
+cmake_install.cmake
+sexp
