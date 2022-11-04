@@ -12,15 +12,13 @@ concurrency:
 
 jobs:
   build:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ windows-latest, macos-latest, ubuntu-latest ]
-
+    runs-on: ubuntu-20.04
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: sudo apt-get install libgcrypt-dev googletest
 
       - name: Configure
         run: |
@@ -32,3 +30,8 @@ jobs:
         run: |
           cd build
           cmake --build .
+
+      - name: Tests
+        run: |
+          cd build
+          ./sexp-tests

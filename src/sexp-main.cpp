@@ -7,7 +7,7 @@
 #include <stdlib.h>
 #include "sexp.h"
 
-char *help =
+const char *help =
 "The program `sexp' reads, parses, and prints out S-expressions.\n"
 " INPUT:\n"
 "   Input is normally taken from stdin, but this can be changed:\n"
@@ -37,9 +37,7 @@ char *help =
 /*************************************************************************/
 /* main(argc,argv)
  */
-int main(argc,argv)
-int argc;
-char **argv;
+int main(int argc, char **argv)
 { char *c;
   int swa = TRUE;
   int swb = TRUE;

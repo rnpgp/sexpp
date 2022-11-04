@@ -67,43 +67,37 @@ void initializeCharacterTables()
 /* isWhiteSpace(c)
  * Returns TRUE if c is a whitespace character (space, tab, etc. ).
  */
-int isWhiteSpace(c)
-int c;
+int isWhiteSpace(int c)
 { return ((c>=0 && c<=255) && whitespace[c]); }
 
 /* isDecDigit(c)
  * Returns TRUE if c is a decimal digit.
  */
-int isDecDigit(c)
-int c;
+int isDecDigit(int c)
 { return ((c>=0 && c<=255) && decdigit[c]); }
 
 /* isHexDigit(c)
  * Returns TRUE if c is a hexadecimal digit.
  */
-int isHexDigit(c)
-int c;
+int isHexDigit(int c)
 { return ((c>=0 && c<=255) && hexdigit[c]); }
 
 /* isBase64Digit(c)
  * returns TRUE if c is a base64 digit A-Z,a-Z,0-9,+,/
  */
-int isBase64Digit(c)
-int c;
+int isBase64Digit(int c)
 { return ((c>=0 && c<=255) && base64digit[c]); }
 
 /* isTokenChar(c)
  * Returns TRUE if c is allowed in a token
  */
-int isTokenChar(c)
-int c;
+int isTokenChar(int c)
 { return ((c>=0 && c<=255) && tokenchar[c]); }
 
 /* isAlpha(c)
  * Returns TRUE if c is alphabetic
  */
-int isAlpha(c)
-int c;
+int isAlpha(int c)
 { return ((c>=0 && c<=255) && alpha[c]); }
 
 /**********************/
@@ -112,9 +106,7 @@ int c;
 
 /* changeInputByteSize(is,newByteSize)
  */
-void changeInputByteSize(is,newByteSize)
-sexpInputStream *is;
-int newByteSize;
+void changeInputByteSize(sexpInputStream *is, int newByteSize)
 {
   is->byteSize = newByteSize;
   is->nBits = 0;
@@ -129,8 +121,7 @@ int newByteSize;
  * The value EOF is obtained when no more input is available.
  * This code handles 4-bit/6-bit/8-bit channels.
  */
-void getChar(is)
-sexpInputStream *is;
+void getChar(sexpInputStream *is)
 { int c;
   if (is->nextChar == EOF)
     { is->byteSize = 8;
@@ -205,8 +196,7 @@ sexpInputStream *newSexpInputStream()
 /* skipWhiteSpace(is)
  * Skip over any white space on the given sexpInputStream.
  */
-void skipWhiteSpace(is)
-sexpInputStream *is;
+void skipWhiteSpace(sexpInputStream *is)
 {
   while (isWhiteSpace(is->nextChar)) is->getChar(is);
 }
@@ -215,9 +205,7 @@ sexpInputStream *is;
  * Skip the following input character on input stream is, if it is
  * equal to the character c.  If it is not equal, then an error occurs.
  */
-void skipChar(is,c)
-sexpInputStream *is;
-int c;
+void skipChar(sexpInputStream *is, int c)
 {
   if (is->nextChar==c)
     is->getChar(is);
@@ -230,9 +218,7 @@ int c;
 /* scanToken(is,ss)
  * scan one or more characters into simple string ss as a token.
  */
-void scanToken(is,ss)
-sexpInputStream *is;
-sexpSimpleString *ss;
+void scanToken(sexpInputStream *is, sexpSimpleString *ss)
 {
   skipWhiteSpace(is);
   while (isTokenChar(is->nextChar))
@@ -247,8 +233,7 @@ sexpSimpleString *ss;
  * scan one or more characters (until EOF reached)
  * return an object that is just that string
  */
-sexpObject *scanToEOF(is)
-sexpInputStream *is;
+sexpObject *scanToEOF(sexpInputStream *is)
 {
   sexpSimpleString *ss = newSimpleString();
   sexpString *s = newSexpString();
@@ -265,8 +250,7 @@ sexpInputStream *is;
 /* scanDecimal(is)
  * returns long integer that is value of decimal number
  */
-unsigned long int scanDecimal(is)
-sexpInputStream *is;
+unsigned long int scanDecimal(sexpInputStream *is)
 { unsigned long int value = 0L;
   int i = 0;
   while (isDecDigit(is->nextChar))
@@ -281,10 +265,7 @@ sexpInputStream *is;
 /* scanVerbatimString(is,ss,length)
  * Reads verbatim string of given length into simple string ss.
  */
-void scanVerbatimString(is,ss,length)
-sexpInputStream *is;
-sexpSimpleString *ss;
-long int length;
+void scanVerbatimString(sexpInputStream *is, sexpSimpleString *ss, long int length)
 {
   long int i = 0L;
   skipWhiteSpace(is);
@@ -303,10 +284,7 @@ long int length;
  * Handles ordinary C escapes.
  * If of indefinite length, length is -1.
  */
-void scanQuotedString(is,ss,length)
-sexpInputStream *is;
-sexpSimpleString *ss;
-long int length;
+void scanQuotedString(sexpInputStream *is, sexpSimpleString *ss, long int length)
 {
   int c;
   skipChar(is,'"');
@@ -391,10 +369,7 @@ long int length;
  * Reads hexadecimal string into simple string ss.
  * String is of given length result, or length = -1 if indefinite length.
  */
-void scanHexString(is,ss,length)
-sexpInputStream *is;
-sexpSimpleString *ss;
-long int length;
+void scanHexString(sexpInputStream *is, sexpSimpleString *ss, long int length)
 { changeInputByteSize(is,4);
   skipChar(is,'#');
   while (is->nextChar != EOF && (is->nextChar != '#' || is->byteSize==4))
@@ -414,10 +389,7 @@ long int length;
  * Reads base64 string into simple string ss.
  * String is of given length result, or length = -1 if indefinite length.
  */
-void scanBase64String(is,ss,length)
-sexpInputStream *is;
-sexpSimpleString *ss;
-long int length;
+void scanBase64String(sexpInputStream *is, sexpSimpleString *ss, long int length)
 { changeInputByteSize(is,6);
   skipChar(is,'|');
   while (is->nextChar != EOF && (is->nextChar != '|' || is->byteSize == 6))
@@ -438,8 +410,7 @@ long int length;
  * Determines type of simple string from the initial character, and
  * dispatches to appropriate routine based on that.
  */
-sexpSimpleString *scanSimpleString(is)
-sexpInputStream *is;
+sexpSimpleString *scanSimpleString(sexpInputStream *is)
 {
   long int length;
   sexpSimpleString *ss;
@@ -474,8 +445,7 @@ sexpInputStream *is;
 /* scanString(is)
  * Reads and returns a string [presentationhint]string from input stream.
  */
-sexpString *scanString(is)
-sexpInputStream *is;
+sexpString *scanString(sexpInputStream *is)
 {
   sexpString *s;
   sexpSimpleString *ss;
@@ -498,8 +468,7 @@ sexpInputStream *is;
 /* scanList(is)
  * Read and return a sexpList from the input stream.
  */
-sexpList *scanList(is)
-sexpInputStream *is;
+sexpList *scanList(sexpInputStream *is)
 { sexpList *list;
   sexpObject *object;
   skipChar(is,'(');
@@ -531,8 +500,7 @@ sexpInputStream *is;
 /* scanObject(is)
  * Reads and returns a sexpObject from the given input stream.
  */
-sexpObject *scanObject(is)
-sexpInputStream *is;
+sexpObject *scanObject(sexpInputStream *is)
 {
   sexpObject *object;
   skipWhiteSpace(is);
