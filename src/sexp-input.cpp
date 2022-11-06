@@ -469,32 +469,34 @@ sexpString *scanString(sexpInputStream *is)
  * Read and return a sexpList from the input stream.
  */
 sexpList *scanList(sexpInputStream *is)
-{ sexpList *list;
+{
+  sexpList *list;
   sexpObject *object;
   skipChar(is,'(');
   skipWhiteSpace(is);
   list = newSexpList();
-  if (is->nextChar == ')')
-    { /* ErrorMessage(ERROR,"List () with no contents is illegal.",0,0); */
-      ; /* OK */
-    }
-  else
-    { object = scanObject(is);
-      sexpAddSexpListObject(list,object);
-    }
-  while (TRUE)
-    { skipWhiteSpace(is);
-      if (is->nextChar == ')') /* we just grabbed last element of list */
-	{
-	  skipChar(is,')');
-	  closeSexpList(list);
-	  return(list);
-	}
-      else
-        { object = scanObject(is);
-	  sexpAddSexpListObject(list,object);
-	}
-    }
+  if (is->nextChar == ')') {
+      /* ErrorMessage(ERROR,"List () with no contents is illegal.",0,0); */
+    ; /* OK */
+  }
+  else {
+    object = scanObject(is);
+    sexpAddSexpListObject(list,object);
+  }
+
+  while (TRUE)  {
+    skipWhiteSpace(is);
+    if (is->nextChar == ')') 	{ /* we just grabbed last element of list */
+	    skipChar(is,')');
+	    closeSexpList(list);
+	    return(list);
+	  }
+    else {
+      object = scanObject(is);
+	    sexpAddSexpListObject(list, object);
+	  }
+  }
+  return list;
 }
 
 /* scanObject(is)

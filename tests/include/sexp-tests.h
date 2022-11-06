@@ -29,8 +29,13 @@
 
 #pragma once
 
+#include <string>
+
 #include <gtest/gtest.h>
 #include <stdio.h>
 #include <string.h>
 #include <gcrypt.h>
 #include <sexp.h>
+
+bool compare_text_files(const std::string& filename1, const std::string& filename2);
+bool compare_binary_files(const std::string& filename1, const std::string& filename2);

@@ -36,19 +36,19 @@ set(CMAKE_BUILD_TYPE Debug)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/modules")
 
-add_library(libsexp STATIC
+add_library(sexp STATIC
     src/sexp-basic.cpp
     src/sexp-input.cpp
     src/sexp-output.cpp
     include/sexp.h
 )
 
-target_include_directories (libsexp PUBLIC include)
+target_include_directories (sexp PUBLIC include)
 
 if(${WITH_APP})
-    add_executable (sexp src/sexp-main.cpp include/sexp.h)
-    target_include_directories (sexp PUBLIC include)
-    target_link_libraries(sexp PRIVATE libsexp)
+    add_executable (sexp-cli src/sexp-main.cpp include/sexp.h)
+    target_include_directories (sexp-cli PUBLIC include)
+    target_link_libraries(sexp-cli PRIVATE sexp)
 endif(${WITH_APP})
 
 
@@ -70,11 +70,12 @@ if(${WITH_TESTS})
 
     add_executable(sexp-tests
         tests/src/sexp-tests.cpp
+        tests/src/compare-files.cpp
         tests/include/sexp-tests.h
     )
 
     target_link_libraries(sexp-tests PRIVATE
-        libsexp
+        sexp
         ${GCRYPT_LIBRARIES}
         gtest_main
         gtest

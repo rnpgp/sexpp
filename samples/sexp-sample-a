@@ -16,5 +16,4 @@
    mother))
  (not-before "1997-01-01_09:00:00")
  (not-after "1998-01-01_09:00:00")
- (tag
-  (spend (account "12345678") (* numeric range "1" "1000"))))
+ (tag (spend (account "12345678") (* numeric range "1" "1000"))))

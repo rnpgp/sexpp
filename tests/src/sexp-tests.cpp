@@ -29,11 +29,123 @@
 
 #include <sexp-tests.h>
 
+
 namespace {
-	TEST(LoadTests, smoke) {
-		int i = 1;
-		EXPECT_EQ(1, i);
-	}
+	class BasicTests : public testing::Test {
+	protected:
+
+        static void SetUpTestSuite() {
+            initializeCharacterTables();
+            initializeMemory();
+		}
+
+		static void TearDownTestSuite() {
+		}
+	};
+
+//    TEST_F(BasicTests, smoke) {
+//	    int i = 1;
+//	    EXPECT_EQ(1, i);
+//    }
+
+    TEST_F(BasicTests, Scan2Canonical) {
+        const size_t n_tests = 3;
+        const char * inputs[n_tests] = {
+            "../samples/sexp-sample-a",
+            "../samples/sexp-sample-b",
+            "../samples/sexp-sample-c"
+        };
+
+        for (size_t i = 0; i < n_tests; i++) {
+            sexpInputStream *is = newSexpInputStream();
+            sexpOutputStream *os = newSexpOutputStream();
+            sexpObject *object;
+
+            is->inputFile = fopen(inputs[i],"rb");
+            EXPECT_NE(is->inputFile, nullptr);
+            if (is->inputFile != nullptr) {
+                changeInputByteSize(is,8);
+                object = scanObject(is);
+                os->outputFile = fopen("sexp-prime","wb");
+                EXPECT_NE(os->outputFile, nullptr);
+                if (os->outputFile != nullptr) {
+                    canonicalPrintObject(os,object);
+                    fclose(os->outputFile);
+                }
+                fclose(is->inputFile);
+            }
+            EXPECT_TRUE(compare_binary_files("../samples/sexp-sample-c", "sexp-prime"));
+            unlink("sexp-prime");
+        }
+    }
+
+    TEST_F(BasicTests, Scan2Base64) {
+        const size_t n_tests = 3;
+        const char * inputs[n_tests] = {
+            "../samples/sexp-sample-a",
+            "../samples/sexp-sample-b",
+            "../samples/sexp-sample-c"
+        };
+
+        for (size_t i = 0; i < n_tests; i++) {
+            sexpInputStream *is = newSexpInputStream();
+            sexpOutputStream *os = newSexpOutputStream();
+            sexpObject *object;
+
+            is->inputFile = fopen(inputs[i],"rb");
+            EXPECT_NE(is->inputFile, nullptr);
+            if (is->inputFile != nullptr) {
+                is->getChar(is);
+                changeInputByteSize(is,8);
+                object = scanObject(is);
+                os->outputFile = fopen("sexp-prime","w");
+                EXPECT_NE(os->outputFile, nullptr);
+                if (os->outputFile != nullptr) {
+                    os->maxcolumn = 0;
+                    base64PrintWholeObject(os, object);
+                    fprintf(os->outputFile, "\n");
+                    fclose(os->outputFile);
+                }
+                fclose(is->inputFile);
+            }
+            EXPECT_TRUE(compare_text_files("../samples/sexp-sample-b", "sexp-prime"));
+            unlink("sexp-prime");
+        }
+    }
+
+    TEST_F(BasicTests, Scan2Advanced) {
+        const size_t n_tests = 3;
+        const char * inputs[n_tests] = {
+            "../samples/sexp-sample-a",
+            "../samples/sexp-sample-b",
+            "../samples/sexp-sample-c"
+        };
+
+        for (size_t i = 0; i < n_tests; i++) {
+            sexpInputStream *is = newSexpInputStream();
+            sexpOutputStream *os = newSexpOutputStream();
+            sexpObject *object;
+
+            is->inputFile = fopen(inputs[i],"rb");
+            EXPECT_NE(is->inputFile, nullptr);
+            if (is->inputFile != nullptr) {
+                is->getChar(is);
+                changeInputByteSize(is,8);
+                object = scanObject(is);
+                os->outputFile = fopen("sexp-prime","w");
+                EXPECT_NE(os->outputFile, nullptr);
+                if (os->outputFile != nullptr) {
+                    advancedPrintObject(os, object);
+                    fprintf(os->outputFile, "\n");
+                    fclose(os->outputFile);
+                }
+                fclose(is->inputFile);
+            }
+            EXPECT_TRUE(compare_text_files("../samples/sexp-sample-a", "sexp-prime"));
+            unlink("sexp-prime-1");
+        }
+    }
+
 }
 
 /*int main(int argc, char** argv) {
