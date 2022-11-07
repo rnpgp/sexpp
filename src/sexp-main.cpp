@@ -1,11 +1,41 @@
-/* SEXP implementation code sexp-main.c
+/**
+ *
+ * Copyright (c) 2022, [Ribose Inc](https://www.ribose.com).
+ * All rights reserved.
+ * This file is a part of RNP sexp library
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other matrials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
+ * TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDERS OR CONTRIBUTORS
+ * BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ *
+ * Original copyright
+ *
+ * SEXP implementation code sexp-main.c
  * Ron Rivest
  * 6/29/1997
- */
+ **/
 
-#include <stdio.h>
-#include <stdlib.h>
-#include "sexp.h"
+#include <sexp/sexp-error.h>
+#include <sexp/sexp.h>
+
+using namespace sexp;
 
 const char *help =
 "The program `sexp' reads, parses, and prints out S-expressions.\n"
@@ -37,121 +67,143 @@ const char *help =
 /*************************************************************************/
 /* main(argc,argv)
  */
-int main(int argc, char **argv)
-{ char *c;
-  int swa = TRUE;
-  int swb = TRUE;
-  int swc = TRUE;
-  int swp = TRUE;
-  int sws = FALSE;
-  int swx = TRUE;
-  int swl = FALSE;
-  int i;
-  sexpObject *object;
-  sexpInputStream *is;
-  sexpOutputStream *os;
-  initializeCharacterTables();
-  initializeMemory();
-  is = newSexpInputStream();
-  os = newSexpOutputStream();
-  /* process switches */
-  if (argc>1) swa = swb = swc = swp = sws = swx = swl = FALSE;
-  for (i=1;i<argc;i++)
-    { c = argv[i];
-      if (*c != '-')
-	{ printf("Unrecognized switch %s\n",c); exit(0); }
-      c++;
-      if (*c == 'a') /* advanced output */
-	swa = TRUE;
-      else if (*c == 'b') /* base-64 output */
-	swb = TRUE;
-      else if (*c == 'c') /* canonical output */
-	swc = TRUE;
-      else if (*c == 'h') /* help */
-	{
-	  printf("%s",help);
-	  fflush(stdout);
-	  exit(0);
-	}
-      else if (*c == 'i') /* input file */
-	{ if (i+1<argc) i++;
-	  is->inputFile = fopen(argv[i],"r");
-	  if (is->inputFile==NULL)
-	    ErrorMessage(ERROR,"Can't open input file.",0,0);
-	}
-      else if (*c == 'l') /* suppress linefeeds after output */
-	swl = TRUE;
-      else if (*c == 'o') /* output file */
-	{ if (i+1<argc) i++;
-	  os->outputFile = fopen(argv[i],"w");
-	  if (os->outputFile==NULL)
-	    ErrorMessage(ERROR,"Can't open output file.",0,0);
-	}
-      else if (*c == 'p') /* prompt for input */
-	swp = TRUE;
-      else if (*c == 's') /* treat input as one big string */
-	sws = TRUE;
-      else if (*c == 'w') /* set output width */
-	{ if (i+1<argc) i++;
-	  os->maxcolumn = atoi(argv[i]);
-	}
-      else if (*c == 'x') /* execute repeatedly */
-	swx = TRUE;
-      else
-	{ printf("Unrecognized switch: %s\n",argv[i]); exit(0); }
-    }
-  if (swa == FALSE && swb == FALSE && swc == FALSE)
-    swc = TRUE;  /* must have some output format! */
+int main(int argc, char **argv) {
+      char *c;
+      bool  swa = true,
+            swb = true,
+            swc = true,
+            swp = true,
+            sws = false,
+            swx = true,
+            swl = false;
+      int i;
+      int ret = -1;
+      sexp_exception::set_interactive(true);
+      std::ifstream* ifs = nullptr;
+      sexpInputStream* is = nullptr;
+      std::ofstream* ofs = nullptr;
+      sexpOutputStream *os = nullptr;
+      try {
+            sexpObject *object;
 
-  /* main loop */
-  if (swp == 0) is->getChar(is);
-  else is->nextChar = -2;  /* this is not EOF */
-  while (is->nextChar != EOF)
-    {
-      if (swp)
-	{ printf("Input:\n"); fflush(stdout); }
+            is = new sexpInputStream(&std::cin);
+            os = new sexpOutputStream(&std::cout);
 
-      changeInputByteSize(is,8);
-      if (is->nextChar == -2) is->getChar(is);
+            /* process switches */
+            if (argc>1) swa = swb = swc = swp = sws = swx = swl = false;
+            for (i=1; i<argc; i++) {
+                  c = argv[i];
+                  if (*c != '-') throw sexp_exception(std::string("Unrecognized switch ") + c, sexp_exception::error, EOF);
+                  c++;
+                  if (*c == 'a') swa = true; /* advanced output */
+	            else if (*c == 'b') swb = true;/* base-64 output */
+	            else if (*c == 'c') swc = true; /* canonical output */
+                  else if (*c == 'h') { /* help */
+                        std::cout << help;
+                        std::cout.flush();
+	                  exit(0);
+      	      }
+                  else if (*c == 'i') { /* input file */
+	                  if (i+1<argc) i++;
+                        ifs = new std::ifstream(argv[i], std::ifstream::binary);
+	                  if (ifs->fail()) ErrorMessage(sexp_exception::error,"Can't open input file.",0,0, EOF);
+                        is->setInput(ifs);
+	            }
+                  else if (*c == 'l') swl = true; /* suppress linefeeds after output */
+                  else if (*c == 'o') { /* output file */
+	                  if (i+1<argc) i++;
+                        ofs = new std::ofstream(argv[i], std::ifstream::binary);
+	                  if (ofs->fail()) ErrorMessage(sexp_exception::error,"Can't open output file.",0,0, EOF);
+                        os->setOutput(ofs);
+	            }
+                  else if (*c == 'p') swp = true; /* prompt for input */
+                  else if (*c == 's') sws = true; /* treat input as one big string */
+                  else if (*c == 'w') { /* set output width */
+	                  if (i+1<argc) i++;
+	                  os->setMaxColumn(atoi(argv[i]));
+	            }
+                  else if (*c == 'x') swx = true; /* execute repeatedly */
+                  else throw sexp_exception(std::string("Unrecognized switch ") + argv[i], sexp_exception::error, EOF);
+            }
 
-      skipWhiteSpace(is);
-      if (is->nextChar == EOF) break;
+            if (swa == false && swb == false && swc == false)
+            swc = true;  /* must have some output format! */
 
-      if (sws == FALSE)
-	object = scanObject(is);
-      else
-	object = scanToEOF(is);
+            /* main loop */
+            if (swp == 0) is->getChar();
+            else is->nextChar = -2;  /* this is not EOF */
+            while (is->nextChar != EOF) {
+                  if (swp) {
+                        std::cout << "Input:" << std::endl;
+                        std::cout.flush();
+                  }
 
-      if (swc)
-	{ if (swp)
-	    { printf("Canonical output:"); fflush(stdout);
-	      os->newLine(os,ADVANCED);
-	    }
-	  canonicalPrintObject(os,object);
-	  if (!swl) { printf("\n"); fflush(stdout); }
-	}
+                  is->setByteSize(8);
+                  if (is->nextChar == -2) is->getChar();
 
-      if (swb)
-	{ if (swp)
-	    { printf("Base64 (of canonical) output:"); fflush(stdout);
-	      os->newLine(os,ADVANCED);
-	    }
-	  base64PrintWholeObject(os,object);
-	  if (!swl) { printf("\n"); fflush(stdout); }
-	}
+                  is->skipWhiteSpace();
+                  if (is->nextChar == EOF) break;
 
-      if (swa)
-	{ if (swp)
-	    { printf("Advanced transport output:"); fflush(stdout);
-	      os->newLine(os,ADVANCED);
-	    }
-	  advancedPrintObject(os,object);
-	  if (!swl) { printf("\n"); fflush(stdout); }
-	}
+                  if (sws == false) object = is->scanObject();
+                  else              object = is->scanToEOF();
 
-      if (!swx) break;
-      if (!swp) skipWhiteSpace(is);
-      else if (!swl) { printf("\n"); fflush(stdout); }
-    }
-  return(0);
+                  if (swc) {
+                        if (swp) {
+                              std::cout << "Canonical output:" << std::endl;
+                              std::cout.flush();
+	                        os->newLine(sexpOutputStream::advanced);
+	                  }
+	                  object->printCanonical(os);
+	                  if (!swl) {
+                              std::cout << std::endl;
+                              std::cout.flush();
+                        }
+	            }
+
+                  if (swb) {
+                        if (swp) {
+                              std::cout << "Base64 (of canonical) output:" << std::endl;
+                              std::cout.flush();
+	                        os->newLine(sexpOutputStream::advanced);
+	                  }
+      	            os->printBase64(object);
+	                  if (!swl) {
+                              std::cout << std::endl;
+                              std::cout.flush();
+                        }
+	            }
+
+                  if (swa) {
+                        if (swp) {
+                              std::cout << "Advanced transport output:" << std::endl;
+                              std::cout.flush();
+	                        os->newLine(sexpOutputStream::advanced);
+	                  }
+	                  os->printAdvanced(object);
+	                  if (!swl) {
+                              std::cout << std::endl;
+                              std::cout.flush();
+                        }
+	            }
+
+                  if (!swx) break;
+                  if (!swp) is->skipWhiteSpace();
+                  else if (!swl) {
+                        std::cout << std::endl;
+                        std::cout.flush();
+                  }
+            }
+            ret = 0;
+      }
+      catch(sexp_exception e) {
+            std::cout << e.what() << std::endl;
+      }
+      catch(...) {
+            std::cout << "UNEXPECTED ERROR" << std::endl;
+      }
+      if (is) delete is;
+      if (ifs) delete ifs;
+      if (os) delete os;
+      if (ofs) delete ofs;
+      return ret;
 }

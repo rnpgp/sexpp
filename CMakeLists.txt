@@ -31,30 +31,50 @@ project (sexp VERSION 0.1.0 LANGUAGES C CXX)
 option(WITH_TESTS "Build tests" ON)
 option(WITH_APP "Build sexp console application" ON)
 
+include(GNUInstallDirs)
+include(CTest)
+
 set(CMAKE_BUILD_TYPE Debug)
-# Die to GTest C++ 11  deprecation
+# Due to GTest C++ 11  deprecation
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/modules")
 
 add_library(sexp STATIC
-    src/sexp-basic.cpp
     src/sexp-input.cpp
     src/sexp-output.cpp
-    include/sexp.h
+    src/sexp-object.cpp
+    src/sexp-simple-string.cpp
+    src/sexp-error.cpp
+    include/sexp/sexp.h
+    include/sexp/sexp-error.h
 )
 
 target_include_directories (sexp PUBLIC include)
 
 if(${WITH_APP})
-    add_executable (sexp-cli src/sexp-main.cpp include/sexp.h)
+    add_executable (sexp-cli
+                    src/sexp-main.cpp
+                    include/sexp/sexp.h
+                    include/sexp/sexp-error.h
+    )
     target_include_directories (sexp-cli PUBLIC include)
     target_link_libraries(sexp-cli PRIVATE sexp)
 endif(${WITH_APP})
 
 
 if(${WITH_TESTS})
-    message(STATUS "Fetching googletest")
     include(FetchContent)
+    include(GoogleTest)
+
+    set(SEXP_SAMPLES_FOLDER "${CMAKE_CURRENT_SOURCE_DIR}/samples")
+
+    configure_file(
+        "${CMAKE_CURRENT_SOURCE_DIR}/cmake/sexp-samples-folder.h.in"
+        "${CMAKE_CURRENT_SOURCE_DIR}/tests/include/sexp-samples-folder.h"
+        @ONLY
+    )
+
+    message(STATUS "Fetching googletest")
     FetchContent_Declare(
         googletest
         GIT_REPOSITORY https://github.com/google/googletest.git
@@ -62,30 +82,46 @@ if(${WITH_TESTS})
     )
     # maintain compiler/linker settings on Windows
     set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+    # do not install gtest
+    set(INSTALL_GTEST OFF CACHE BOOL "" FORCE)
     # explicitely disable unneeded gmock build
-    set(BUILD_GMOCK OFF CACHE BOOL "" FORCE)
     FetchContent_MakeAvailable(googletest)
 
-    find_package(GCrypt REQUIRED)
-
     add_executable(sexp-tests
-        tests/src/sexp-tests.cpp
+        tests/src/baseline-tests.cpp
+        tests/src/compat-tests.cpp
+        tests/src/exception-tests.cpp
+        tests/src/primitives-tests.cpp
         tests/src/compare-files.cpp
         tests/include/sexp-tests.h
     )
 
     target_link_libraries(sexp-tests PRIVATE
         sexp
-        ${GCRYPT_LIBRARIES}
         gtest_main
+        gmock_main
         gtest
     )
 
     target_include_directories(sexp-tests PRIVATE
         tests/include
         include
-        ${GCRYPT_INCLUDE_DIRS}
-        ${GTEST_INCLUDE_DIRS}
+        "${GTEST_INCLUDE_DIRS}"
     )
 
+    gtest_discover_tests(sexp-tests)
 endif(${WITH_TESTS})
+
+set(CONFIGURED_PC "${CMAKE_CURRENT_BINARY_DIR}/sexp.pc")
+configure_file(
+    "${CMAKE_CURRENT_SOURCE_DIR}/cmake/sexp.pc.in"
+    "${CONFIGURED_PC}"
+    @ONLY
+)
+
+install(TARGETS sexp DESTINATION "${CMAKE_INSTALL_LIBDIR}")
+install(DIRECTORY include/ DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
+install(FILES "${CONFIGURED_PC}" DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
+if(${WITH_APP})
+    install(TARGETS sexp-cli DESTINATION "${CMAKE_INSTALL_BINDIR}")
+endif(${WITH_APP})

@@ -1,0 +1,2 @@
+*.giattributes text eol=lf
+samples/** -text

@@ -1,3 +1,5 @@
 ### CMake and build artifacts ###
 /build
-/.vscode
+/baseline
+/tests/include/sexp-samples-folder.h
+#/.vscode

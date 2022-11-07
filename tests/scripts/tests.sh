@@ -1,3 +1,4 @@
+#! /bin/bash
 #
 # Copyright (c) 2022 [Ribose Inc](https://www.ribose.com).
 # All rights reserved.
@@ -24,52 +25,41 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-name: build-and-test
+# More safety, by turning some bugs into errors.
+# Without `errexit` you don’t need ! and can replace
+# PIPESTATUS with a simple $?
+set -o errexit -o pipefail -o noclobber -o nounset
 
-on:
-  push:
-    branches: [ main ]
-  pull_request:
-  workflow_dispatch:
+assert_installed() {
+   assertTrue "$1 was not installed" "[ -f $1 ]"
+}
 
-concurrency:
-  group: '${{ github.workflow }}-${{ github.job }}-${{ github.head_ref || github.ref_name }}'
-  cancel-in-progress: true
+# ......................................................................
+# Check that sexp is installed as expected
+test_install_script() {
+   echo "==> Install script test"
 
-jobs:
-  build-and-test:
-    runs-on: ubuntu-20.04
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
+   DIR_INSTALL="$DIR_ROOT"/install
+   DIR_INS_B="$DIR_INSTALL"/bin
+   DIR_INS_L="$DIR_INSTALL"/lib
+   DIR_INS_P="$DIR_INS_L"/pkgconfig
+   DIR_INS_I="$DIR_INSTALL"/include/sexp
 
-      - name: Configure
-        run: |
-          mkdir -p build
-          cd build
-          cmake .. -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/install
+   assert_installed "$DIR_INS_B/sexp-cli"
+   assert_installed "$DIR_INS_L/libsexp.a"
+   assert_installed "$DIR_INS_P/sexp.pc"
+   assert_installed "$DIR_INS_I/sexp.h"
+   assert_installed "$DIR_INS_I/sexp-error.h"
+}
 
-      - name: Build
-        run: |
-          cd build
-          cmake --build .
+# ......................................................................
+# main
+DIR0="$( cd "$( dirname "$0" )" && pwd )"
+DIR1="${DIR_ROOT:="$DIR0/../.."}"
+DIR_ROOT="$( cd "$DIR1" && pwd )"
 
-      - name: Run tests
-        run: |
-          cd build
-          ctest
+DIR_TESTS="$( cd "$DIR0/.." && pwd)"
 
-      - name: Checkout shell test framework
-        uses: actions/checkout@v3
-        with:
-          repository: kward/shunit2
-          path: ${{github.workspace}}/tests/shunit2
-          fetch-depth: 1
-
-      - name: Install
-        run: |
-          cd build
-          cmake --install .
-
-      - name: Run additional tests
-        run:  ${{github.workspace}}/tests/scripts/tests.sh
+echo "Running libdwarfs additional tests"
+# shellcheck source=/dev/null
+. "$DIR_TESTS"/shunit2/shunit2
