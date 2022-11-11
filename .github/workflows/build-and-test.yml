@@ -38,7 +38,11 @@ concurrency:
 
 jobs:
   build-and-test:
-    runs-on: ubuntu-20.04
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ ubuntu-20.04, macos-11 ]
     steps:
       - name: Checkout
         uses: actions/checkout@v3

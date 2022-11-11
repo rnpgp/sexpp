@@ -30,7 +30,7 @@ BreakBeforeBinaryOperators: None
 BreakBeforeBraces: Custom
 BreakBeforeTernaryOperators: false
 BreakStringLiterals: true
-ColumnLimit:     95
+ColumnLimit:     110
 ContinuationIndentWidth: 2
 DerivePointerAlignment: false
 DisableFormat:   false
