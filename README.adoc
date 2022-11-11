@@ -1,4 +1,4 @@
-image:https://github.com/rnpgp/sexp/workflows/build-and-test/badge.svg["Ubuntu Build Status", link="https://github.com/rnpgp/sexp/actions?workflow=build-and-test"]
+image:https://github.com/rnpgp/sexp/workflows/build-and-test/badge.svg["Build status", link="https://github.com/rnpgp/sexp/actions?workflow=build-and-test"]
 
 # SEXP---(S-expressions) parser and generator library
 

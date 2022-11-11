@@ -39,14 +39,20 @@ assert_installed() {
 test_install_script() {
    echo "==> Install script test"
 
-   DIR_INSTALL="$DIR_ROOT"/install
-   DIR_INS_B="$DIR_INSTALL"/bin
-   DIR_INS_L="$DIR_INSTALL"/lib
-   DIR_INS_P="$DIR_INS_L"/pkgconfig
-   DIR_INS_I="$DIR_INSTALL"/include/sexp
+   DIR_INSTALL="$DIR_ROOT/install"
+   DIR_INS_B="$DIR_INSTALL/bin"
+   DIR_INS_L="$DIR_INSTALL/lib"
+   DIR_INS_P="$DIR_INS_L/pkgconfig"
+   DIR_INS_I="$DIR_INSTALL/include/sexp"
 
-   assert_installed "$DIR_INS_B/sexp-cli"
-   assert_installed "$DIR_INS_L/libsexp.a"
+   if [[ "$OSTYPE" == "windows" ]]; then
+      assert_installed "$DIR_INS_B/sexp-cli.exe"
+      assert_installed "$DIR_INS_L/sexp.lib"
+   else
+      assert_installed "$DIR_INS_B/sexp-cli"
+      assert_installed "$DIR_INS_L/libsexp.a"
+   fi
+
    assert_installed "$DIR_INS_P/sexp.pc"
    assert_installed "$DIR_INS_I/sexp.h"
    assert_installed "$DIR_INS_I/sexp-error.h"
@@ -60,6 +66,6 @@ DIR_ROOT="$( cd "$DIR1" && pwd )"
 
 DIR_TESTS="$( cd "$DIR0/.." && pwd)"
 
-echo "Running libdwarfs additional tests"
+echo "Running sexp additional tests"
 # shellcheck source=/dev/null
 . "$DIR_TESTS"/shunit2/shunit2
