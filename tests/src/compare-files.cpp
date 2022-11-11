@@ -30,8 +30,7 @@
 #include <algorithm>
 #include <fstream>
 
-bool
-compare_binary_files(const std::string &filename1, const std::string &filename2)
+bool compare_binary_files(const std::string &filename1, const std::string &filename2)
 {
     bool          res = false;
     std::ifstream file1(filename1, std::ifstream::ate | std::ifstream::binary);
@@ -50,8 +49,16 @@ compare_binary_files(const std::string &filename1, const std::string &filename2)
     return res;
 }
 
-std::istream &
-safe_get_line(std::istream &is, std::string &t)
+bool compare_binary_files(const std::string &filename1, std::istream &file2)
+{
+    std::ifstream file1(filename1, std::ifstream::binary);
+
+    std::istreambuf_iterator<char> begin1(file1);
+    std::istreambuf_iterator<char> begin2(file2);
+    return std::equal(begin1, std::istreambuf_iterator<char>(), begin2);
+}
+
+std::istream &safe_get_line(std::istream &is, std::string &t)
 {
     t.clear();
 
@@ -84,13 +91,31 @@ safe_get_line(std::istream &is, std::string &t)
     }
 }
 
-bool
-compare_text_files(const std::string &filename1, const std::string &filename2)
+bool compare_text_files(const std::string &filename1, const std::string &filename2)
 {
     bool          res = true;
     std::ifstream file1(filename1, std::ifstream::binary);
     std::ifstream file2(filename2, std::ifstream::binary);
     std::string   s1, s2;
+
+    while (res) {
+        if (file1.eof() && file2.eof())
+            break;
+        safe_get_line(file1, s1);
+        safe_get_line(file2, s2);
+        if (s1 != s2)
+            res = false;
+    }
+
+    return res;
+}
+
+bool compare_text_files(const std::string &filename1, std::istream &file2)
+{
+    bool          res = true;
+    std::ifstream file1(filename1, std::ifstream::binary);
+    std::string   s1, s2;
+    file2.seekg(0);
 
     while (res) {
         if (file1.eof() && file2.eof())

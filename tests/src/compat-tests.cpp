@@ -36,10 +36,7 @@ class CompatTests : public testing::Test {
   protected:
     static void SetUpTestSuite(){};
 
-    static void
-    TearDownTestSuite()
-    {
-    }
+    static void TearDownTestSuite() {}
 };
 
 TEST_F(CompatTests, Canonical)
@@ -52,18 +49,12 @@ TEST_F(CompatTests, Canonical)
         sexpInputStream is(&ifs);
         sexpObject *    obj = is.setByteSize(8)->getChar()->scanObject();
 
-        char fn[L_tmpnam];
-        std::tmpnam(fn);
-        std::ofstream ofs(fn, std::iostream::binary);
-        EXPECT_FALSE(ofs.fail());
+        std::ostringstream oss(std::ios_base::binary);
+        sexpOutputStream   os(&oss);
+        os.printCanonical(obj);
 
-        if (!ofs.fail()) {
-            sexpOutputStream os(&ofs);
-            os.printCanonical(obj);
-            ofs.close();
-            EXPECT_TRUE(compare_binary_files(keyfile, fn));
-        }
-        unlink(fn);
+        std::istringstream iss(oss.str(), std::ios_base::binary);
+        EXPECT_TRUE(compare_binary_files(keyfile, iss));
     }
 }
 
@@ -78,20 +69,15 @@ TEST_F(CompatTests, Advanced)
         sexpInputStream is(&ifs);
         sexpObject *    obj = is.setByteSize(8)->getChar()->scanObject();
 
-        char fn[L_tmpnam];
-        std::tmpnam(fn);
-        std::ofstream ofs(fn, std::iostream::binary);
-        EXPECT_FALSE(ofs.fail());
+        std::ostringstream oss(std::ios_base::binary);
+        sexpOutputStream   os(&oss);
 
-        if (!ofs.fail()) {
-            sexpOutputStream os(&ofs);
-            os.setMaxColumn(100);
-            os.printAdvanced(obj);
-            ofs << std::endl;
-            ofs.close();
-            EXPECT_TRUE(compare_binary_files(expectedfile, fn));
-        }
-        unlink(fn);
+        os.setMaxColumn(100);
+        os.printAdvanced(obj);
+        oss << std::endl;
+
+        std::istringstream iss(oss.str(), std::ios_base::binary);
+        EXPECT_TRUE(compare_text_files(expectedfile, iss));
     }
 }
 

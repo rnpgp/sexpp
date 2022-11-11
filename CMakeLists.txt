@@ -33,8 +33,12 @@ option(WITH_APP "Build sexp console application" ON)
 
 include(GNUInstallDirs)
 
-set(CMAKE_BUILD_TYPE Debug)
-set(CMAKE_CXX_STANDARD 11)
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Debug)
+endif(NOT CMAKE_BUILD_TYPE)
+
+message(STATUS "Building ${CMAKE_BUILD_TYPE} configuration")
+
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/modules")
 
 add_library(sexp STATIC
@@ -47,6 +51,7 @@ add_library(sexp STATIC
     include/sexp/sexp-error.h
 )
 
+target_compile_features(sexp PUBLIC cxx_std_11)
 target_include_directories (sexp PUBLIC include)
 
 if(${WITH_APP})
@@ -59,6 +64,8 @@ if(${WITH_APP})
     target_link_libraries(sexp-cli PRIVATE sexp)
 endif(${WITH_APP})
 
+target_compile_features(sexp-cli PUBLIC cxx_std_11)
+target_include_directories (sexp-cli PUBLIC include)
 
 if(${WITH_TESTS})
     include(CTest)
@@ -107,6 +114,8 @@ if(${WITH_TESTS})
         include
         "${GTEST_INCLUDE_DIRS}"
     )
+
+    target_compile_features(sexp-tests PUBLIC cxx_std_11)
 
     gtest_discover_tests(sexp-tests)
 endif(${WITH_TESTS})

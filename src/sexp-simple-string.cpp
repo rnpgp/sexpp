@@ -40,15 +40,14 @@ namespace sexp {
  * sexpSimpleString::printCanonicalVerbatim(os)
  * Print out simple string on output stream os as verbatim string.
  */
-sexpOutputStream *
-sexpSimpleString::printCanonicalVerbatim(sexpOutputStream *os) const
+sexpOutputStream *sexpSimpleString::printCanonicalVerbatim(sexpOutputStream *os) const
 {
     const octet *c = c_str();
     /* print out len: */
-    os->printDecimal(length())->varPutChar(':');
+    os->print_decimal(length())->var_put_char(':');
     /* print characters in fragment */
     for (size_t i = 0; i < length(); i++)
-        os->varPutChar((int) *c++);
+        os->var_put_char((int) *c++);
     return os;
 }
 
@@ -56,8 +55,7 @@ sexpSimpleString::printCanonicalVerbatim(sexpOutputStream *os) const
  * sexpSimpleString::advancedLength(os)
  * Returns length of printed image of s
  */
-size_t
-sexpSimpleString::advancedLength(sexpOutputStream *os) const
+size_t sexpSimpleString::advancedLength(sexpOutputStream *os) const
 {
     if (canPrintAsToken(os))
         return advancedLengthToken();
@@ -76,12 +74,11 @@ sexpSimpleString::advancedLength(sexpOutputStream *os) const
  * Prints out simple string ss as a token (assumes that this is OK).
  * May run over max-column, but there is no fragmentation allowed...
  */
-sexpOutputStream *
-sexpSimpleString::printToken(sexpOutputStream *os) const
+sexpOutputStream *sexpSimpleString::printToken(sexpOutputStream *os) const
 {
     const octet *c = c_str();
     if (os->getMaxColumn() > 0 && os->getColumn() > (os->getMaxColumn() - length()))
-        os->newLine(sexpOutputStream::advanced);
+        os->new_line(sexpOutputStream::advanced);
     for (size_t i = 0; i < length(); i++)
         os->putChar((int) (*c++));
     return os;
@@ -92,43 +89,42 @@ sexpSimpleString::printToken(sexpOutputStream *os) const
  * Print out simple string ss on output stream os as verbatim string.
  * Again, can't fragment string, so max-column is just a suggestion...
  */
-sexpOutputStream *
-sexpSimpleString::printVerbatim(sexpOutputStream *os) const
+sexpOutputStream *sexpSimpleString::printVerbatim(sexpOutputStream *os) const
 {
     const octet *c = c_str();
     if (os->getMaxColumn() > 0 && os->getColumn() > (os->getMaxColumn() - length()))
-        os->newLine(sexpOutputStream::advanced)->printDecimal(length())->putChar(':');
+        os->new_line(sexpOutputStream::advanced)->print_decimal(length())->putChar(':');
     for (size_t i = 0; i < length(); i++)
         os->putChar((int) *c++);
     return os;
 }
 
 /*
- * sexpSimpleString::printBase64(os)
+ * sexpSimpleString::print_base64(os)
  * Prints out simple string ss as a base64 value.
  */
-sexpOutputStream *
-sexpSimpleString::printBase64(sexpOutputStream *os) const
+sexpOutputStream *sexpSimpleString::print_base64(sexpOutputStream *os) const
 {
     const octet *c = c_str();
-    os->varPutChar('|')->changeOutputByteSize(6, sexpOutputStream::advanced);
+    os->var_put_char('|')->change_output_byte_size(6, sexpOutputStream::advanced);
     for (size_t i = 0; i < length(); i++)
-        os->varPutChar((int) (*c++));
-    return os->flushOutput()->changeOutputByteSize(8, sexpOutputStream::advanced)->varPutChar('|');
+        os->var_put_char((int) (*c++));
+    return os->flush()
+      ->change_output_byte_size(8, sexpOutputStream::advanced)
+      ->var_put_char('|');
 }
 
 /*
  * sexpSimpleString::printHex(os)
  * Prints out simple string as a hexadecimal value.
  */
-sexpOutputStream *
-sexpSimpleString::printHex(sexpOutputStream *os) const
+sexpOutputStream *sexpSimpleString::printHex(sexpOutputStream *os) const
 {
     const octet *c = c_str();
-    os->putChar('#')->changeOutputByteSize(4, sexpOutputStream::advanced);
+    os->putChar('#')->change_output_byte_size(4, sexpOutputStream::advanced);
     for (size_t i = 0; i < length(); i++)
-        os->varPutChar((int) (*c++));
-    return os->flushOutput()->changeOutputByteSize(8, sexpOutputStream::advanced)->putChar('#');
+        os->var_put_char((int) (*c++));
+    return os->flush()->change_output_byte_size(8, sexpOutputStream::advanced)->putChar('#');
 }
 
 /*
@@ -138,8 +134,7 @@ sexpSimpleString::printHex(sexpOutputStream *os) const
  *  so no escape sequences need to be generated.
  * May run over max-column, but there is no fragmentation allowed...
  */
-sexpOutputStream *
-sexpSimpleString::printQuoted(sexpOutputStream *os) const
+sexpOutputStream *sexpSimpleString::printQuoted(sexpOutputStream *os) const
 {
     const octet *c = c_str();
     os->putChar('\"');
@@ -157,8 +152,7 @@ sexpSimpleString::printQuoted(sexpOutputStream *os) const
  * sexpSimpleString::printAdvanced(os)
  * Prints out simple string onto output stream ss
  */
-sexpOutputStream *
-sexpSimpleString::printAdvanced(sexpOutputStream *os) const
+sexpOutputStream *sexpSimpleString::printAdvanced(sexpOutputStream *os) const
 {
     if (canPrintAsToken(os))
         printToken(os);
@@ -167,10 +161,13 @@ sexpSimpleString::printAdvanced(sexpOutputStream *os) const
     else if (length() <= 4 && os->getByteSize() == 8)
         printHex(os);
     else if (os->getByteSize() == 8)
-        printBase64(os);
+        print_base64(os);
     else
-        ErrorMessage(
-          sexp_exception::error, "Can't print advanced mode with restricted output character set", 0, 0, EOF);
+        sexp_error(sexp_exception::error,
+                   "Can't print advanced mode with restricted output character set",
+                   0,
+                   0,
+                   EOF);
     return os;
 }
 
@@ -179,8 +176,7 @@ sexpSimpleString::printAdvanced(sexpOutputStream *os) const
  * Returns TRUE if simple string can be printed as a quoted string.
  * Must have only tokenchars and blanks.
  */
-bool
-sexpSimpleString::canPrintAsQuotedString(void) const
+bool sexpSimpleString::canPrintAsQuotedString(void) const
 {
     const octet *c = c_str();
     if (length() < 0)
@@ -197,8 +193,7 @@ sexpSimpleString::canPrintAsQuotedString(void) const
  * Returns TRUE if simple string can be printed as a token.
  * Doesn't begin with a digit, and all characters are tokenchars.
  */
-bool
-sexpSimpleString::canPrintAsToken(const sexpOutputStream *os) const
+bool sexpSimpleString::canPrintAsToken(const sexpOutputStream *os) const
 {
     const octet *c = c_str();
     if (length() <= 0)

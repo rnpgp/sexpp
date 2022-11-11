@@ -41,18 +41,14 @@ class BaselineTests : public testing::Test {
 
     static std::string base_samples[n_base_samples];
 
-    static void
-    SetUpTestSuite()
+    static void SetUpTestSuite()
     {
         base_samples[base_sample_advanced] = sexp_samples_folder + "/sexp-sample-a";
         base_samples[base_sample_base64] = sexp_samples_folder + "/sexp-sample-b";
         base_samples[base_sample_canonical] = sexp_samples_folder + "/sexp-sample-c";
     };
 
-    static void
-    TearDownTestSuite()
-    {
-    }
+    static void TearDownTestSuite() {}
 };
 
 const size_t BaselineTests::n_base_samples;
@@ -71,18 +67,12 @@ TEST_F(BaselineTests, Scan2Canonical)
             sexpInputStream is(&ifs);
             sexpObject *    obj = is.setByteSize(8)->getChar()->scanObject();
 
-            char fn[L_tmpnam];
-            std::tmpnam(fn);
-            std::ofstream ofs(fn, std::iostream::binary);
-            EXPECT_FALSE(ofs.fail());
+            std::ostringstream oss(std::ios_base::binary);
+            sexpOutputStream   os(&oss);
+            os.printCanonical(obj);
 
-            if (!ofs.fail()) {
-                sexpOutputStream os(&ofs);
-                os.printCanonical(obj);
-                ofs.close();
-                EXPECT_TRUE(compare_binary_files(base_samples[base_sample_canonical], fn));
-            }
-            unlink(fn);
+            std::istringstream iss(oss.str(), std::ios_base::binary);
+            EXPECT_TRUE(compare_binary_files(base_samples[base_sample_canonical], iss));
         }
     }
 }
@@ -97,20 +87,15 @@ TEST_F(BaselineTests, Scan2Base64)
             sexpInputStream is(&ifs);
             sexpObject *    object = is.setByteSize(8)->getChar()->scanObject();
 
-            char fn[L_tmpnam];
-            std::tmpnam(fn);
-            std::ofstream ofs(fn, std::iostream::binary);
-            EXPECT_FALSE(ofs.fail());
+            std::ostringstream oss(std::ios_base::binary);
+            sexpOutputStream   os(&oss);
 
-            if (!ofs.fail()) {
-                sexpOutputStream os(&ofs);
-                os.setMaxColumn(0);
-                os.printBase64(object);
-                ofs << std::endl;
-                ofs.close();
-                EXPECT_TRUE(compare_text_files(base_samples[base_sample_base64], fn));
-            }
-            unlink(fn);
+            os.setMaxColumn(0);
+            os.print_base64(object);
+            oss << std::endl;
+
+            std::istringstream iss(oss.str(), std::ios_base::binary);
+            EXPECT_TRUE(compare_text_files(base_samples[base_sample_base64], iss));
         }
     }
 }
@@ -125,19 +110,12 @@ TEST_F(BaselineTests, Scan2Advanced)
             sexpInputStream is(&ifs);
             sexpObject *    object = is.setByteSize(8)->getChar()->scanObject();
 
-            char fn[L_tmpnam];
-            std::tmpnam(fn);
-            std::ofstream ofs(fn, std::iostream::binary);
-            EXPECT_FALSE(ofs.fail());
+            std::ostringstream oss(std::ios_base::binary);
+            sexpOutputStream   os(&oss);
+            os.printAdvanced(object);
 
-            if (!ofs.fail()) {
-                sexpOutputStream os(&ofs);
-                os.printAdvanced(object);
-                ofs << std::endl;
-                ofs.close();
-                EXPECT_TRUE(compare_text_files(base_samples[base_sample_advanced], fn));
-            }
-            unlink(fn);
+            std::istringstream iss(oss.str(), std::ios_base::binary);
+            EXPECT_TRUE(compare_text_files(base_samples[base_sample_advanced], iss));
         }
     }
 }

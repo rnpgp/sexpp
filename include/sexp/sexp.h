@@ -80,27 +80,17 @@ typedef unsigned char octet;
 
 class sexpSimpleString : public std::basic_string<octet>, private sexpCharDefs {
   public:
-    sexpSimpleString &
-    append(int c)
+    sexpSimpleString &append(int c)
     {
         (*this) += (octet)(c & 0xFF);
         return *this;
     }
     // Returns length for printing simple string ss as a token
-    size_t
-    advancedLengthToken(void) const
-    {
-        return length();
-    }
+    size_t advancedLengthToken(void) const { return length(); }
     // Returns length for printing simple string ss as a base64 string
-    size_t
-    advancedLengthBase64(void) const
-    {
-        return (2 + 4 * ((length() + 2) / 3));
-    }
+    size_t advancedLengthBase64(void) const { return (2 + 4 * ((length() + 2) / 3)); }
     // Returns length for printing simple string ss in verbatim mode
-    size_t
-    advancedLengthVerbatim(void) const
+    size_t advancedLengthVerbatim(void) const
     {
         size_t len = length(), i = 1;
         while (len > 9L) {
@@ -110,17 +100,9 @@ class sexpSimpleString : public std::basic_string<octet>, private sexpCharDefs {
         return (i + 1 + len);
     }
     // Returns length for printing simple string ss in quoted-string mode
-    size_t
-    advancedLengthQuotedString(void) const
-    {
-        return (1 + length() + 1);
-    }
+    size_t advancedLengthQuotedString(void) const { return (1 + length() + 1); }
     // Returns length for printing simple string ss in hexadecimal mode
-    size_t
-    advancedLengthHexadecimal(void) const
-    {
-        return (1 + 2 * length() + 1);
-    }
+    size_t advancedLengthHexadecimal(void) const { return (1 + 2 * length() + 1); }
     size_t advancedLength(sexpOutputStream *os) const;
 
     sexpOutputStream *printCanonicalVerbatim(sexpOutputStream *os) const;
@@ -129,7 +111,7 @@ class sexpSimpleString : public std::basic_string<octet>, private sexpCharDefs {
     sexpOutputStream *printVerbatim(sexpOutputStream *os) const;
     sexpOutputStream *printQuoted(sexpOutputStream *os) const;
     sexpOutputStream *printHex(sexpOutputStream *os) const;
-    sexpOutputStream *printBase64(sexpOutputStream *os) const;
+    sexpOutputStream *print_base64(sexpOutputStream *os) const;
 
     bool canPrintAsQuotedString(void) const;
     bool canPrintAsToken(const sexpOutputStream *os) const;
@@ -157,9 +139,7 @@ class sexpString : public sexpObject {
     sexpSimpleString *string;
 
   public:
-    sexpString(void) : presentationHint(NULL), string(NULL)
-    {
-    }
+    sexpString(void) : presentationHint(NULL), string(NULL) {}
 
     virtual ~sexpString()
     {
@@ -169,23 +149,10 @@ class sexpString : public sexpObject {
             delete string;
     }
 
-    sexpSimpleString *
-    getString(void) const
-    {
-        return string;
-    }
-    sexpSimpleString *
-    setString(sexpSimpleString *ss)
-    {
-        return string = ss;
-    }
-    sexpSimpleString *
-    getPresentationHint(void) const
-    {
-        return presentationHint;
-    }
-    sexpSimpleString *
-    setPresentationHint(sexpSimpleString *ph)
+    sexpSimpleString *getString(void) const { return string; }
+    sexpSimpleString *setString(sexpSimpleString *ss) { return string = ss; }
+    sexpSimpleString *getPresentationHint(void) const { return presentationHint; }
+    sexpSimpleString *setPresentationHint(sexpSimpleString *ph)
     {
         return presentationHint = ph;
     }
@@ -224,17 +191,9 @@ class sexpInputStream : private sexpCharDefs {
     size_t        count;     /* number of 8-bit characters output by getChar */
   public:
     sexpInputStream(std::istream *i);
-    void
-    setInput(std::istream *i)
-    {
-        inputFile = i;
-    }
+    void             setInput(std::istream *i) { inputFile = i; }
     sexpInputStream *setByteSize(size_t newByteSize);
-    size_t
-    getByteSize(void)
-    {
-        return byte_size;
-    }
+    size_t           getByteSize(void) { return byte_size; }
     sexpInputStream *getChar(void);
     sexpInputStream *skipWhiteSpace(void);
     sexpInputStream *skipChar(int c);
@@ -251,16 +210,8 @@ class sexpInputStream : private sexpCharDefs {
     void              scanBase64String(sexpSimpleString *ss, int length);
     int               scanDecimal(void);
 
-    int
-    get_next_char(void) const
-    {
-        return next_char;
-    }
-    int
-    set_next_char(int c)
-    {
-        return next_char = c;
-    }
+    int get_next_char(void) const { return next_char; }
+    int set_next_char(int c) { return next_char = c; }
 };
 
 class sexpOutputStream {
@@ -284,74 +235,44 @@ class sexpOutputStream {
     size_t        indent;      /* current indentation level (starts at 0) */
   public:
     sexpOutputStream(std::ostream *o);
-    void
-    setOutput(std::ostream *o)
-    {
-        outputFile = o;
-    }
-    sexpOutputStream *putChar(int c);              /* output a character */
-    sexpOutputStream *newLine(sexpPrintMode mode); /* go to next line (and indent) */
-    sexpOutputStream *varPutChar(int c);
-    sexpOutputStream *flushOutput(void);
-    sexpOutputStream *printDecimal(long int n);
+    void              setOutput(std::ostream *o) { outputFile = o; }
+    sexpOutputStream *putChar(int c);               /* output a character */
+    sexpOutputStream *new_line(sexpPrintMode mode); /* go to next line (and indent) */
+    sexpOutputStream *var_put_char(int c);
+    sexpOutputStream *flush(void);
+    sexpOutputStream *print_decimal(size_t n);
 
-    sexpOutputStream *changeOutputByteSize(int newByteSize, sexpPrintMode mode);
+    sexpOutputStream *change_output_byte_size(int newByteSize, sexpPrintMode mode);
 
-    sexpOutputStream *
-    printCanonical(const sexpObject *obj)
+    sexpOutputStream *printCanonical(const sexpObject *obj)
     {
         return obj->printCanonical(this);
     }
-    sexpOutputStream *
-    printAdvanced(const sexpObject *obj)
+    sexpOutputStream *printAdvanced(const sexpObject *obj)
     {
         return obj->printAdvanced(this);
     };
-    sexpOutputStream *printBase64(const sexpObject *obj);
-    sexpOutputStream *
-    printCanonical(const sexpSimpleString *ss)
+    sexpOutputStream *print_base64(const sexpObject *obj);
+    sexpOutputStream *printCanonical(const sexpSimpleString *ss)
     {
         return ss->printCanonicalVerbatim(this);
     }
-    sexpOutputStream *
-    printAdvanced(const sexpSimpleString *ss)
+    sexpOutputStream *printAdvanced(const sexpSimpleString *ss)
     {
         return ss->printAdvanced(this);
     };
 
-    size_t
-    getByteSize(void) const
-    {
-        return byte_size;
-    }
-    size_t
-    getColumn(void) const
-    {
-        return column;
-    }
-    size_t
-    resetColumn(void)
-    {
-        return column = 0;
-    }
-    size_t
-    getMaxColumn(void) const
-    {
-        return maxcolumn;
-    }
-    size_t
-    setMaxColumn(size_t mc)
-    {
-        return maxcolumn = mc;
-    }
-    sexpOutputStream *
-    incIndent(void)
+    size_t            getByteSize(void) const { return byte_size; }
+    size_t            getColumn(void) const { return column; }
+    size_t            resetColumn(void) { return column = 0; }
+    size_t            getMaxColumn(void) const { return maxcolumn; }
+    size_t            setMaxColumn(size_t mc) { return maxcolumn = mc; }
+    sexpOutputStream *incIndent(void)
     {
         ++indent;
         return this;
     }
-    sexpOutputStream *
-    decIndent(void)
+    sexpOutputStream *decIndent(void)
     {
         --indent;
         return this;

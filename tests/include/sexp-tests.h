@@ -40,5 +40,8 @@
 
 #include <sexp-samples-folder.h>
 
-bool compare_text_files(const std::string &filename1, const std::string &filename2);
 bool compare_binary_files(const std::string &filename1, const std::string &filename2);
+bool compare_text_files(const std::string &filename1, const std::string &filename2);
+
+bool compare_binary_files(const std::string &filename1, std::istream &file2);
+bool compare_text_files(const std::string &filename1, std::istream &file2);

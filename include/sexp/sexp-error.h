@@ -41,56 +41,25 @@ class sexp_exception : public std::exception {
     static severity verbosity_;
     static bool     interactive_;
 
-    int         position_; // May be EOF aka -1
+    size_t      position_; // May be EOF aka -1
     std::string msg_;
     severity    level_;
 
   public:
-    sexp_exception(std::string message, severity level, int position)
+    sexp_exception(std::string message, severity level, size_t position)
         : position_{position}, level_{level}, msg_{format(message, level, position)} {};
-    static std::string format(std::string message, severity level, int position);
-    static bool
-    shall_throw(severity level)
-    {
-        return level == error || verbosity_ != error;
-    };
-    virtual const char *
-    what() const throw()
-    {
-        return msg_.c_str();
-    };
-    int
-    level() const
-    {
-        return level_;
-    };
-    int
-    position() const
-    {
-        return position_;
-    };
-    static severity
-    verbosity()
-    {
-        return verbosity_;
-    };
-    static bool
-    interactive()
-    {
-        return interactive_;
-    };
-    static void
-    set_verbosity(severity vrb)
-    {
-        verbosity_ = vrb;
-    };
-    static void
-    set_interactive(bool intr)
-    {
-        interactive_ = intr;
-    };
+    static std::string format(std::string message, severity level, size_t position);
+    static bool shall_throw(severity level) { return level == error || verbosity_ != error; };
+    virtual const char *what() const throw() { return msg_.c_str(); };
+    severity            level() const { return level_; };
+    size_t              position() const { return position_; };
+    static severity     verbosity() { return verbosity_; };
+    static bool         interactive() { return interactive_; };
+    static void         set_verbosity(severity vrb) { verbosity_ = vrb; };
+    static void         set_interactive(bool intr) { interactive_ = intr; };
 };
 
-void ErrorMessage(int level, const char *msg, int c1, int c2, int pos);
+void sexp_error(
+  sexp_exception::severity level, const char *msg, size_t c1, size_t c2, size_t pos);
 
 } // namespace sexp

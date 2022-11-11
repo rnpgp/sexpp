@@ -67,8 +67,7 @@ const char *help = "The program `sexp' reads, parses, and prints out S-expressio
 /*************************************************************************/
 /* main(argc,argv)
  */
-int
-main(int argc, char **argv)
+int main(int argc, char **argv)
 {
     char *c;
     bool  swa = true, swb = true, swc = true, swp = true, sws = false, swx = true, swl = false;
@@ -91,7 +90,8 @@ main(int argc, char **argv)
         for (i = 1; i < argc; i++) {
             c = argv[i];
             if (*c != '-')
-                throw sexp_exception(std::string("Unrecognized switch ") + c, sexp_exception::error, EOF);
+                throw sexp_exception(
+                  std::string("Unrecognized switch ") + c, sexp_exception::error, EOF);
             c++;
             if (*c == 'a')
                 swa = true; /* advanced output */
@@ -108,7 +108,7 @@ main(int argc, char **argv)
                     i++;
                 ifs = new std::ifstream(argv[i], std::ifstream::binary);
                 if (ifs->fail())
-                    ErrorMessage(sexp_exception::error, "Can't open input file.", 0, 0, EOF);
+                    sexp_error(sexp_exception::error, "Can't open input file.", 0, 0, EOF);
                 is->setInput(ifs);
             } else if (*c == 'l')
                 swl = true;       /* suppress linefeeds after output */
@@ -117,7 +117,7 @@ main(int argc, char **argv)
                     i++;
                 ofs = new std::ofstream(argv[i], std::ifstream::binary);
                 if (ofs->fail())
-                    ErrorMessage(sexp_exception::error, "Can't open output file.", 0, 0, EOF);
+                    sexp_error(sexp_exception::error, "Can't open output file.", 0, 0, EOF);
                 os->setOutput(ofs);
             } else if (*c == 'p')
                 swp = true; /* prompt for input */
@@ -165,7 +165,7 @@ main(int argc, char **argv)
                 if (swp) {
                     std::cout << "Canonical output:" << std::endl;
                     std::cout.flush();
-                    os->newLine(sexpOutputStream::advanced);
+                    os->new_line(sexpOutputStream::advanced);
                 }
                 object->printCanonical(os);
                 if (!swl) {
@@ -178,9 +178,9 @@ main(int argc, char **argv)
                 if (swp) {
                     std::cout << "Base64 (of canonical) output:" << std::endl;
                     std::cout.flush();
-                    os->newLine(sexpOutputStream::advanced);
+                    os->new_line(sexpOutputStream::advanced);
                 }
-                os->printBase64(object);
+                os->print_base64(object);
                 if (!swl) {
                     std::cout << std::endl;
                     std::cout.flush();
@@ -191,7 +191,7 @@ main(int argc, char **argv)
                 if (swp) {
                     std::cout << "Advanced transport output:" << std::endl;
                     std::cout.flush();
-                    os->newLine(sexpOutputStream::advanced);
+                    os->new_line(sexpOutputStream::advanced);
                 }
                 os->printAdvanced(object);
                 if (!swl) {

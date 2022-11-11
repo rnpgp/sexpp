@@ -35,27 +35,27 @@ namespace sexp {
 sexp_exception::severity sexp_exception::verbosity_ = sexp_exception::error;
 bool                     sexp_exception::interactive_ = false;
 
-std::string
-sexp_exception::format(std::string message, severity level, int position)
+std::string sexp_exception::format(std::string message, severity level, size_t position)
 {
-    std::string r = std::string("SEXP ") + (level == error ? "ERROR: " : "WARNING: ") + message;
+    std::string r =
+      std::string("SEXP ") + (level == error ? "ERROR: " : "WARNING: ") + message;
     if (position >= 0)
         r += " at position " + std::to_string(position);
     return r;
 };
 
-void
-ErrorMessage(int level, const char *msg, int c1, int c2, int pos)
+void sexp_error(
+  sexp_exception::severity level, const char *msg, size_t c1, size_t c2, size_t pos)
 {
     char                     tmp[256];
     sexp_exception::severity l = (sexp_exception::severity) level;
-std:
     snprintf(tmp, sizeof(tmp) / sizeof(tmp[0]), msg, c1, c2);
     if (sexp_exception::shall_throw(l))
         throw sexp_exception(tmp, l, pos);
     if (sexp_exception::interactive()) {
         std::cout.flush() << std::endl
-                          << "*** " << sexp_exception::format(tmp, l, pos) << " ***" << std::endl;
+                          << "*** " << sexp_exception::format(tmp, l, pos) << " ***"
+                          << std::endl;
     }
 }
 } // namespace sexp

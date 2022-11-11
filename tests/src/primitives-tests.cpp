@@ -36,13 +36,9 @@ class PrimitivesTests : public testing::Test {
   protected:
     static void SetUpTestSuite(void){};
 
-    static void
-    TearDownTestSuite(void)
-    {
-    }
+    static void TearDownTestSuite(void) {}
 
-    static void
-    do_test_advanced(const char *str_in, const char *str_out = nullptr)
+    static void do_test_advanced(const char *str_in, const char *str_out = nullptr)
     {
         std::istringstream iss(str_in);
         sexpInputStream    is(&iss);
@@ -55,8 +51,7 @@ class PrimitivesTests : public testing::Test {
         EXPECT_EQ(oss.str(), sample);
     }
 
-    static void
-    do_test_canonical(const char *str_in, const char *str_out = nullptr)
+    static void do_test_canonical(const char *str_in, const char *str_out = nullptr)
     {
         std::istringstream iss(str_in);
         sexpInputStream    is(&iss);
@@ -113,8 +108,10 @@ TEST_F(PrimitivesTests, HexString)
 
 TEST_F(PrimitivesTests, ListList)
 {
-    do_test_canonical("(string-level-1 (string-level-2) )", "(14:string-level-1(14:string-level-2))");
-    do_test_advanced("(string-level-1 (string-level-2) )", "(string-level-1 (string-level-2))");
+    do_test_canonical("(string-level-1 (string-level-2) )",
+                      "(14:string-level-1(14:string-level-2))");
+    do_test_advanced("(string-level-1 (string-level-2) )",
+                     "(string-level-1 (string-level-2))");
 }
 
 TEST_F(PrimitivesTests, Base64OfOctet)
