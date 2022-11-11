@@ -30,72 +30,76 @@
 #include <algorithm>
 #include <fstream>
 
-bool compare_binary_files(const std::string &filename1,
-                          const std::string &filename2) {
-  bool res = false;
-  std::ifstream file1(filename1, std::ifstream::ate | std::ifstream::binary);
-  std::ifstream file2(filename2, std::ifstream::ate | std::ifstream::binary);
+bool
+compare_binary_files(const std::string &filename1, const std::string &filename2)
+{
+    bool          res = false;
+    std::ifstream file1(filename1, std::ifstream::ate | std::ifstream::binary);
+    std::ifstream file2(filename2, std::ifstream::ate | std::ifstream::binary);
 
-  if (file1.tellg() == file2.tellg()) { // otherwise different file size
-    file1.seekg(0);
-    file2.seekg(0);
+    if (file1.tellg() == file2.tellg()) { // otherwise different file size
+        file1.seekg(0);
+        file2.seekg(0);
 
-    std::istreambuf_iterator<char> begin1(file1);
-    std::istreambuf_iterator<char> begin2(file2);
+        std::istreambuf_iterator<char> begin1(file1);
+        std::istreambuf_iterator<char> begin2(file2);
 
-    res = std::equal(begin1, std::istreambuf_iterator<char>(), begin2);
-  }
-
-  return res;
-}
-
-std::istream &safe_get_line(std::istream &is, std::string &t) {
-  t.clear();
-
-  // The characters in the stream are read one-by-one using a std::streambuf.
-  // That is faster than reading them one-by-one using the std::istream.
-  // Code that uses streambuf this way must be guarded by a sentry object.
-  // The sentry object performs various tasks,
-  // such as thread synchronization and updating the stream state.
-
-  std::istream::sentry se(is, true);
-  std::streambuf *sb = is.rdbuf();
-
-  for (;;) {
-    int c = sb->sbumpc();
-    switch (c) {
-    case '\n':
-      return is;
-    case '\r':
-      if (sb->sgetc() == '\n')
-        sb->sbumpc();
-      return is;
-    case std::streambuf::traits_type::eof():
-      // Also handle the case when the last line has no line ending
-      if (t.empty())
-        is.setstate(std::ios::eofbit);
-      return is;
-    default:
-      t += (char)c;
+        res = std::equal(begin1, std::istreambuf_iterator<char>(), begin2);
     }
-  }
+
+    return res;
 }
 
-bool compare_text_files(const std::string &filename1,
-                        const std::string &filename2) {
-  bool res = true;
-  std::ifstream file1(filename1, std::ifstream::binary);
-  std::ifstream file2(filename2, std::ifstream::binary);
-  std::string s1, s2;
+std::istream &
+safe_get_line(std::istream &is, std::string &t)
+{
+    t.clear();
 
-  while (res) {
-    if (file1.eof() && file2.eof())
-      break;
-    safe_get_line(file1, s1);
-    safe_get_line(file2, s2);
-    if (s1 != s2)
-      res = false;
-  }
+    // The characters in the stream are read one-by-one using a std::streambuf.
+    // That is faster than reading them one-by-one using the std::istream.
+    // Code that uses streambuf this way must be guarded by a sentry object.
+    // The sentry object performs various tasks,
+    // such as thread synchronization and updating the stream state.
 
-  return res;
+    std::istream::sentry se(is, true);
+    std::streambuf *     sb = is.rdbuf();
+
+    for (;;) {
+        int c = sb->sbumpc();
+        switch (c) {
+        case '\n':
+            return is;
+        case '\r':
+            if (sb->sgetc() == '\n')
+                sb->sbumpc();
+            return is;
+        case std::streambuf::traits_type::eof():
+            // Also handle the case when the last line has no line ending
+            if (t.empty())
+                is.setstate(std::ios::eofbit);
+            return is;
+        default:
+            t += (char) c;
+        }
+    }
+}
+
+bool
+compare_text_files(const std::string &filename1, const std::string &filename2)
+{
+    bool          res = true;
+    std::ifstream file1(filename1, std::ifstream::binary);
+    std::ifstream file2(filename2, std::ifstream::binary);
+    std::string   s1, s2;
+
+    while (res) {
+        if (file1.eof() && file2.eof())
+            break;
+        safe_get_line(file1, s1);
+        safe_get_line(file2, s2);
+        if (s1 != s2)
+            res = false;
+    }
+
+    return res;
 }

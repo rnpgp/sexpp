@@ -36,76 +36,92 @@ using namespace sexp;
 
 namespace {
 class ExceptionTests : public testing::Test {
-protected:
-  static void SetUpTestSuite() { }
+  protected:
+    static void
+    SetUpTestSuite()
+    {
+    }
 
-  static void TearDownTestSuite() {}
+    static void
+    TearDownTestSuite()
+    {
+    }
 
-  static void do_scan(std::ifstream &ifs) {
-    sexpInputStream is(&ifs);
-    is.setByteSize(8)->getChar()->scanObject();
-  }
+    static void
+    do_scan(std::ifstream &ifs)
+    {
+        sexpInputStream is(&ifs);
+        is.setByteSize(8)->getChar()->scanObject();
+    }
 };
 
-TEST_F(ExceptionTests, UnexpectedEof) {
-  std::ifstream ifs(sexp_samples_folder + "/malformed/sexp-malformed-1", std::ifstream::binary);
-  EXPECT_FALSE(ifs.fail());
-  if (!ifs.fail()) {
-    EXPECT_THAT([&]() { do_scan(ifs); },
-                ThrowsMessage<sexp::sexp_exception>(StrEq("SEXP ERROR: unxpected end of file at position 19"))
-    );
-  }
+TEST_F(ExceptionTests, UnexpectedEof)
+{
+    std::ifstream ifs(sexp_samples_folder + "/malformed/sexp-malformed-1", std::ifstream::binary);
+    EXPECT_FALSE(ifs.fail());
+    if (!ifs.fail()) {
+        EXPECT_THAT(
+          [&]() { do_scan(ifs); },
+          ThrowsMessage<sexp::sexp_exception>(StrEq("SEXP ERROR: unxpected end of file at position 19")));
+    }
 }
 
-TEST_F(ExceptionTests, UnexpectedCharacter4bit) {
-  std::ifstream ifs(sexp_samples_folder + "/malformed/sexp-malformed-2", std::ifstream::binary);
-  EXPECT_FALSE(ifs.fail());
-  if (!ifs.fail()) {
-    EXPECT_THAT([&]() { do_scan(ifs); },
-                ThrowsMessage<sexp::sexp_exception>(StrEq("SEXP ERROR: character ')' found in 4-bit coding region at position 21"))
-    );
-  }
+TEST_F(ExceptionTests, UnexpectedCharacter4bit)
+{
+    std::ifstream ifs(sexp_samples_folder + "/malformed/sexp-malformed-2", std::ifstream::binary);
+    EXPECT_FALSE(ifs.fail());
+    if (!ifs.fail()) {
+        EXPECT_THAT(
+          [&]() { do_scan(ifs); },
+          ThrowsMessage<sexp::sexp_exception>(StrEq("SEXP ERROR: character ')' found in 4-bit coding "
+                                                    "region at position 21")));
+    }
 }
 
-TEST_F(ExceptionTests, IllegalCharacter) {
-  std::ifstream ifs(sexp_samples_folder + "/malformed/sexp-malformed-3", std::ifstream::binary);
-  EXPECT_FALSE(ifs.fail());
-  if (!ifs.fail()) {
-    EXPECT_THAT([&]() { do_scan(ifs); },
-        ThrowsMessage<sexp::sexp_exception>(StrEq("SEXP ERROR: illegal character '?' (63 decimal) at position 16"))
-    );
-  }
+TEST_F(ExceptionTests, IllegalCharacter)
+{
+    std::ifstream ifs(sexp_samples_folder + "/malformed/sexp-malformed-3", std::ifstream::binary);
+    EXPECT_FALSE(ifs.fail());
+    if (!ifs.fail()) {
+        EXPECT_THAT([&]() { do_scan(ifs); },
+                    ThrowsMessage<sexp::sexp_exception>(
+                      StrEq("SEXP ERROR: illegal character '?' (63 decimal) at position 16")));
+    }
 }
 
-TEST_F(ExceptionTests, UnexpectedEofAfterQoute) {
-  std::ifstream ifs(sexp_samples_folder + "/malformed/sexp-malformed-4", std::ifstream::binary);
-  EXPECT_FALSE(ifs.fail());
-  if (!ifs.fail()) {
-    EXPECT_THAT([&]() { do_scan(ifs); },
-        ThrowsMessage<sexp::sexp_exception>( StrEq("SEXP ERROR: unxpected end of file at position 3"))
-    );
-  }
+TEST_F(ExceptionTests, UnexpectedEofAfterQoute)
+{
+    std::ifstream ifs(sexp_samples_folder + "/malformed/sexp-malformed-4", std::ifstream::binary);
+    EXPECT_FALSE(ifs.fail());
+    if (!ifs.fail()) {
+        EXPECT_THAT(
+          [&]() { do_scan(ifs); },
+          ThrowsMessage<sexp::sexp_exception>(StrEq("SEXP ERROR: unxpected end of file at position 3")));
+    }
 }
 
-TEST_F(ExceptionTests, IllegalCharacterBase64) {
-  std::ifstream ifs(sexp_samples_folder + "/malformed/sexp-malformed-5", std::ifstream::binary);
-  EXPECT_FALSE(ifs.fail());
-  if (!ifs.fail()) {
-    EXPECT_THAT([&]() { do_scan(ifs); },
-        ThrowsMessage<sexp::sexp_exception>(StrEq("SEXP ERROR: illegal character '}' (125 decimal) at position 27"))
-    );
-  }
+TEST_F(ExceptionTests, IllegalCharacterBase64)
+{
+    std::ifstream ifs(sexp_samples_folder + "/malformed/sexp-malformed-5", std::ifstream::binary);
+    EXPECT_FALSE(ifs.fail());
+    if (!ifs.fail()) {
+        EXPECT_THAT([&]() { do_scan(ifs); },
+                    ThrowsMessage<sexp::sexp_exception>(
+                      StrEq("SEXP ERROR: illegal character '}' (125 decimal) at position 27")));
+    }
 }
 
-TEST_F(ExceptionTests, UnusedBits) {
-  std::ifstream ifs(sexp_samples_folder + "/malformed/sexp-malformed-6", std::ifstream::binary);
-  EXPECT_FALSE(ifs.fail());
-  if (!ifs.fail()) {
-    sexp::sexp_exception::set_verbosity(sexp::sexp_exception::warning);
-    EXPECT_THAT([&]() { do_scan(ifs); },
-        ThrowsMessage<sexp::sexp_exception>(StrEq("SEXP WARNING: 6-bit region ended with 4 unused bits left-over at position 13"))
-    );
-  }
+TEST_F(ExceptionTests, UnusedBits)
+{
+    std::ifstream ifs(sexp_samples_folder + "/malformed/sexp-malformed-6", std::ifstream::binary);
+    EXPECT_FALSE(ifs.fail());
+    if (!ifs.fail()) {
+        sexp::sexp_exception::set_verbosity(sexp::sexp_exception::warning);
+        EXPECT_THAT(
+          [&]() { do_scan(ifs); },
+          ThrowsMessage<sexp::sexp_exception>(StrEq("SEXP WARNING: 6-bit region ended with 4 unused bits "
+                                                    "left-over at position 13")));
+    }
 }
 
 } // namespace

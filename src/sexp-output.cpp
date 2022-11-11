@@ -16,14 +16,14 @@
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
  * TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
- * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDERS OR CONTRIBUTORS
- * BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDERS OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+ * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+ * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+ * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  * Original copyright
  *
@@ -44,15 +44,9 @@ static const char *base64Digits = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrs
  * sexpOutputStream::newSexpOutputStream()
  * Creates and initializes new sexpOutputStream object.
  */
-sexpOutputStream::sexpOutputStream(std::ostream* o):
-  outputFile(o),
-  column(0),
-  maxcolumn(defaultlineliength),
-  indent(0),
-  byteSize(8),
-  bits(0),
-  nBits(0),
-  mode(canonical)
+sexpOutputStream::sexpOutputStream(std::ostream *o)
+    : outputFile(o), column(0), maxcolumn(defaultlineliength), indent(0), byte_size(8), bits(0), n_bits(0),
+      mode(canonical)
 {
 }
 
@@ -61,11 +55,12 @@ sexpOutputStream::sexpOutputStream(std::ostream* o):
  * Puts the character c out on the output stream os.
  * Keeps track of the "column" the next output char will go to.
  */
-sexpOutputStream* sexpOutputStream::putChar(int c)
+sexpOutputStream *
+sexpOutputStream::putChar(int c)
 {
-  outputFile->put(c);
-  column++;
-  return this;
+    outputFile->put(c);
+    column++;
+    return this;
 }
 
 /*
@@ -73,73 +68,78 @@ sexpOutputStream* sexpOutputStream::putChar(int c)
  * putChar with variable sized output bytes considered.
  * int c;  -- this is always an eight-bit byte being output
  */
-sexpOutputStream* sexpOutputStream::varPutChar(int c)
+sexpOutputStream *
+sexpOutputStream::varPutChar(int c)
 {
-  c &= 0xFF;
-  bits = (bits << 8) | c;
-  nBits += 8;
-  while (nBits >= byteSize)
-  {
-    if ((byteSize==6 || byteSize==4 ||
-         c == '}' || c == '{' || c == '#' || c == '|')
-	      && maxcolumn > 0 && column >= maxcolumn ) newLine(mode);
-    if (byteSize == 4) 	    putChar(hexDigits[(bits >> (nBits-4)) & 0x0F]);
-    else if (byteSize == 6) putChar(base64Digits[(bits >> (nBits-6)) & 0x3F]);
-    else if (byteSize == 8) putChar(bits & 0xFF);
-    nBits -= byteSize;
-    base64Count++;
-  }
-  return this;
+    c &= 0xFF;
+    bits = (bits << 8) | c;
+    n_bits += 8;
+    while (n_bits >= byte_size) {
+        if ((byte_size == 6 || byte_size == 4 || c == '}' || c == '{' || c == '#' || c == '|') &&
+            maxcolumn > 0 && column >= maxcolumn)
+            newLine(mode);
+        if (byte_size == 4)
+            putChar(hexDigits[(bits >> (n_bits - 4)) & 0x0F]);
+        else if (byte_size == 6)
+            putChar(base64Digits[(bits >> (n_bits - 6)) & 0x3F]);
+        else if (byte_size == 8)
+            putChar(bits & 0xFF);
+        n_bits -= byte_size;
+        base64Count++;
+    }
+    return this;
 }
 
 /*
  * sexpOutputStream::changeOutputByteSize(newByteSize,newMode)
- * Change os->byteSize to newByteSize
+ * Change os->byte_size to newByteSize
  * record mode in output stream for automatic line breaks
  */
-sexpOutputStream*  sexpOutputStream::changeOutputByteSize(int newByteSize, sexpPrintMode newMode)
+sexpOutputStream *
+sexpOutputStream::changeOutputByteSize(int newByteSize, sexpPrintMode newMode)
 {
-  if (newByteSize != 4 && newByteSize !=6 && newByteSize !=8)
-    ErrorMessage(sexp_exception::error,
-                 "Illegal output base %d",
-                 newByteSize,
-                 0,
-                 EOF);
-  if (newByteSize !=8 && byteSize != 8)
-    ErrorMessage(sexp_exception::error,
-                 "Illegal change of output byte size from %d to %d",
-		             byteSize,
-                 newByteSize,
-                 EOF);
-  byteSize = newByteSize;
-  nBits = 0;
-  bits = 0;
-  base64Count = 0;
-  mode = newMode;
-  return this;
+    if (newByteSize != 4 && newByteSize != 6 && newByteSize != 8)
+        ErrorMessage(sexp_exception::error, "Illegal output base %d", newByteSize, 0, EOF);
+    if (newByteSize != 8 && byte_size != 8)
+        ErrorMessage(sexp_exception::error,
+                     "Illegal change of output byte size from %d to %d",
+                     byte_size,
+                     newByteSize,
+                     EOF);
+    byte_size = newByteSize;
+    n_bits = 0;
+    bits = 0;
+    base64Count = 0;
+    mode = newMode;
+    return this;
 }
 
 /*
  * sexpOutputStream::flushOutput()
  * flush out any remaining bits
  */
-sexpOutputStream * sexpOutputStream::flushOutput(void)
+sexpOutputStream *
+sexpOutputStream::flushOutput(void)
 {
-  if (nBits > 0) {
-    if (byteSize == 4) putChar(hexDigits[(bits << (4 - nBits)) & 0x0F]);
-    else if (byteSize == 6)	putChar(base64Digits[(bits << (6 - nBits)) & 0x3F]);
-    else if (byteSize == 8) putChar(bits & 0xFF);
-    nBits = 0;
-    base64Count++;
-  }
-  if (byteSize == 6) { /* and add switch here */
-    while ((base64Count & 3) != 0) {
-      if (maxcolumn > 0 && column >= maxcolumn) newLine(mode);
-  	  putChar('=');
-	    base64Count++;
+    if (n_bits > 0) {
+        if (byte_size == 4)
+            putChar(hexDigits[(bits << (4 - n_bits)) & 0x0F]);
+        else if (byte_size == 6)
+            putChar(base64Digits[(bits << (6 - n_bits)) & 0x3F]);
+        else if (byte_size == 8)
+            putChar(bits & 0xFF);
+        n_bits = 0;
+        base64Count++;
     }
-  }
-  return this;
+    if (byte_size == 6) { /* and add switch here */
+        while ((base64Count & 3) != 0) {
+            if (maxcolumn > 0 && column >= maxcolumn)
+                newLine(mode);
+            putChar('=');
+            base64Count++;
+        }
+    }
+    return this;
 }
 
 /*
@@ -149,28 +149,35 @@ sexpOutputStream * sexpOutputStream::flushOutput(void)
  * indentation level (but never indents more than half of maxcolumn).
  * Resets column for next output character.
  */
-sexpOutputStream* sexpOutputStream::newLine(sexpPrintMode mode)
+sexpOutputStream *
+sexpOutputStream::newLine(sexpPrintMode mode)
 {
-  if (mode == advanced || mode == base64) {
-    putChar('\n');
-    column = 0;
-  }
-  if (mode == advanced) {
-    for (int i=0;i<indent&&(4*i)<maxcolumn;i++) putChar(' ');
-  }
-  return this;
+    if (mode == advanced || mode == base64) {
+        putChar('\n');
+        column = 0;
+    }
+    if (mode == advanced) {
+        for (int i = 0; i < indent && (4 * i) < maxcolumn; i++)
+            putChar(' ');
+    }
+    return this;
 }
 
 /*
  * sexpOutputStream::printDecimal(n)
  * print out n in decimal to output stream os
  */
-sexpOutputStream* sexpOutputStream::printDecimal(long int n)
+sexpOutputStream *
+sexpOutputStream::printDecimal(long int n)
 {
-  char buffer[50];
-  snprintf(buffer,sizeof(buffer)/sizeof(buffer[0]),"%ld",n);   // since itoa is not a part of any standard
-  for (size_t i=0; buffer[i]!=0; i++) varPutChar(buffer[i]);
-  return this;
+    char buffer[50];
+    snprintf(buffer,
+             sizeof(buffer) / sizeof(buffer[0]),
+             "%ld",
+             n); // since itoa is not a part of any standard
+    for (size_t i = 0; buffer[i] != 0; i++)
+        varPutChar(buffer[i]);
+    return this;
 }
 
 /*
@@ -178,10 +185,11 @@ sexpOutputStream* sexpOutputStream::printDecimal(long int n)
  * Same as canonical, except all characters get put out as base 64 ones
  */
 
-sexpOutputStream* sexpOutputStream::printBase64(const sexpObject *object)
+sexpOutputStream *
+sexpOutputStream::printBase64(const sexpObject *object)
 {
-  changeOutputByteSize(8,base64)->varPutChar('{')->changeOutputByteSize(6,base64);
-  printCanonical(object);
-  return flushOutput()->changeOutputByteSize(8,base64)->varPutChar('}');
+    changeOutputByteSize(8, base64)->varPutChar('{')->changeOutputByteSize(6, base64);
+    printCanonical(object);
+    return flushOutput()->changeOutputByteSize(8, base64)->varPutChar('}');
 }
-}
+} // namespace sexp

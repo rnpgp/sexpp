@@ -32,11 +32,9 @@ option(WITH_TESTS "Build tests" ON)
 option(WITH_APP "Build sexp console application" ON)
 
 include(GNUInstallDirs)
-include(CTest)
 
 set(CMAKE_BUILD_TYPE Debug)
-# Due to GTest C++ 11  deprecation
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/modules")
 
 add_library(sexp STATIC
@@ -63,6 +61,7 @@ endif(${WITH_APP})
 
 
 if(${WITH_TESTS})
+    include(CTest)
     include(FetchContent)
     include(GoogleTest)
 
