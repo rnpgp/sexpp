@@ -45,46 +45,46 @@ sexpOutputStream *sexpString::printCanonical(sexpOutputStream *os) const
 {
     if (presentationHint != NULL) {
         os->var_put_char('[');
-        presentationHint->printCanonicalVerbatim(os);
+        presentationHint->print_canonical_verbatim(os);
         os->var_put_char(']');
     }
     if (string == NULL)
         sexp_error(sexp_exception::error, "NULL string can't be printed", 0, 0, EOF);
-    string->printCanonicalVerbatim(os);
+    string->print_canonical_verbatim(os);
     return os;
 }
 
 /*
- * sexpString::printAdvanced(os)
+ * sexpString::print_advanced(os)
  * Prints out sexp string onto output stream os
  */
-sexpOutputStream *sexpString::printAdvanced(sexpOutputStream *os) const
+sexpOutputStream *sexpString::print_advanced(sexpOutputStream *os) const
 {
-    sexpObject::printAdvanced(os);
+    sexpObject::print_advanced(os);
     sexpSimpleString *ph = getPresentationHint();
     sexpSimpleString *ss = getString();
     if (ph != NULL) {
         os->putChar('[');
-        ph->printAdvanced(os);
+        ph->print_advanced(os);
         os->putChar(']');
     }
     if (ss == NULL)
         sexp_error(sexp_exception::error, "NULL string can't be printed", 0, 0, EOF);
-    ss->printAdvanced(os);
+    ss->print_advanced(os);
     return os;
 }
 
 /*
- * sexpString::advancedLength(os)
+ * sexpString::advanced_length(os)
  * Returns length of printed image of string
  */
-size_t sexpString::advancedLength(sexpOutputStream *os) const
+size_t sexpString::advanced_length(sexpOutputStream *os) const
 {
     size_t len = 0;
     if (presentationHint != NULL)
-        len += 2 + presentationHint->advancedLength(os);
+        len += 2 + presentationHint->advanced_length(os);
     if (string != NULL)
-        len += string->advancedLength(os);
+        len += string->advanced_length(os);
     return len;
 }
 
@@ -102,20 +102,20 @@ sexpOutputStream *sexpList::printCanonical(sexpOutputStream *os) const
 }
 
 /*
- * sexpList::printAdvanced(os)
+ * sexpList::print_advanced(os)
  * Prints out the list onto output stream os.
  * Uses print-length to determine length of the image.  If it all fits
  * on the current line, then it is printed that way.  Otherwise, it is
  * written out in "vertical" mode, with items of the list starting in
  * the same column on successive lines.
  */
-sexpOutputStream *sexpList::printAdvanced(sexpOutputStream *os) const
+sexpOutputStream *sexpList::print_advanced(sexpOutputStream *os) const
 {
-    sexpObject::printAdvanced(os);
+    sexpObject::print_advanced(os);
     int vertical = false;
     int firstelement = true;
     os->putChar('(')->incIndent();
-    vertical = (advancedLength(os) > os->getMaxColumn() - os->getColumn());
+    vertical = (advanced_length(os) > os->getMaxColumn() - os->getColumn());
 
     std::for_each(begin(), end(), [&](const sexpObject *obj) {
         if (!firstelement) {
@@ -124,7 +124,7 @@ sexpOutputStream *sexpList::printAdvanced(sexpOutputStream *os) const
             else
                 os->putChar(' ');
         }
-        obj->printAdvanced(os);
+        obj->print_advanced(os);
         firstelement = false;
     });
 
@@ -134,22 +134,22 @@ sexpOutputStream *sexpList::printAdvanced(sexpOutputStream *os) const
 }
 
 /*
- * sexpList::advancedLength(os)
+ * sexpList::advanced_length(os)
  * Returns length of printed image of list given as iterator
  */
-size_t sexpList::advancedLength(sexpOutputStream *os) const
+size_t sexpList::advanced_length(sexpOutputStream *os) const
 {
     size_t len = 1; /* for left paren */
     std::for_each(
-      begin(), end(), [&](const sexpObject *obj) { len += obj->advancedLength(os); });
+      begin(), end(), [&](const sexpObject *obj) { len += obj->advanced_length(os); });
     return (len + 1); /* for final paren */
 }
 
 /*
- * sexpObject::printAdvanced(os)
+ * sexpObject::print_advanced(os)
  * Prints out object on output stream os
  */
-sexpOutputStream *sexpObject::printAdvanced(sexpOutputStream *os) const
+sexpOutputStream *sexpObject::print_advanced(sexpOutputStream *os) const
 {
     if (os->getMaxColumn() > 0 && os->getColumn() > os->getMaxColumn() - 4)
         os->new_line(sexpOutputStream::advanced);

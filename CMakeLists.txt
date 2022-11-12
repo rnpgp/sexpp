@@ -46,6 +46,7 @@ add_library(sexp STATIC
     src/sexp-output.cpp
     src/sexp-object.cpp
     src/sexp-simple-string.cpp
+    src/sexp-char-defs.cpp
     src/sexp-error.cpp
     include/sexp/sexp.h
     include/sexp/sexp-error.h

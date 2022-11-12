@@ -112,7 +112,7 @@ TEST_F(BaselineTests, Scan2Advanced)
 
             std::ostringstream oss(std::ios_base::binary);
             sexpOutputStream   os(&oss);
-            os.printAdvanced(object);
+            os.print_advanced(object);
 
             std::istringstream iss(oss.str(), std::ios_base::binary);
             EXPECT_TRUE(compare_text_files(base_samples[base_sample_advanced], iss));

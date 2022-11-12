@@ -46,7 +46,7 @@ class PrimitivesTests : public testing::Test {
 
         std::ostringstream oss(std::ios_base::binary);
         sexpOutputStream   os(&oss);
-        os.printAdvanced(obj);
+        os.print_advanced(obj);
         const char *sample = str_out == nullptr ? str_in : str_out;
         EXPECT_EQ(oss.str(), sample);
     }

@@ -37,10 +37,10 @@
 
 namespace sexp {
 /*
- * sexpSimpleString::printCanonicalVerbatim(os)
+ * sexpSimpleString::print_canonical_verbatim(os)
  * Print out simple string on output stream os as verbatim string.
  */
-sexpOutputStream *sexpSimpleString::printCanonicalVerbatim(sexpOutputStream *os) const
+sexpOutputStream *sexpSimpleString::print_canonical_verbatim(sexpOutputStream *os) const
 {
     const octet *c = c_str();
     /* print out len: */
@@ -52,29 +52,29 @@ sexpOutputStream *sexpSimpleString::printCanonicalVerbatim(sexpOutputStream *os)
 }
 
 /*
- * sexpSimpleString::advancedLength(os)
+ * sexpSimpleString::advanced_length(os)
  * Returns length of printed image of s
  */
-size_t sexpSimpleString::advancedLength(sexpOutputStream *os) const
+size_t sexpSimpleString::advanced_length(sexpOutputStream *os) const
 {
-    if (canPrintAsToken(os))
-        return advancedLengthToken();
-    else if (canPrintAsQuotedString())
-        return advancedLengthQuotedString();
+    if (can_print_as_token(os))
+        return advanced_length_token();
+    else if (can_print_as_quoted_string())
+        return advanced_length_quoted();
     else if (length() <= 4 && os->getByteSize() == 8)
-        return advancedLengthHexadecimal();
+        return advanced_length_hexadecimal();
     else if (os->getByteSize() == 8)
-        return advancedLengthBase64();
+        return advanced_length_base64();
     else
         return 0; /* an error condition */
 }
 
 /*
- * sexpSimpleString::printToken(os)
+ * sexpSimpleString::print_token(os)
  * Prints out simple string ss as a token (assumes that this is OK).
  * May run over max-column, but there is no fragmentation allowed...
  */
-sexpOutputStream *sexpSimpleString::printToken(sexpOutputStream *os) const
+sexpOutputStream *sexpSimpleString::print_token(sexpOutputStream *os) const
 {
     const octet *c = c_str();
     if (os->getMaxColumn() > 0 && os->getColumn() > (os->getMaxColumn() - length()))
@@ -85,11 +85,11 @@ sexpOutputStream *sexpSimpleString::printToken(sexpOutputStream *os) const
 }
 
 /*
- * sexpSimpleString::printVerbatim(os)
+ * sexpSimpleString::print_verbatim(os)
  * Print out simple string ss on output stream os as verbatim string.
  * Again, can't fragment string, so max-column is just a suggestion...
  */
-sexpOutputStream *sexpSimpleString::printVerbatim(sexpOutputStream *os) const
+sexpOutputStream *sexpSimpleString::print_verbatim(sexpOutputStream *os) const
 {
     const octet *c = c_str();
     if (os->getMaxColumn() > 0 && os->getColumn() > (os->getMaxColumn() - length()))
@@ -115,10 +115,10 @@ sexpOutputStream *sexpSimpleString::print_base64(sexpOutputStream *os) const
 }
 
 /*
- * sexpSimpleString::printHex(os)
+ * sexpSimpleString::print_hexadecimal(os)
  * Prints out simple string as a hexadecimal value.
  */
-sexpOutputStream *sexpSimpleString::printHex(sexpOutputStream *os) const
+sexpOutputStream *sexpSimpleString::print_hexadecimal(sexpOutputStream *os) const
 {
     const octet *c = c_str();
     os->putChar('#')->change_output_byte_size(4, sexpOutputStream::advanced);
@@ -128,13 +128,13 @@ sexpOutputStream *sexpSimpleString::printHex(sexpOutputStream *os) const
 }
 
 /*
- * sexpSimpleString::printQuoted(os)
+ * sexpSimpleString::print_quoted(os)
  * Prints out simple string ss as a quoted string
  * This code assumes that all characters are tokenchars and blanks,
  *  so no escape sequences need to be generated.
  * May run over max-column, but there is no fragmentation allowed...
  */
-sexpOutputStream *sexpSimpleString::printQuoted(sexpOutputStream *os) const
+sexpOutputStream *sexpSimpleString::print_quoted(sexpOutputStream *os) const
 {
     const octet *c = c_str();
     os->putChar('\"');
@@ -149,17 +149,17 @@ sexpOutputStream *sexpSimpleString::printQuoted(sexpOutputStream *os) const
 }
 
 /*
- * sexpSimpleString::printAdvanced(os)
+ * sexpSimpleString::print_advanced(os)
  * Prints out simple string onto output stream ss
  */
-sexpOutputStream *sexpSimpleString::printAdvanced(sexpOutputStream *os) const
+sexpOutputStream *sexpSimpleString::print_advanced(sexpOutputStream *os) const
 {
-    if (canPrintAsToken(os))
-        printToken(os);
-    else if (canPrintAsQuotedString())
-        printQuoted(os);
+    if (can_print_as_token(os))
+        print_token(os);
+    else if (can_print_as_quoted_string())
+        print_quoted(os);
     else if (length() <= 4 && os->getByteSize() == 8)
-        printHex(os);
+        print_hexadecimal(os);
     else if (os->getByteSize() == 8)
         print_base64(os);
     else
@@ -172,38 +172,38 @@ sexpOutputStream *sexpSimpleString::printAdvanced(sexpOutputStream *os) const
 }
 
 /*
- * sexpSimpleString::canPrintAsQuotedString(void)
+ * sexpSimpleString::can_print_as_quoted_string(void)
  * Returns TRUE if simple string can be printed as a quoted string.
  * Must have only tokenchars and blanks.
  */
-bool sexpSimpleString::canPrintAsQuotedString(void) const
+bool sexpSimpleString::can_print_as_quoted_string(void) const
 {
     const octet *c = c_str();
     if (length() < 0)
         return false;
     for (size_t i = 0; i < length(); i++, c++) {
-        if (!isTokenChar((int) (*c)) && *c != ' ')
+        if (!is_token_char((int) (*c)) && *c != ' ')
             return false;
     }
     return true;
 }
 
 /*
- * sexpSimpleString::canPrintAsToken(os)
+ * sexpSimpleString::can_print_as_token(os)
  * Returns TRUE if simple string can be printed as a token.
  * Doesn't begin with a digit, and all characters are tokenchars.
  */
-bool sexpSimpleString::canPrintAsToken(const sexpOutputStream *os) const
+bool sexpSimpleString::can_print_as_token(const sexpOutputStream *os) const
 {
     const octet *c = c_str();
     if (length() <= 0)
         return false;
-    if (isDecDigit((int) *c))
+    if (is_dec_digit((int) *c))
         return false;
     if (os->getMaxColumn() > 0 && os->getColumn() + length() >= os->getMaxColumn())
         return false;
     for (size_t i = 0; i < length(); i++) {
-        if (!isTokenChar((int) (*c++)))
+        if (!is_token_char((int) (*c++)))
             return false;
     }
     return true;

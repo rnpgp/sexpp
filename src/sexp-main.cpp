@@ -193,7 +193,7 @@ int main(int argc, char **argv)
                     std::cout.flush();
                     os->new_line(sexpOutputStream::advanced);
                 }
-                os->printAdvanced(object);
+                os->print_advanced(object);
                 if (!swl) {
                     std::cout << std::endl;
                     std::cout.flush();

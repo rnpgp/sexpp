@@ -73,7 +73,7 @@ TEST_F(CompatTests, Advanced)
         sexpOutputStream   os(&oss);
 
         os.setMaxColumn(100);
-        os.printAdvanced(obj);
+        os.print_advanced(obj);
         oss << std::endl;
 
         std::istringstream iss(oss.str(), std::ios_base::binary);

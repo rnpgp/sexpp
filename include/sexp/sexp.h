@@ -40,6 +40,10 @@
 
 namespace sexp {
 
+/*
+ * SEXP octet definitions
+ */
+
 class sexpCharDefs {
   protected:
     static char upper[256];       /* upper[c] is upper case version of c */
@@ -55,12 +59,12 @@ class sexpCharDefs {
 
     static bool initialized;
     static void initialize_character_tables(void);
-    static bool isWhiteSpace(int c);
-    static bool isDecDigit(int c);
-    static bool isHexDigit(int c);
-    static bool isBase64Digit(int c);
-    static bool isTokenChar(int c);
-    static bool isAlpha(int c);
+    static bool is_white_space(int c);
+    static bool is_dec_digit(int c);
+    static bool is_hex_digit(int c);
+    static bool is_base64_digit(int c);
+    static bool is_token_char(int c);
+    static bool is_alpha(int c);
 
     sexpCharDefs(void)
     {
@@ -71,9 +75,10 @@ class sexpCharDefs {
     }
 };
 
-/***********************************/
-/* SEXP SIMPLE STRING              */
-/***********************************/
+/*
+ * SEXP simple string
+ */
+
 class sexpOutputStream;
 
 typedef unsigned char octet;
@@ -85,36 +90,26 @@ class sexpSimpleString : public std::basic_string<octet>, private sexpCharDefs {
         (*this) += (octet)(c & 0xFF);
         return *this;
     }
-    // Returns length for printing simple string ss as a token
-    size_t advancedLengthToken(void) const { return length(); }
-    // Returns length for printing simple string ss as a base64 string
-    size_t advancedLengthBase64(void) const { return (2 + 4 * ((length() + 2) / 3)); }
-    // Returns length for printing simple string ss in verbatim mode
-    size_t advancedLengthVerbatim(void) const
-    {
-        size_t len = length(), i = 1;
-        while (len > 9L) {
-            i++;
-            len = len / 10;
-        }
-        return (i + 1 + len);
-    }
+    // Returns length for printing simple string as a token
+    size_t advanced_length_token(void) const { return length(); }
+    // Returns length for printing simple string as a base64 string
+    size_t advanced_length_base64(void) const { return (2 + 4 * ((length() + 2) / 3)); }
     // Returns length for printing simple string ss in quoted-string mode
-    size_t advancedLengthQuotedString(void) const { return (1 + length() + 1); }
+    size_t advanced_length_quoted(void) const { return (1 + length() + 1); }
     // Returns length for printing simple string ss in hexadecimal mode
-    size_t advancedLengthHexadecimal(void) const { return (1 + 2 * length() + 1); }
-    size_t advancedLength(sexpOutputStream *os) const;
+    size_t advanced_length_hexadecimal(void) const { return (1 + 2 * length() + 1); }
+    size_t advanced_length(sexpOutputStream *os) const;
 
-    sexpOutputStream *printCanonicalVerbatim(sexpOutputStream *os) const;
-    sexpOutputStream *printAdvanced(sexpOutputStream *os) const;
-    sexpOutputStream *printToken(sexpOutputStream *os) const;
-    sexpOutputStream *printVerbatim(sexpOutputStream *os) const;
-    sexpOutputStream *printQuoted(sexpOutputStream *os) const;
-    sexpOutputStream *printHex(sexpOutputStream *os) const;
+    sexpOutputStream *print_canonical_verbatim(sexpOutputStream *os) const;
+    sexpOutputStream *print_advanced(sexpOutputStream *os) const;
+    sexpOutputStream *print_token(sexpOutputStream *os) const;
+    sexpOutputStream *print_verbatim(sexpOutputStream *os) const;
+    sexpOutputStream *print_quoted(sexpOutputStream *os) const;
+    sexpOutputStream *print_hexadecimal(sexpOutputStream *os) const;
     sexpOutputStream *print_base64(sexpOutputStream *os) const;
 
-    bool canPrintAsQuotedString(void) const;
-    bool canPrintAsToken(const sexpOutputStream *os) const;
+    bool can_print_as_quoted_string(void) const;
+    bool can_print_as_token(const sexpOutputStream *os) const;
 };
 
 /***********************************/
@@ -126,8 +121,8 @@ class sexpObject {
     virtual ~sexpObject(){};
 
     virtual sexpOutputStream *printCanonical(sexpOutputStream *os) const = 0;
-    virtual sexpOutputStream *printAdvanced(sexpOutputStream *os) const;
-    virtual size_t            advancedLength(sexpOutputStream *os) const = 0;
+    virtual sexpOutputStream *print_advanced(sexpOutputStream *os) const;
+    virtual size_t            advanced_length(sexpOutputStream *os) const = 0;
 };
 
 /***********************************/
@@ -158,8 +153,8 @@ class sexpString : public sexpObject {
     }
 
     virtual sexpOutputStream *printCanonical(sexpOutputStream *os) const;
-    virtual sexpOutputStream *printAdvanced(sexpOutputStream *os) const;
-    virtual size_t            advancedLength(sexpOutputStream *os) const;
+    virtual sexpOutputStream *print_advanced(sexpOutputStream *os) const;
+    virtual size_t            advanced_length(sexpOutputStream *os) const;
 };
 
 /***********************************/
@@ -177,8 +172,8 @@ class sexpList : public sexpObject, public std::vector<sexpObject *> {
     }
 
     virtual sexpOutputStream *printCanonical(sexpOutputStream *os) const;
-    virtual sexpOutputStream *printAdvanced(sexpOutputStream *os) const;
-    virtual size_t            advancedLength(sexpOutputStream *os) const;
+    virtual sexpOutputStream *print_advanced(sexpOutputStream *os) const;
+    virtual size_t            advanced_length(sexpOutputStream *os) const;
 };
 
 class sexpInputStream : private sexpCharDefs {
@@ -248,18 +243,18 @@ class sexpOutputStream {
     {
         return obj->printCanonical(this);
     }
-    sexpOutputStream *printAdvanced(const sexpObject *obj)
+    sexpOutputStream *print_advanced(const sexpObject *obj)
     {
-        return obj->printAdvanced(this);
+        return obj->print_advanced(this);
     };
     sexpOutputStream *print_base64(const sexpObject *obj);
     sexpOutputStream *printCanonical(const sexpSimpleString *ss)
     {
-        return ss->printCanonicalVerbatim(this);
+        return ss->print_canonical_verbatim(this);
     }
-    sexpOutputStream *printAdvanced(const sexpSimpleString *ss)
+    sexpOutputStream *print_advanced(const sexpSimpleString *ss)
     {
-        return ss->printAdvanced(this);
+        return ss->print_advanced(this);
     };
 
     size_t            getByteSize(void) const { return byte_size; }

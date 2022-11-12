@@ -24,7 +24,7 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-name: build-and-test-msys
+name: build-and-test-rh
 
 on:
   push:
@@ -36,28 +36,26 @@ concurrency:
   group: '${{ github.workflow }}-${{ github.job }}-${{ github.head_ref || github.ref_name }}'
   cancel-in-progress: true
 
-defaults:
-  run:
-    shell: msys2 {0}
 jobs:
   build-and-test:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        image: [ 'tgagor/centos:stream8' ]
+#        image: [ 'tgagor/centos:stream8', 'fedora:35', 'fedora:36' ]
+    container:
+      image: ${{ matrix.image }}
     steps:
+      - name: Install packages
+        run: yum -y install sudo git cmake gcc gcc-c++ make
+
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Install MSys
-        uses: msys2/setup-msys2@v2
-        with:
-          msystem: ucrt64
-          pacboy: >-
-            toolchain:p
-            cmake:p
-          path-type: minimal
-
       - name: Adjust environment
         shell: bash
-        run: echo "SEXP_INSTALL_PATH=$(cygpath -u $PWD/install)" >> $GITHUB_ENV
+        run: echo "SEXP_INSTALL_PATH=$PWD/install" >> $GITHUB_ENV
 
       - name: Configure
         run: |
@@ -74,11 +72,12 @@ jobs:
         uses: actions/checkout@v3
         with:
           repository: kward/shunit2
-          path: ${{ github.workspace }}/tests/shunit2
+          path: ${{github.workspace}}/tests/shunit2
           fetch-depth: 1
 
       - name: Install
         run: cmake --install build
 
       - name: Run additional tests
-        run:  tests/scripts/tests.sh
+        shell: bash
+        run: tests/scripts/tests.sh
