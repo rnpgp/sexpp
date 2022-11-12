@@ -33,7 +33,7 @@
 #include <iostream>
 #include <string>
 
-#include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
 #include <sexp/sexp-error.h>
 #include <sexp/sexp.h>

@@ -30,6 +30,7 @@
 #include <sexp-tests.h>
 
 using namespace sexp;
+using ::testing::UnitTest;
 
 namespace {
 class BaselineTests : public testing::Test {
@@ -39,16 +40,15 @@ class BaselineTests : public testing::Test {
     static const size_t base_sample_canonical = 2;
     static const size_t n_base_samples = base_sample_canonical + 1;
 
-    static std::string base_samples[n_base_samples];
+    static const size_t was_set_upbase_sample_advanced = 0;
+    static std::string  base_samples[n_base_samples];
 
-    static void SetUpTestSuite()
+    BaselineTests()
     {
         base_samples[base_sample_advanced] = sexp_samples_folder + "/sexp-sample-a";
         base_samples[base_sample_base64] = sexp_samples_folder + "/sexp-sample-b";
         base_samples[base_sample_canonical] = sexp_samples_folder + "/sexp-sample-c";
     };
-
-    static void TearDownTestSuite() {}
 };
 
 const size_t BaselineTests::n_base_samples;
@@ -61,7 +61,8 @@ TEST_F(BaselineTests, Scan2Canonical)
 {
     for (size_t i = 0; i < n_base_samples; i++) {
         std::ifstream ifs(base_samples[i], std::ifstream::binary);
-        EXPECT_FALSE(ifs.fail());
+        bool          r = ifs.fail();
+        EXPECT_FALSE(r);
 
         if (!ifs.fail()) {
             sexpInputStream is(&ifs);

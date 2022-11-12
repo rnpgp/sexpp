@@ -35,7 +35,7 @@ namespace sexp {
 sexp_exception::severity sexp_exception::verbosity_ = sexp_exception::error;
 bool                     sexp_exception::interactive_ = false;
 
-std::string sexp_exception::format(std::string message, severity level, size_t position)
+std::string sexp_exception::format(std::string message, severity level, int position)
 {
     std::string r =
       std::string("SEXP ") + (level == error ? "ERROR: " : "WARNING: ") + message;
@@ -44,8 +44,7 @@ std::string sexp_exception::format(std::string message, severity level, size_t p
     return r;
 };
 
-void sexp_error(
-  sexp_exception::severity level, const char *msg, size_t c1, size_t c2, size_t pos)
+void sexp_error(sexp_exception::severity level, const char *msg, size_t c1, size_t c2, int pos)
 {
     char                     tmp[256];
     sexp_exception::severity l = (sexp_exception::severity) level;

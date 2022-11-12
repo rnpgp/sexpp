@@ -179,8 +179,6 @@ sexpOutputStream *sexpSimpleString::print_advanced(sexpOutputStream *os) const
 bool sexpSimpleString::can_print_as_quoted_string(void) const
 {
     const octet *c = c_str();
-    if (length() < 0)
-        return false;
     for (size_t i = 0; i < length(); i++, c++) {
         if (!is_token_char((int) (*c)) && *c != ' ')
             return false;

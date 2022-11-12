@@ -1,4 +1,6 @@
-image:https://github.com/rnpgp/sexp/workflows/build-and-test/badge.svg["Build status", link="https://github.com/rnpgp/sexp/actions?workflow=build-and-test"]
+image:https://github.com/rnpgp/sexp/workflows/build-and-test/badge.svg["Build status Ubuntu/MacOS/Windows", link="https://github.com/rnpgp/sexp/actions?workflow=build-and-test"]
+image:https://github.com/rnpgp/sexp/workflows/build-and-test-rh/badge.svg["Build status CentOS/Fedora", link="https://github.com/rnpgp/sexp/actions?workflow=build-and-test-rh"]
+image:https://github.com/rnpgp/sexp/workflows/build-and-test-msys/badge.svg["Build status MSys", link="https://github.com/rnpgp/sexp/actions?workflow=build-and-test-msys"]
 
 # SEXP---(S-expressions) parser and generator library
 

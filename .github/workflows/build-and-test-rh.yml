@@ -42,24 +42,35 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        image: [ 'tgagor/centos:stream8', 'fedora:35', 'fedora:36' ]
+        image: [ 'centos:7', 'tgagor/centos:stream8', 'quay.io/centos/centos:stream9', 'fedora:35', 'fedora:36' ]
     container:
       image: ${{ matrix.image }}
     steps:
-      - name: Install packages
-        run: yum -y install sudo git cmake gcc gcc-c++ make
+      - name: Install packages CentOS 7
+        if: matrix.image == 'centos:7'
+        run: |
+          yum -y install http://opensource.wandisco.com/centos/7/git/x86_64/wandisco-git-release-7-2.noarch.rpm
+          yum -y install sudo git make wget gcc gcc-c++
+          wget -nv https://github.com/Kitware/CMake/releases/download/v3.24.3/cmake-3.24.3-linux-x86_64.sh
+          chmod a+x cmake-3.24.3-linux-x86_64.sh
+          ./cmake-3.24.3-linux-x86_64.sh --skip-license --skip-license --exclude-subdir --prefix=/usr/local
+
+      - name: Install packages not CentOS 7
+        if: matrix.image != 'centos:7'
+        run: yum -y install sudo git gcc gcc-c++ make cmake
 
       - name: Checkout
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
 
       - name: Adjust environment
-        shell: bash
         run: echo "SEXP_INSTALL_PATH=$PWD/install" >> $GITHUB_ENV
 
       - name: Configure
         run: |
           mkdir -p build
-          cmake -Bbuild -DCMAKE_INSTALL_PREFIX=${{ env.SEXP_INSTALL_PATH }} -DCMAKE_BUILD_TYPE=Release
+          cmake . -Bbuild -DCMAKE_INSTALL_PREFIX=${{ env.SEXP_INSTALL_PATH }} -DCMAKE_BUILD_TYPE=Release
 
       - name: Build
         run: cmake --build build --config Release

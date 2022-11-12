@@ -82,16 +82,19 @@ if(${WITH_TESTS})
     )
 
     message(STATUS "Fetching googletest")
+    # Version 1.8.1 to make it compatible with gcc 4.8.5 which misses some C++11 features
     FetchContent_Declare(
         googletest
         GIT_REPOSITORY https://github.com/google/googletest.git
-        GIT_TAG        release-1.12.1
+        GIT_TAG        release-1.8.1
     )
     # maintain compiler/linker settings on Windows
     set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
     # do not install gtest
     set(INSTALL_GTEST OFF CACHE BOOL "" FORCE)
     # explicitely disable unneeded gmock build
+    set(BUILD_GMOCK OFF CACHE BOOL "" FORCE)
+
     FetchContent_MakeAvailable(googletest)
 
     add_executable(sexp-tests
@@ -106,7 +109,6 @@ if(${WITH_TESTS})
     target_link_libraries(sexp-tests PRIVATE
         sexp
         gtest_main
-        gmock_main
         gtest
     )
 

@@ -183,7 +183,7 @@ class sexpInputStream : private sexpCharDefs {
     int           next_char; /* character currently being scanned */
     size_t        bits;      /* Bits waiting to be used */
     size_t        n_bits;    /* number of such bits waiting to be used */
-    size_t        count;     /* number of 8-bit characters output by getChar */
+    int           count;     /* number of 8-bit characters output by getChar */
   public:
     sexpInputStream(std::istream *i);
     void             setInput(std::istream *i) { inputFile = i; }

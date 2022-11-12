@@ -34,10 +34,6 @@ using namespace sexp;
 namespace {
 class PrimitivesTests : public testing::Test {
   protected:
-    static void SetUpTestSuite(void){};
-
-    static void TearDownTestSuite(void) {}
-
     static void do_test_advanced(const char *str_in, const char *str_out = nullptr)
     {
         std::istringstream iss(str_in);

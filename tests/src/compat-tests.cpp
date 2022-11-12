@@ -33,10 +33,6 @@ using namespace sexp;
 
 namespace {
 class CompatTests : public testing::Test {
-  protected:
-    static void SetUpTestSuite(){};
-
-    static void TearDownTestSuite() {}
 };
 
 TEST_F(CompatTests, Canonical)

@@ -41,14 +41,14 @@ class sexp_exception : public std::exception {
     static severity verbosity_;
     static bool     interactive_;
 
-    size_t      position_; // May be EOF aka -1
+    int         position_; // May be EOF aka -1
     std::string msg_;
     severity    level_;
 
   public:
-    sexp_exception(std::string message, severity level, size_t position)
+    sexp_exception(std::string message, severity level, int position)
         : position_{position}, level_{level}, msg_{format(message, level, position)} {};
-    static std::string format(std::string message, severity level, size_t position);
+    static std::string format(std::string message, severity level, int position);
     static bool shall_throw(severity level) { return level == error || verbosity_ != error; };
     virtual const char *what() const throw() { return msg_.c_str(); };
     severity            level() const { return level_; };
@@ -60,6 +60,6 @@ class sexp_exception : public std::exception {
 };
 
 void sexp_error(
-  sexp_exception::severity level, const char *msg, size_t c1, size_t c2, size_t pos);
+  sexp_exception::severity level, const char *msg, size_t c1, size_t c2, int pos);
 
 } // namespace sexp
