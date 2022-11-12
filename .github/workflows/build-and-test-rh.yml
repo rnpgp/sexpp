@@ -42,8 +42,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        image: [ 'tgagor/centos:stream8' ]
-#        image: [ 'tgagor/centos:stream8', 'fedora:35', 'fedora:36' ]
+        image: [ 'tgagor/centos:stream8', 'fedora:35', 'fedora:36' ]
     container:
       image: ${{ matrix.image }}
     steps:
