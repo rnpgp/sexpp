@@ -45,7 +45,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        image: [ 'i386/debian:11', 'amd64/debian:11' ]
+        image: [ 'i386/debian:9', 'i386/debian:11', 'amd64/debian:11' ]
     container:
       image: ${{ matrix.image }}
     steps:
