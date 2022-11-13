@@ -68,7 +68,7 @@ TEST_F(CompatTests, Advanced)
         std::ostringstream oss(std::ios_base::binary);
         sexpOutputStream   os(&oss);
 
-        os.setMaxColumn(100);
+        os.set_max_column(100);
         os.print_advanced(obj);
         oss << std::endl;
 

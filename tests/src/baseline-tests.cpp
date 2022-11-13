@@ -35,13 +35,13 @@ using ::testing::UnitTest;
 namespace {
 class BaselineTests : public testing::Test {
   protected:
-    static const size_t base_sample_advanced = 0;
-    static const size_t base_sample_base64 = 1;
-    static const size_t base_sample_canonical = 2;
-    static const size_t n_base_samples = base_sample_canonical + 1;
+    static const uint32_t base_sample_advanced = 0;
+    static const uint32_t base_sample_base64 = 1;
+    static const uint32_t base_sample_canonical = 2;
+    static const uint32_t n_base_samples = base_sample_canonical + 1;
 
-    static const size_t was_set_upbase_sample_advanced = 0;
-    static std::string  base_samples[n_base_samples];
+    static const uint32_t was_set_upbase_sample_advanced = 0;
+    static std::string    base_samples[n_base_samples];
 
     BaselineTests()
     {
@@ -51,15 +51,15 @@ class BaselineTests : public testing::Test {
     };
 };
 
-const size_t BaselineTests::n_base_samples;
-const size_t BaselineTests::base_sample_advanced;
-const size_t BaselineTests::base_sample_base64;
-const size_t BaselineTests::base_sample_canonical;
-std::string  BaselineTests::base_samples[n_base_samples];
+const uint32_t BaselineTests::n_base_samples;
+const uint32_t BaselineTests::base_sample_advanced;
+const uint32_t BaselineTests::base_sample_base64;
+const uint32_t BaselineTests::base_sample_canonical;
+std::string    BaselineTests::base_samples[n_base_samples];
 
 TEST_F(BaselineTests, Scan2Canonical)
 {
-    for (size_t i = 0; i < n_base_samples; i++) {
+    for (uint32_t i = 0; i < n_base_samples; i++) {
         std::ifstream ifs(base_samples[i], std::ifstream::binary);
         bool          r = ifs.fail();
         EXPECT_FALSE(r);
@@ -80,7 +80,7 @@ TEST_F(BaselineTests, Scan2Canonical)
 
 TEST_F(BaselineTests, Scan2Base64)
 {
-    for (size_t i = 0; i < n_base_samples; i++) {
+    for (uint32_t i = 0; i < n_base_samples; i++) {
         std::ifstream ifs(base_samples[i], std::ifstream::binary);
         EXPECT_FALSE(ifs.fail());
 
@@ -91,7 +91,7 @@ TEST_F(BaselineTests, Scan2Base64)
             std::ostringstream oss(std::ios_base::binary);
             sexpOutputStream   os(&oss);
 
-            os.setMaxColumn(0);
+            os.set_max_column(0);
             os.print_base64(object);
             oss << std::endl;
 
@@ -103,7 +103,7 @@ TEST_F(BaselineTests, Scan2Base64)
 
 TEST_F(BaselineTests, Scan2Advanced)
 {
-    for (size_t i = 0; i < n_base_samples; i++) {
+    for (uint32_t i = 0; i < n_base_samples; i++) {
         std::ifstream ifs(base_samples[i], std::ifstream::binary);
         EXPECT_FALSE(ifs.fail());
 

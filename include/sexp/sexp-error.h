@@ -52,7 +52,7 @@ class sexp_exception : public std::exception {
     static bool shall_throw(severity level) { return level == error || verbosity_ != error; };
     virtual const char *what() const throw() { return msg_.c_str(); };
     severity            level() const { return level_; };
-    size_t              position() const { return position_; };
+    uint32_t            position() const { return position_; };
     static severity     verbosity() { return verbosity_; };
     static bool         interactive() { return interactive_; };
     static void         set_verbosity(severity vrb) { verbosity_ = vrb; };
@@ -60,6 +60,6 @@ class sexp_exception : public std::exception {
 };
 
 void sexp_error(
-  sexp_exception::severity level, const char *msg, size_t c1, size_t c2, int pos);
+  sexp_exception::severity level, const char *msg, uint32_t c1, uint32_t c2, int pos);
 
 } // namespace sexp

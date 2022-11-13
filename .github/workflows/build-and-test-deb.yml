@@ -37,14 +37,15 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  CMAKE_VERSION: '3.24.3'
+# Looks like the lat version that supports i386
+  CMAKE_VERSION: '3.20.6-2'
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        image: [ 'amd64/debian:11' ]
+        image: [ 'i386/debian:11', 'amd64/debian:11' ]
     container:
       image: ${{ matrix.image }}
     steps:
@@ -52,33 +53,24 @@ jobs:
         run: |
           apt update
           apt -y install sudo git wget build-essential libssl-dev
-#gcc gcc-c++ make cmake
-
-      - name: Cache cmake
-        id: cache-cmake
-        uses: actions/cache@v3
-        with:
-          path: cmake-${{ env.CMAKE_VERSION }}
-          key: ${{ matrix.image }}-cmake-${{ env.CMAKE_VERSION }}
-
-      - name: Build cmake
-        if: steps.cache.outputs.cache-hit != 'true'
-        run: |
-          wget -nv https://github.com/Kitware/CMake/releases/download/v${{ env.CMAKE_VERSION }}/cmake-${{ env.CMAKE_VERSION }}.tar.gz
-          tar -zxf cmake-${{ env.CMAKE_VERSION }}.tar.gz
-          cd cmake-${{ env.CMAKE_VERSION }}
-          ./bootstrap
-          make
-
-      - name: Install cmake
-        run: |
-          cd cmake-${{ env.CMAKE_VERSION }}
-          make install
 
       - name: Checkout
-        uses: actions/checkout@v3
+        # Because i386 support v1 only (no node run-time)
+        uses: actions/checkout@v1
         with:
           fetch-depth: 1
+
+      - name: Install cmake/i386
+        if: startsWith(matrix.image, 'i386')
+        run: |
+          wget -nv https://github.com/xpack-dev-tools/cmake-xpack/releases/download/v${{ env.CMAKE_VERSION }}/xpack-cmake-${{ env.CMAKE_VERSION }}-linux-ia32.tar.gz
+          tar -zxf xpack-cmake-${{ env.CMAKE_VERSION }}-linux-ia32.tar.gz --directory /usr/local --strip-components=1 --skip-old-files
+
+      - name: Install cmake/amd64
+        if: startsWith(matrix.image, 'amd64')
+        run: |
+          wget -nv https://github.com/xpack-dev-tools/cmake-xpack/releases/download/v${{ env.CMAKE_VERSION }}/xpack-cmake-${{ env.CMAKE_VERSION }}-linux-x64.tar.gz
+          tar -zxf xpack-cmake-${{ env.CMAKE_VERSION }}-linux-x64.tar.gz --directory /usr/local --strip-components=1 --skip-old-files
 
       - name: Adjust environment
         run: echo "SEXP_INSTALL_PATH=$PWD/install" >> $GITHUB_ENV
@@ -90,9 +82,12 @@ jobs:
         run: cmake --build build --config Release
 
       - name: Run tests
-        run: ctest --test-dir build
+        run: ctest --test-dir build --output-on-failure
 
-      - name: Checkout shell test framework
+      - name: Checkout shell test framework/amd64 only
+        # Because i386 support actions/checkout@v1 only (no Node.js 32-bit binary)
+        # and and actions/checkout@v1 has some issues with nested repositories
+        if: startsWith(matrix.image, 'amd64')
         uses: actions/checkout@v3
         with:
           repository: kward/shunit2
@@ -103,5 +98,7 @@ jobs:
         run: cmake --install build
 
       - name: Run additional tests
+        # See above, just assume that in i386 config it was installed correctly
+        if: startsWith(matrix.image, 'amd64')
         shell: bash
         run: tests/scripts/tests.sh

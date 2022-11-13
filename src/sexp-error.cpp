@@ -44,7 +44,8 @@ std::string sexp_exception::format(std::string message, severity level, int posi
     return r;
 };
 
-void sexp_error(sexp_exception::severity level, const char *msg, size_t c1, size_t c2, int pos)
+void sexp_error(
+  sexp_exception::severity level, const char *msg, uint32_t c1, uint32_t c2, int pos)
 {
     char                     tmp[256];
     sexp_exception::severity l = (sexp_exception::severity) level;

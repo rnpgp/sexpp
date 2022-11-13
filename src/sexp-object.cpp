@@ -64,9 +64,9 @@ sexpOutputStream *sexpString::print_advanced(sexpOutputStream *os) const
     sexpSimpleString *ph = get_presentation_hint();
     sexpSimpleString *ss = get_string();
     if (ph != NULL) {
-        os->putChar('[');
+        os->put_char('[');
         ph->print_advanced(os);
-        os->putChar(']');
+        os->put_char(']');
     }
     if (ss == NULL)
         sexp_error(sexp_exception::error, "NULL string can't be printed", 0, 0, EOF);
@@ -78,9 +78,9 @@ sexpOutputStream *sexpString::print_advanced(sexpOutputStream *os) const
  * sexpString::advanced_length(os)
  * Returns length of printed image of string
  */
-size_t sexpString::advanced_length(sexpOutputStream *os) const
+uint32_t sexpString::advanced_length(sexpOutputStream *os) const
 {
-    size_t len = 0;
+    uint32_t len = 0;
     if (presentation_hint != NULL)
         len += 2 + presentation_hint->advanced_length(os);
     if (string != NULL)
@@ -114,32 +114,32 @@ sexpOutputStream *sexpList::print_advanced(sexpOutputStream *os) const
     sexpObject::print_advanced(os);
     int vertical = false;
     int firstelement = true;
-    os->putChar('(')->incIndent();
-    vertical = (advanced_length(os) > os->getMaxColumn() - os->getColumn());
+    os->put_char('(')->inc_indent();
+    vertical = (advanced_length(os) > os->get_max_column() - os->get_column());
 
     std::for_each(begin(), end(), [&](const sexpObject *obj) {
         if (!firstelement) {
             if (vertical)
                 os->new_line(sexpOutputStream::advanced);
             else
-                os->putChar(' ');
+                os->put_char(' ');
         }
         obj->print_advanced(os);
         firstelement = false;
     });
 
-    if (os->getMaxColumn() > 0 && os->getColumn() > os->getMaxColumn() - 2)
+    if (os->get_max_column() > 0 && os->get_column() > os->get_max_column() - 2)
         os->new_line(sexpOutputStream::advanced);
-    return os->decIndent()->putChar(')');
+    return os->dec_indent()->put_char(')');
 }
 
 /*
  * sexpList::advanced_length(os)
  * Returns length of printed image of list given as iterator
  */
-size_t sexpList::advanced_length(sexpOutputStream *os) const
+uint32_t sexpList::advanced_length(sexpOutputStream *os) const
 {
-    size_t len = 1; /* for left paren */
+    uint32_t len = 1; /* for left paren */
     std::for_each(
       begin(), end(), [&](const sexpObject *obj) { len += obj->advanced_length(os); });
     return (len + 1); /* for final paren */
@@ -151,7 +151,7 @@ size_t sexpList::advanced_length(sexpOutputStream *os) const
  */
 sexpOutputStream *sexpObject::print_advanced(sexpOutputStream *os) const
 {
-    if (os->getMaxColumn() > 0 && os->getColumn() > os->getMaxColumn() - 4)
+    if (os->get_max_column() > 0 && os->get_column() > os->get_max_column() - 4)
         os->new_line(sexpOutputStream::advanced);
     return os;
 }

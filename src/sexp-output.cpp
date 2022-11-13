@@ -46,26 +46,26 @@ static const char *base64Digits =
  * Creates and initializes new sexpOutputStream object.
  */
 sexpOutputStream::sexpOutputStream(std::ostream *o)
-    : outputFile(o), column(0), maxcolumn(defaultlineliength), indent(0), byte_size(8),
+    : output_file(o), column(0), max_column(default_line_length), indent(0), byte_size(8),
       bits(0), n_bits(0), mode(canonical)
 {
 }
 
 /*
- * sexpOutputStream::putChar(c)
+ * sexpOutputStream::put_char(c)
  * Puts the character c out on the output stream os.
  * Keeps track of the "column" the next output char will go to.
  */
-sexpOutputStream *sexpOutputStream::putChar(int c)
+sexpOutputStream *sexpOutputStream::put_char(int c)
 {
-    outputFile->put(c);
+    output_file->put(c);
     column++;
     return this;
 }
 
 /*
  * sexpOutputStream::var_put_char(c)
- * putChar with variable sized output bytes considered.
+ * put_char with variable sized output bytes considered.
  * int c;  -- this is always an eight-bit byte being output
  */
 sexpOutputStream *sexpOutputStream::var_put_char(int c)
@@ -76,16 +76,16 @@ sexpOutputStream *sexpOutputStream::var_put_char(int c)
     while (n_bits >= byte_size) {
         if ((byte_size == 6 || byte_size == 4 || c == '}' || c == '{' || c == '#' ||
              c == '|') &&
-            maxcolumn > 0 && column >= maxcolumn)
+            max_column > 0 && column >= max_column)
             new_line(mode);
         if (byte_size == 4)
-            putChar(hexDigits[(bits >> (n_bits - 4)) & 0x0F]);
+            put_char(hexDigits[(bits >> (n_bits - 4)) & 0x0F]);
         else if (byte_size == 6)
-            putChar(base64Digits[(bits >> (n_bits - 6)) & 0x3F]);
+            put_char(base64Digits[(bits >> (n_bits - 6)) & 0x3F]);
         else if (byte_size == 8)
-            putChar(bits & 0xFF);
+            put_char(bits & 0xFF);
         n_bits -= byte_size;
-        base64Count++;
+        base64_count++;
     }
     return this;
 }
@@ -109,7 +109,7 @@ sexpOutputStream *sexpOutputStream::change_output_byte_size(int           newByt
     byte_size = newByteSize;
     n_bits = 0;
     bits = 0;
-    base64Count = 0;
+    base64_count = 0;
     mode = newMode;
     return this;
 }
@@ -122,20 +122,20 @@ sexpOutputStream *sexpOutputStream::flush(void)
 {
     if (n_bits > 0) {
         if (byte_size == 4)
-            putChar(hexDigits[(bits << (4 - n_bits)) & 0x0F]);
+            put_char(hexDigits[(bits << (4 - n_bits)) & 0x0F]);
         else if (byte_size == 6)
-            putChar(base64Digits[(bits << (6 - n_bits)) & 0x3F]);
+            put_char(base64Digits[(bits << (6 - n_bits)) & 0x3F]);
         else if (byte_size == 8)
-            putChar(bits & 0xFF);
+            put_char(bits & 0xFF);
         n_bits = 0;
-        base64Count++;
+        base64_count++;
     }
     if (byte_size == 6) { /* and add switch here */
-        while ((base64Count & 3) != 0) {
-            if (maxcolumn > 0 && column >= maxcolumn)
+        while ((base64_count & 3) != 0) {
+            if (max_column > 0 && column >= max_column)
                 new_line(mode);
-            putChar('=');
-            base64Count++;
+            put_char('=');
+            base64_count++;
         }
     }
     return this;
@@ -145,18 +145,18 @@ sexpOutputStream *sexpOutputStream::flush(void)
  * sexpOutputStream::new_line(mode)
  * Outputs a newline symbol to the output stream os.
  * For advanced mode, also outputs indentation as one blank per
- * indentation level (but never indents more than half of maxcolumn).
+ * indentation level (but never indents more than half of max_column).
  * Resets column for next output character.
  */
 sexpOutputStream *sexpOutputStream::new_line(sexpPrintMode mode)
 {
     if (mode == advanced || mode == base64) {
-        putChar('\n');
+        put_char('\n');
         column = 0;
     }
     if (mode == advanced) {
-        for (int i = 0; i < indent && (4 * i) < maxcolumn; i++)
-            putChar(' ');
+        for (int i = 0; i < indent && (4 * i) < max_column; i++)
+            put_char(' ');
     }
     return this;
 }
@@ -165,14 +165,14 @@ sexpOutputStream *sexpOutputStream::new_line(sexpPrintMode mode)
  * sexpOutputStream::print_decimal(n)
  * print out n in decimal to output stream os
  */
-sexpOutputStream *sexpOutputStream::print_decimal(size_t n)
+sexpOutputStream *sexpOutputStream::print_decimal(uint32_t n)
 {
     char buffer[50];
     snprintf(buffer,
              sizeof(buffer) / sizeof(buffer[0]),
-             "%zu",
+             "%u",
              n); // since itoa is not a part of any standard
-    for (size_t i = 0; buffer[i] != 0; i++)
+    for (uint32_t i = 0; buffer[i] != 0; i++)
         var_put_char(buffer[i]);
     return this;
 }

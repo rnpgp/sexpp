@@ -52,7 +52,7 @@ sexpInputStream::sexpInputStream(std::istream *i)
 /*
  * sexpInputStream::set_byte_size(newByteSize)
  */
-sexpInputStream *sexpInputStream::set_byte_size(size_t newByteSize)
+sexpInputStream *sexpInputStream::set_byte_size(uint32_t newByteSize)
 {
     byte_size = newByteSize;
     n_bits = 0;
@@ -108,7 +108,7 @@ sexpInputStream *sexpInputStream::get_char(void)
                 bits = bits | hexvalue[c];
             else {
                 sexp_error(sexp_exception::error,
-                           "character '%c' found in %d-bit coding region",
+                           "character '%c' found in %u-bit coding region",
                            next_char,
                            byte_size,
                            count);
@@ -151,10 +151,10 @@ sexpInputStream *sexpInputStream::skip_char(int c)
 }
 
 /*
- * sexpInputStream::scanToken(ss)
+ * sexpInputStream::scan_token(ss)
  * scan one or more characters into simple string ss as a token.
  */
-void sexpInputStream::scanToken(sexpSimpleString *ss)
+void sexpInputStream::scan_token(sexpSimpleString *ss)
 {
     skip_white_space();
     while (is_token_char(next_char)) {
@@ -183,13 +183,13 @@ sexpObject *sexpInputStream::scan_to_eof(void)
 }
 
 /*
- * scanDecimal(is)
+ * scan_decimal_string(is)
  * returns long integer that is value of decimal number
  */
-int sexpInputStream::scanDecimal(void)
+int sexpInputStream::scan_decimal_string(void)
 {
-    int    value = 0;
-    size_t i = 0;
+    int      value = 0;
+    uint32_t i = 0;
     while (is_dec_digit(next_char)) {
         value = value * 10 + decvalue[next_char];
         get_char();
@@ -201,10 +201,10 @@ int sexpInputStream::scanDecimal(void)
 }
 
 /*
- * sexpInputStream::scanVerbatimString(is,ss,length)
+ * sexpInputStream::scan_verbatim_string(is,ss,length)
  * Reads verbatim string of given length into simple string ss.
  */
-void sexpInputStream::scanVerbatimString(sexpSimpleString *ss, int length)
+void sexpInputStream::scan_verbatim_string(sexpSimpleString *ss, int length)
 {
     skip_white_space()->skip_char(':');
     if (length == -1L) /* no length was specified */
@@ -218,12 +218,12 @@ void sexpInputStream::scanVerbatimString(sexpSimpleString *ss, int length)
 }
 
 /*
- * sexpInputStream::scanQuotedString(ss,length)
+ * sexpInputStream::scan_quoted_string(ss,length)
  * Reads quoted string of given length into simple string ss.
  * Handles ordinary C escapes.
  * If of indefinite length, length is -1.
  */
-void sexpInputStream::scanQuotedString(sexpSimpleString *ss, int length)
+void sexpInputStream::scan_quoted_string(sexpSimpleString *ss, int length)
 {
     int c;
     skip_char('"');
@@ -328,11 +328,11 @@ void sexpInputStream::scanQuotedString(sexpSimpleString *ss, int length)
 }
 
 /*
- * scanHexString(ss,length)
+ * scan_hexadecimal_string(ss,length)
  * Reads hexadecimal string into simple string ss.
  * String is of given length result, or length = -1 if indefinite length.
  */
-void sexpInputStream::scanHexString(sexpSimpleString *ss, int length)
+void sexpInputStream::scan_hexadecimal_string(sexpSimpleString *ss, int length)
 {
     set_byte_size(4)->skip_char('#');
     while (next_char != EOF && (next_char != '#' || get_byte_size() == 4)) {
@@ -349,11 +349,11 @@ void sexpInputStream::scanHexString(sexpSimpleString *ss, int length)
 }
 
 /*
- * sexpInputStream::scanBase64String(ss,length)
+ * sexpInputStream::scan_base64_string(ss,length)
  * Reads base64 string into simple string ss.
  * String is of given length result, or length = -1 if indefinite length.
  */
-void sexpInputStream::scanBase64String(sexpSimpleString *ss, int length)
+void sexpInputStream::scan_base64_string(sexpSimpleString *ss, int length)
 {
     set_byte_size(6)->skip_char('|');
     while (next_char != EOF && (next_char != '|' || get_byte_size() == 6)) {
@@ -370,12 +370,12 @@ void sexpInputStream::scanBase64String(sexpSimpleString *ss, int length)
 }
 
 /*
- * sexpInputStream::scanSimpleString(void)
+ * sexpInputStream::scan_simple_string(void)
  * Reads and returns a simple string from the input stream.
  * Determines type of simple string from the initial character, and
  * dispatches to appropriate routine based on that.
  */
-sexpSimpleString *sexpInputStream::scanSimpleString(void)
+sexpSimpleString *sexpInputStream::scan_simple_string(void)
 {
     int               length;
     sexpSimpleString *ss = new sexpSimpleString;
@@ -385,21 +385,21 @@ sexpSimpleString *sexpInputStream::scanSimpleString(void)
      * which would otherwise be treated as a verbatim string missing a length.
      */
     if (is_token_char(next_char) && !is_dec_digit(next_char)) {
-        scanToken(ss);
+        scan_token(ss);
     } else if (is_dec_digit(next_char) || next_char == '\"' || next_char == '#' ||
                next_char == '|' || next_char == ':') {
         if (is_dec_digit(next_char))
-            length = scanDecimal();
+            length = scan_decimal_string();
         else
             length = -1L;
         if (next_char == '\"')
-            scanQuotedString(ss, length);
+            scan_quoted_string(ss, length);
         else if (next_char == '#')
-            scanHexString(ss, length);
+            scan_hexadecimal_string(ss, length);
         else if (next_char == '|')
-            scanBase64String(ss, length);
+            scan_base64_string(ss, length);
         else if (next_char == ':')
-            scanVerbatimString(ss, length);
+            scan_verbatim_string(ss, length);
     } else {
         const char *const msg = (next_char == EOF) ? "unxpected end of file" :
                                 isprint(next_char) ? "illegal character '%c' (%d decimal)" :
@@ -412,26 +412,26 @@ sexpSimpleString *sexpInputStream::scanSimpleString(void)
 }
 
 /*
- * sexpInputStream::scanString(void)
+ * sexpInputStream::scan_string(void)
  * Reads and returns a string [presentationhint]string from input stream.
  */
-sexpString *sexpInputStream::scanString(void)
+sexpString *sexpInputStream::scan_string(void)
 {
     sexpString *s = new sexpString();
     if (next_char == '[') { /* scan presentation hint */
         skip_char('[');
-        s->set_presentation_hint(scanSimpleString());
+        s->set_presentation_hint(scan_simple_string());
         skip_white_space()->skip_char(']')->skip_white_space();
     }
-    s->set_string(scanSimpleString());
+    s->set_string(scan_simple_string());
     return (s);
 }
 
 /*
- * sexpInputStream::scanList(void)
+ * sexpInputStream::scan_list(void)
  * Read and return a sexpList from the input stream.
  */
-sexpList *sexpInputStream::scanList(void)
+sexpList *sexpInputStream::scan_list(void)
 {
     sexpList *list = new sexpList();
     skip_char('(')->skip_white_space();
@@ -467,9 +467,9 @@ sexpObject *sexpInputStream::scan_object(void)
         skip_char('}');
     } else {
         if (next_char == '(')
-            object = scanList();
+            object = scan_list();
         else
-            object = scanString();
+            object = scan_string();
     }
     return object;
 }

@@ -118,7 +118,7 @@ int main(int argc, char **argv)
                 ofs = new std::ofstream(argv[i], std::ifstream::binary);
                 if (ofs->fail())
                     sexp_error(sexp_exception::error, "Can't open output file.", 0, 0, EOF);
-                os->setOutput(ofs);
+                os->set_output(ofs);
             } else if (*c == 'p')
                 swp = true; /* prompt for input */
             else if (*c == 's')
@@ -126,7 +126,7 @@ int main(int argc, char **argv)
             else if (*c == 'w') { /* set output width */
                 if (i + 1 < argc)
                     i++;
-                os->setMaxColumn(atoi(argv[i]));
+                os->set_max_column(atoi(argv[i]));
             } else if (*c == 'x')
                 swx = true; /* execute repeatedly */
             else

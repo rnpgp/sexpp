@@ -53,7 +53,7 @@ jobs:
           yum -y install sudo git make wget gcc gcc-c++
           wget -nv https://github.com/Kitware/CMake/releases/download/v3.24.3/cmake-3.24.3-linux-x86_64.sh
           chmod a+x cmake-3.24.3-linux-x86_64.sh
-          ./cmake-3.24.3-linux-x86_64.sh --skip-license --skip-license --exclude-subdir --prefix=/usr/local
+          ./cmake-3.24.3-linux-x86_64.sh --skip-license --exclude-subdir --prefix=/usr/local
 
       - name: Install packages not CentOS 7
         if: matrix.image != 'centos:7'
@@ -74,7 +74,7 @@ jobs:
         run: cmake --build build --config Release
 
       - name: Run tests
-        run: ctest --test-dir build
+        run: ctest --test-dir build --output-on-failure
 
       - name: Checkout shell test framework
         uses: actions/checkout@v3

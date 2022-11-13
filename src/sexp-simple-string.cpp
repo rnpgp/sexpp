@@ -46,7 +46,7 @@ sexpOutputStream *sexpSimpleString::print_canonical_verbatim(sexpOutputStream *o
     /* print out len: */
     os->print_decimal(length())->var_put_char(':');
     /* print characters in fragment */
-    for (size_t i = 0; i < length(); i++)
+    for (uint32_t i = 0; i < length(); i++)
         os->var_put_char((int) *c++);
     return os;
 }
@@ -55,7 +55,7 @@ sexpOutputStream *sexpSimpleString::print_canonical_verbatim(sexpOutputStream *o
  * sexpSimpleString::advanced_length(os)
  * Returns length of printed image of s
  */
-size_t sexpSimpleString::advanced_length(sexpOutputStream *os) const
+uint32_t sexpSimpleString::advanced_length(sexpOutputStream *os) const
 {
     if (can_print_as_token(os))
         return advanced_length_token();
@@ -77,10 +77,10 @@ size_t sexpSimpleString::advanced_length(sexpOutputStream *os) const
 sexpOutputStream *sexpSimpleString::print_token(sexpOutputStream *os) const
 {
     const octet *c = c_str();
-    if (os->getMaxColumn() > 0 && os->getColumn() > (os->getMaxColumn() - length()))
+    if (os->get_max_column() > 0 && os->get_column() > (os->get_max_column() - length()))
         os->new_line(sexpOutputStream::advanced);
-    for (size_t i = 0; i < length(); i++)
-        os->putChar((int) (*c++));
+    for (uint32_t i = 0; i < length(); i++)
+        os->put_char((int) (*c++));
     return os;
 }
 
@@ -92,10 +92,10 @@ sexpOutputStream *sexpSimpleString::print_token(sexpOutputStream *os) const
 sexpOutputStream *sexpSimpleString::print_verbatim(sexpOutputStream *os) const
 {
     const octet *c = c_str();
-    if (os->getMaxColumn() > 0 && os->getColumn() > (os->getMaxColumn() - length()))
-        os->new_line(sexpOutputStream::advanced)->print_decimal(length())->putChar(':');
-    for (size_t i = 0; i < length(); i++)
-        os->putChar((int) *c++);
+    if (os->get_max_column() > 0 && os->get_column() > (os->get_max_column() - length()))
+        os->new_line(sexpOutputStream::advanced)->print_decimal(length())->put_char(':');
+    for (uint32_t i = 0; i < length(); i++)
+        os->put_char((int) *c++);
     return os;
 }
 
@@ -107,7 +107,7 @@ sexpOutputStream *sexpSimpleString::print_base64(sexpOutputStream *os) const
 {
     const octet *c = c_str();
     os->var_put_char('|')->change_output_byte_size(6, sexpOutputStream::advanced);
-    for (size_t i = 0; i < length(); i++)
+    for (uint32_t i = 0; i < length(); i++)
         os->var_put_char((int) (*c++));
     return os->flush()
       ->change_output_byte_size(8, sexpOutputStream::advanced)
@@ -121,10 +121,10 @@ sexpOutputStream *sexpSimpleString::print_base64(sexpOutputStream *os) const
 sexpOutputStream *sexpSimpleString::print_hexadecimal(sexpOutputStream *os) const
 {
     const octet *c = c_str();
-    os->putChar('#')->change_output_byte_size(4, sexpOutputStream::advanced);
-    for (size_t i = 0; i < length(); i++)
+    os->put_char('#')->change_output_byte_size(4, sexpOutputStream::advanced);
+    for (uint32_t i = 0; i < length(); i++)
         os->var_put_char((int) (*c++));
-    return os->flush()->change_output_byte_size(8, sexpOutputStream::advanced)->putChar('#');
+    return os->flush()->change_output_byte_size(8, sexpOutputStream::advanced)->put_char('#');
 }
 
 /*
@@ -137,15 +137,15 @@ sexpOutputStream *sexpSimpleString::print_hexadecimal(sexpOutputStream *os) cons
 sexpOutputStream *sexpSimpleString::print_quoted(sexpOutputStream *os) const
 {
     const octet *c = c_str();
-    os->putChar('\"');
-    for (size_t i = 0; i < length(); i++) {
-        if (os->getMaxColumn() > 0 && os->getColumn() >= os->getMaxColumn() - 2) {
-            os->putChar('\\')->putChar('\n');
-            os->resetColumn();
+    os->put_char('\"');
+    for (uint32_t i = 0; i < length(); i++) {
+        if (os->get_max_column() > 0 && os->get_column() >= os->get_max_column() - 2) {
+            os->put_char('\\')->put_char('\n');
+            os->reset_column();
         }
-        os->putChar(*c++);
+        os->put_char(*c++);
     }
-    return os->putChar('\"');
+    return os->put_char('\"');
 }
 
 /*
@@ -179,7 +179,7 @@ sexpOutputStream *sexpSimpleString::print_advanced(sexpOutputStream *os) const
 bool sexpSimpleString::can_print_as_quoted_string(void) const
 {
     const octet *c = c_str();
-    for (size_t i = 0; i < length(); i++, c++) {
+    for (uint32_t i = 0; i < length(); i++, c++) {
         if (!is_token_char((int) (*c)) && *c != ' ')
             return false;
     }
@@ -198,9 +198,9 @@ bool sexpSimpleString::can_print_as_token(const sexpOutputStream *os) const
         return false;
     if (is_dec_digit((int) *c))
         return false;
-    if (os->getMaxColumn() > 0 && os->getColumn() + length() >= os->getMaxColumn())
+    if (os->get_max_column() > 0 && os->get_column() + length() >= os->get_max_column())
         return false;
-    for (size_t i = 0; i < length(); i++) {
+    for (uint32_t i = 0; i < length(); i++) {
         if (!is_token_char((int) (*c++)))
             return false;
     }

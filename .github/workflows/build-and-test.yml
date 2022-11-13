@@ -61,7 +61,7 @@ jobs:
         run: cmake --build build --config Release
 
       - name: Run tests
-        run: ctest --test-dir build
+        run: ctest --test-dir build --output-on-failure
 
       - name: Checkout shell test framework
         uses: actions/checkout@v3
