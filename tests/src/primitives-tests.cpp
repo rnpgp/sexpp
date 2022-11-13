@@ -38,7 +38,7 @@ class PrimitivesTests : public testing::Test {
     {
         std::istringstream iss(str_in);
         sexpInputStream    is(&iss);
-        sexpObject *       obj = is.setByteSize(8)->getChar()->scanObject();
+        sexpObject *       obj = is.set_byte_size(8)->get_char()->scan_object();
 
         std::ostringstream oss(std::ios_base::binary);
         sexpOutputStream   os(&oss);
@@ -51,11 +51,11 @@ class PrimitivesTests : public testing::Test {
     {
         std::istringstream iss(str_in);
         sexpInputStream    is(&iss);
-        sexpObject *       obj = is.setByteSize(8)->getChar()->scanObject();
+        sexpObject *       obj = is.set_byte_size(8)->get_char()->scan_object();
 
         std::ostringstream oss(std::ios_base::binary);
         sexpOutputStream   os(&oss);
-        os.printCanonical(obj);
+        os.print_canonical(obj);
         const char *sample = str_out == nullptr ? str_in : str_out;
         EXPECT_EQ(oss.str(), sample);
     }

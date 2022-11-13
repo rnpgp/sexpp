@@ -185,7 +185,7 @@ sexpOutputStream *sexpOutputStream::print_decimal(size_t n)
 sexpOutputStream *sexpOutputStream::print_base64(const sexpObject *object)
 {
     change_output_byte_size(8, base64)->var_put_char('{')->change_output_byte_size(6, base64);
-    printCanonical(object);
+    print_canonical(object);
     return flush()->change_output_byte_size(8, base64)->var_put_char('}');
 }
 } // namespace sexp

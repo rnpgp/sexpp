@@ -24,7 +24,7 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-name: build-and-test
+name: build-and-test-deb
 
 on:
   push:
@@ -36,26 +36,55 @@ concurrency:
   group: '${{ github.workflow }}-${{ github.job }}-${{ github.head_ref || github.ref_name }}'
   cancel-in-progress: true
 
+env:
+  CMAKE_VERSION: '3.24.3'
 jobs:
   build-and-test:
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        os: [ ubuntu-20.04, macos-11, windows-2019 ]
+        image: [ 'amd64/debian:11' ]
+    container:
+      image: ${{ matrix.image }}
     steps:
+      - name: Install packages
+        run: |
+          apt update
+          apt -y install sudo git wget build-essential libssl-dev
+#gcc gcc-c++ make cmake
+
+      - name: Cache cmake
+        id: cache-cmake
+        uses: actions/cache@v3
+        with:
+          path: cmake-${{ env.CMAKE_VERSION }}
+          key: ${{ matrix.image }}-cmake-${{ env.CMAKE_VERSION }}
+
+      - name: Build cmake
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          wget -nv https://github.com/Kitware/CMake/releases/download/v${{ env.CMAKE_VERSION }}/cmake-${{ env.CMAKE_VERSION }}.tar.gz
+          tar -zxf cmake-${{ env.CMAKE_VERSION }}.tar.gz
+          cd cmake-${{ env.CMAKE_VERSION }}
+          ./bootstrap
+          make
+
+      - name: Install cmake
+        run: |
+          cd cmake-${{ env.CMAKE_VERSION }}
+          make install
+
       - name: Checkout
         uses: actions/checkout@v3
         with:
           fetch-depth: 1
 
-      - name: Configure
-        run:  cmake -Bbuild -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/install -DCMAKE_BUILD_TYPE=Release
-
       - name: Adjust environment
-        if: runner.os == 'Windows'
-        shell: bash
-        run: echo "OSTYPE=windows" >> $GITHUB_ENV
+        run: echo "SEXP_INSTALL_PATH=$PWD/install" >> $GITHUB_ENV
+
+      - name: Configure
+        run: cmake . -Bbuild -DCMAKE_INSTALL_PREFIX=${{ env.SEXP_INSTALL_PATH }} -DCMAKE_BUILD_TYPE=Release
 
       - name: Build
         run: cmake --build build --config Release

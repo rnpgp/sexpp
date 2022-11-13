@@ -50,9 +50,9 @@ sexpInputStream::sexpInputStream(std::istream *i)
 }
 
 /*
- * sexpInputStream::setByteSize(newByteSize)
+ * sexpInputStream::set_byte_size(newByteSize)
  */
-sexpInputStream *sexpInputStream::setByteSize(size_t newByteSize)
+sexpInputStream *sexpInputStream::set_byte_size(size_t newByteSize)
 {
     byte_size = newByteSize;
     n_bits = 0;
@@ -61,15 +61,15 @@ sexpInputStream *sexpInputStream::setByteSize(size_t newByteSize)
 }
 
 /*
- * sexpInputStream::getChar()
+ * sexpInputStream::get_char()
  * This is one possible character input routine for an input stream.
  * (This version uses the standard input stream.)
- * getChar places next 8-bit character into is->next_char.
+ * get_char places next 8-bit character into is->next_char.
  * It also updates the count of number of 8-bit characters read.
  * The value EOF is obtained when no more input is available.
  * This code handles 4-bit/6-bit/8-bit channels.
  */
-sexpInputStream *sexpInputStream::getChar(void)
+sexpInputStream *sexpInputStream::get_char(void)
 {
     int c;
     if (next_char == EOF) {
@@ -91,7 +91,7 @@ sexpInputStream *sexpInputStream::getChar(void)
                            n_bits,
                            count);
             }
-            return setByteSize(8);
+            return set_byte_size(8);
         } else if (byte_size != 8 && is_white_space(c))
             ; /* ignore white space in hex and base64 regions */
         else if (byte_size == 6 && c == '=')
@@ -124,22 +124,22 @@ sexpInputStream *sexpInputStream::getChar(void)
 }
 
 /*
- * sexpInputStream::skipWhiteSpace
+ * sexpInputStream::skip_white_space
  * Skip over any white space on the given sexpInputStream.
  */
-sexpInputStream *sexpInputStream::skipWhiteSpace(void)
+sexpInputStream *sexpInputStream::skip_white_space(void)
 {
     while (is_white_space(next_char))
-        getChar();
+        get_char();
     return this;
 }
 
 /*
- * sexpInputStream::skipChar(c)
+ * sexpInputStream::skip_char(c)
  * Skip the following input character on input stream is, if it is
  * equal to the character c.  If it is not equal, then an error occurs.
  */
-sexpInputStream *sexpInputStream::skipChar(int c)
+sexpInputStream *sexpInputStream::skip_char(int c)
 {
     if (next_char != c)
         sexp_error(sexp_exception::error,
@@ -147,7 +147,7 @@ sexpInputStream *sexpInputStream::skipChar(int c)
                    next_char,
                    c,
                    count);
-    return getChar();
+    return get_char();
 }
 
 /*
@@ -156,28 +156,28 @@ sexpInputStream *sexpInputStream::skipChar(int c)
  */
 void sexpInputStream::scanToken(sexpSimpleString *ss)
 {
-    skipWhiteSpace();
+    skip_white_space();
     while (is_token_char(next_char)) {
         ss->append(next_char);
-        getChar();
+        get_char();
     }
     return;
 }
 
 /*
- * sexpInputStream::scanToEOF(void)
+ * sexpInputStream::scan_to_eof(void)
  * scan one or more characters (until EOF reached)
  * return an object that is just that string
  */
-sexpObject *sexpInputStream::scanToEOF(void)
+sexpObject *sexpInputStream::scan_to_eof(void)
 {
     sexpSimpleString *ss = new sexpSimpleString();
     sexpString *      s = new sexpString();
-    s->setString(ss);
-    skipWhiteSpace();
+    s->set_string(ss);
+    skip_white_space();
     while (next_char != EOF) {
         ss->append(next_char);
-        getChar();
+        get_char();
     }
     return s;
 }
@@ -192,7 +192,7 @@ int sexpInputStream::scanDecimal(void)
     size_t i = 0;
     while (is_dec_digit(next_char)) {
         value = value * 10 + decvalue[next_char];
-        getChar();
+        get_char();
         if (i++ > 8)
             sexp_error(
               sexp_exception::error, "Decimal number %d... too long.", (int) value, 0, count);
@@ -206,13 +206,13 @@ int sexpInputStream::scanDecimal(void)
  */
 void sexpInputStream::scanVerbatimString(sexpSimpleString *ss, int length)
 {
-    skipWhiteSpace()->skipChar(':');
+    skip_white_space()->skip_char(':');
     if (length == -1L) /* no length was specified */
         sexp_error(
           sexp_exception::error, "Verbatim string had no declared length.", 0, 0, count);
     for (int i = 0; i < length; i++) {
         ss->append(next_char);
-        getChar();
+        get_char();
     }
     return;
 }
@@ -226,11 +226,11 @@ void sexpInputStream::scanVerbatimString(sexpSimpleString *ss, int length)
 void sexpInputStream::scanQuotedString(sexpSimpleString *ss, int length)
 {
     int c;
-    skipChar('"');
+    skip_char('"');
     while (length == -1 || ss->length() <= length) {
         if (next_char == '\"') {
             if (length == -1 || (ss->length() == length)) {
-                skipChar('\"');
+                skip_char('\"');
                 return;
             } else
                 sexp_error(sexp_exception::error,
@@ -240,7 +240,7 @@ void sexpInputStream::scanQuotedString(sexpSimpleString *ss, int length)
                            count);
         } else if (next_char == '\\') /* handle escape sequence */
         {
-            getChar();
+            get_char();
             c = next_char;
             if (c == 'b')
                 ss->append('\b');
@@ -267,7 +267,7 @@ void sexpInputStream::scanQuotedString(sexpSimpleString *ss, int length)
                     if (c >= '0' && c <= '7') {
                         val = ((val << 3) | (c - '0'));
                         if (j < 2) {
-                            getChar();
+                            get_char();
                             c = next_char;
                         }
                     } else
@@ -285,13 +285,13 @@ void sexpInputStream::scanQuotedString(sexpSimpleString *ss, int length)
             {
                 int j, val;
                 val = 0;
-                getChar();
+                get_char();
                 c = next_char;
                 for (j = 0; j < 2; j++) {
                     if (is_hex_digit(c)) {
                         val = ((val << 4) | hexvalue[c]);
                         if (j < 1) {
-                            getChar();
+                            get_char();
                             c = next_char;
                         }
                     } else
@@ -304,13 +304,13 @@ void sexpInputStream::scanQuotedString(sexpSimpleString *ss, int length)
                 ss->append(val);
             } else if (c == '\n') /* ignore backslash line feed */
             {                     /* also ignore following carriage-return if present */
-                getChar();
+                get_char();
                 if (next_char != '\r')
                     continue;
                 ;
             } else if (c == '\r') /* ignore backslash carriage-return */
             {                     /* also ignore following linefeed if present */
-                getChar();
+                get_char();
                 if (next_char != '\n')
                     continue;
             } else
@@ -322,7 +322,7 @@ void sexpInputStream::scanQuotedString(sexpSimpleString *ss, int length)
         } else {
             ss->append(next_char);
         }
-        getChar();
+        get_char();
     } /* end of main while loop */
     return;
 }
@@ -334,12 +334,12 @@ void sexpInputStream::scanQuotedString(sexpSimpleString *ss, int length)
  */
 void sexpInputStream::scanHexString(sexpSimpleString *ss, int length)
 {
-    setByteSize(4)->skipChar('#');
-    while (next_char != EOF && (next_char != '#' || getByteSize() == 4)) {
+    set_byte_size(4)->skip_char('#');
+    while (next_char != EOF && (next_char != '#' || get_byte_size() == 4)) {
         ss->append(next_char);
-        getChar();
+        get_char();
     }
-    skipChar('#');
+    skip_char('#');
     if (ss->length() != length && length >= 0)
         sexp_error(sexp_exception::warning,
                    "Hex string has length %d different than declared length %d",
@@ -355,12 +355,12 @@ void sexpInputStream::scanHexString(sexpSimpleString *ss, int length)
  */
 void sexpInputStream::scanBase64String(sexpSimpleString *ss, int length)
 {
-    setByteSize(6)->skipChar('|');
-    while (next_char != EOF && (next_char != '|' || getByteSize() == 6)) {
+    set_byte_size(6)->skip_char('|');
+    while (next_char != EOF && (next_char != '|' || get_byte_size() == 6)) {
         ss->append(next_char);
-        getChar();
+        get_char();
     }
-    skipChar('|');
+    skip_char('|');
     if (ss->length() != length && length >= 0)
         sexp_error(sexp_exception::warning,
                    "Base64 string has length %d different than declared length %d",
@@ -379,7 +379,7 @@ sexpSimpleString *sexpInputStream::scanSimpleString(void)
 {
     int               length;
     sexpSimpleString *ss = new sexpSimpleString;
-    skipWhiteSpace();
+    skip_white_space();
     /* Note that it is important in the following code to test for token-ness
      * before checking the other cases, so that a token may begin with ":",
      * which would otherwise be treated as a verbatim string missing a length.
@@ -419,11 +419,11 @@ sexpString *sexpInputStream::scanString(void)
 {
     sexpString *s = new sexpString();
     if (next_char == '[') { /* scan presentation hint */
-        skipChar('[');
-        s->setPresentationHint(scanSimpleString());
-        skipWhiteSpace()->skipChar(']')->skipWhiteSpace();
+        skip_char('[');
+        s->set_presentation_hint(scanSimpleString());
+        skip_white_space()->skip_char(']')->skip_white_space();
     }
-    s->setString(scanSimpleString());
+    s->set_string(scanSimpleString());
     return (s);
 }
 
@@ -434,37 +434,37 @@ sexpString *sexpInputStream::scanString(void)
 sexpList *sexpInputStream::scanList(void)
 {
     sexpList *list = new sexpList();
-    skipChar('(')->skipWhiteSpace();
+    skip_char('(')->skip_white_space();
     if (next_char == ')') {
         ; /* OK */
     } else {
-        list->push_back(scanObject());
+        list->push_back(scan_object());
     }
 
     while (true) {
-        skipWhiteSpace();
+        skip_white_space();
         if (next_char == ')') { /* we just grabbed last element of list */
-            skipChar(')');
+            skip_char(')');
             return list;
         } else {
-            list->push_back(scanObject());
+            list->push_back(scan_object());
         }
     }
     return list;
 }
 
 /*
- * sexpInputStream::scanObject(void)
+ * sexpInputStream::scan_object(void)
  * Reads and returns a sexpObject from the given input stream.
  */
-sexpObject *sexpInputStream::scanObject(void)
+sexpObject *sexpInputStream::scan_object(void)
 {
     sexpObject *object;
-    skipWhiteSpace();
+    skip_white_space();
     if (next_char == '{') {
-        setByteSize(6)->skipChar('{');
-        object = scanObject();
-        skipChar('}');
+        set_byte_size(6)->skip_char('{');
+        object = scan_object();
+        skip_char('}');
     } else {
         if (next_char == '(')
             object = scanList();

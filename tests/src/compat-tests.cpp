@@ -43,11 +43,11 @@ TEST_F(CompatTests, Canonical)
 
     if (!ifs.fail()) {
         sexpInputStream is(&ifs);
-        sexpObject *    obj = is.setByteSize(8)->getChar()->scanObject();
+        sexpObject *    obj = is.set_byte_size(8)->get_char()->scan_object();
 
         std::ostringstream oss(std::ios_base::binary);
         sexpOutputStream   os(&oss);
-        os.printCanonical(obj);
+        os.print_canonical(obj);
 
         std::istringstream iss(oss.str(), std::ios_base::binary);
         EXPECT_TRUE(compare_binary_files(keyfile, iss));
@@ -63,7 +63,7 @@ TEST_F(CompatTests, Advanced)
 
     if (!ifs.fail()) {
         sexpInputStream is(&ifs);
-        sexpObject *    obj = is.setByteSize(8)->getChar()->scanObject();
+        sexpObject *    obj = is.set_byte_size(8)->get_char()->scan_object();
 
         std::ostringstream oss(std::ios_base::binary);
         sexpOutputStream   os(&oss);

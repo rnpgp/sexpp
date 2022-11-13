@@ -66,11 +66,11 @@ TEST_F(BaselineTests, Scan2Canonical)
 
         if (!ifs.fail()) {
             sexpInputStream is(&ifs);
-            sexpObject *    obj = is.setByteSize(8)->getChar()->scanObject();
+            sexpObject *    obj = is.set_byte_size(8)->get_char()->scan_object();
 
             std::ostringstream oss(std::ios_base::binary);
             sexpOutputStream   os(&oss);
-            os.printCanonical(obj);
+            os.print_canonical(obj);
 
             std::istringstream iss(oss.str(), std::ios_base::binary);
             EXPECT_TRUE(compare_binary_files(base_samples[base_sample_canonical], iss));
@@ -86,7 +86,7 @@ TEST_F(BaselineTests, Scan2Base64)
 
         if (!ifs.fail()) {
             sexpInputStream is(&ifs);
-            sexpObject *    object = is.setByteSize(8)->getChar()->scanObject();
+            sexpObject *    object = is.set_byte_size(8)->get_char()->scan_object();
 
             std::ostringstream oss(std::ios_base::binary);
             sexpOutputStream   os(&oss);
@@ -109,7 +109,7 @@ TEST_F(BaselineTests, Scan2Advanced)
 
         if (!ifs.fail()) {
             sexpInputStream is(&ifs);
-            sexpObject *    object = is.setByteSize(8)->getChar()->scanObject();
+            sexpObject *    object = is.set_byte_size(8)->get_char()->scan_object();
 
             std::ostringstream oss(std::ios_base::binary);
             sexpOutputStream   os(&oss);

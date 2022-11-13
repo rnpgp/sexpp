@@ -109,7 +109,7 @@ int main(int argc, char **argv)
                 ifs = new std::ifstream(argv[i], std::ifstream::binary);
                 if (ifs->fail())
                     sexp_error(sexp_exception::error, "Can't open input file.", 0, 0, EOF);
-                is->setInput(ifs);
+                is->set_input(ifs);
             } else if (*c == 'l')
                 swl = true;       /* suppress linefeeds after output */
             else if (*c == 'o') { /* output file */
@@ -139,7 +139,7 @@ int main(int argc, char **argv)
 
         /* main loop */
         if (swp == 0)
-            is->getChar();
+            is->get_char();
         else
             is->set_next_char(-2); /* this is not EOF */
         while (is->get_next_char() != EOF) {
@@ -148,18 +148,18 @@ int main(int argc, char **argv)
                 std::cout.flush();
             }
 
-            is->setByteSize(8);
+            is->set_byte_size(8);
             if (is->get_next_char() == -2)
-                is->getChar();
+                is->get_char();
 
-            is->skipWhiteSpace();
+            is->skip_white_space();
             if (is->get_next_char() == EOF)
                 break;
 
             if (sws == false)
-                object = is->scanObject();
+                object = is->scan_object();
             else
-                object = is->scanToEOF();
+                object = is->scan_to_eof();
 
             if (swc) {
                 if (swp) {
@@ -167,7 +167,7 @@ int main(int argc, char **argv)
                     std::cout.flush();
                     os->new_line(sexpOutputStream::advanced);
                 }
-                object->printCanonical(os);
+                object->print_canonical(os);
                 if (!swl) {
                     std::cout << std::endl;
                     std::cout.flush();
@@ -203,7 +203,7 @@ int main(int argc, char **argv)
             if (!swx)
                 break;
             if (!swp)
-                is->skipWhiteSpace();
+                is->skip_white_space();
             else if (!swl) {
                 std::cout << std::endl;
                 std::cout.flush();

@@ -41,7 +41,7 @@ class ExceptionTests : public testing::Test {
         if (!ifs.fail()) {
             try {
                 sexpInputStream is(&ifs);
-                is.setByteSize(8)->getChar()->scanObject();
+                is.set_byte_size(8)->get_char()->scan_object();
                 FAIL() << "sexp::sexp_exception expected but has not been thrown";
             } catch (sexp::sexp_exception e) {
                 EXPECT_STREQ(e.what(), msg);

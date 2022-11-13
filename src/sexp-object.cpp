@@ -38,14 +38,14 @@
 namespace sexp {
 
 /*
- * sexpString::printCanonical(os)
+ * sexpString::print_canonical(os)
  * Prints out sexp string onto output stream os
  */
-sexpOutputStream *sexpString::printCanonical(sexpOutputStream *os) const
+sexpOutputStream *sexpString::print_canonical(sexpOutputStream *os) const
 {
-    if (presentationHint != NULL) {
+    if (presentation_hint != NULL) {
         os->var_put_char('[');
-        presentationHint->print_canonical_verbatim(os);
+        presentation_hint->print_canonical_verbatim(os);
         os->var_put_char(']');
     }
     if (string == NULL)
@@ -61,8 +61,8 @@ sexpOutputStream *sexpString::printCanonical(sexpOutputStream *os) const
 sexpOutputStream *sexpString::print_advanced(sexpOutputStream *os) const
 {
     sexpObject::print_advanced(os);
-    sexpSimpleString *ph = getPresentationHint();
-    sexpSimpleString *ss = getString();
+    sexpSimpleString *ph = get_presentation_hint();
+    sexpSimpleString *ss = get_string();
     if (ph != NULL) {
         os->putChar('[');
         ph->print_advanced(os);
@@ -81,22 +81,22 @@ sexpOutputStream *sexpString::print_advanced(sexpOutputStream *os) const
 size_t sexpString::advanced_length(sexpOutputStream *os) const
 {
     size_t len = 0;
-    if (presentationHint != NULL)
-        len += 2 + presentationHint->advanced_length(os);
+    if (presentation_hint != NULL)
+        len += 2 + presentation_hint->advanced_length(os);
     if (string != NULL)
         len += string->advanced_length(os);
     return len;
 }
 
 /*
- * sexpList::printCanonical(os)
+ * sexpList::print_canonical(os)
  * Prints out the list "list" onto output stream os
  */
-sexpOutputStream *sexpList::printCanonical(sexpOutputStream *os) const
+sexpOutputStream *sexpList::print_canonical(sexpOutputStream *os) const
 {
     os->var_put_char('(');
     std::for_each(
-      begin(), end(), [os](const sexpObject *object) { object->printCanonical(os); });
+      begin(), end(), [os](const sexpObject *object) { object->print_canonical(os); });
     os->var_put_char(')');
     return os;
 }

@@ -61,9 +61,9 @@ size_t sexpSimpleString::advanced_length(sexpOutputStream *os) const
         return advanced_length_token();
     else if (can_print_as_quoted_string())
         return advanced_length_quoted();
-    else if (length() <= 4 && os->getByteSize() == 8)
+    else if (length() <= 4 && os->get_byte_size() == 8)
         return advanced_length_hexadecimal();
-    else if (os->getByteSize() == 8)
+    else if (os->get_byte_size() == 8)
         return advanced_length_base64();
     else
         return 0; /* an error condition */
@@ -158,9 +158,9 @@ sexpOutputStream *sexpSimpleString::print_advanced(sexpOutputStream *os) const
         print_token(os);
     else if (can_print_as_quoted_string())
         print_quoted(os);
-    else if (length() <= 4 && os->getByteSize() == 8)
+    else if (length() <= 4 && os->get_byte_size() == 8)
         print_hexadecimal(os);
-    else if (os->getByteSize() == 8)
+    else if (os->get_byte_size() == 8)
         print_base64(os);
     else
         sexp_error(sexp_exception::error,
