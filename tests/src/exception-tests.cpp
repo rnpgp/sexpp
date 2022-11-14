@@ -43,7 +43,7 @@ class ExceptionTests : public testing::Test {
                 sexp_input_stream is(&ifs);
                 is.set_byte_size(8)->get_char()->scan_object();
                 FAIL() << "sexp::sexp_exception expected but has not been thrown";
-            } catch (sexp::sexp_exception e) {
+            } catch (sexp::sexp_exception &e) {
                 EXPECT_STREQ(e.what(), msg);
             }
         }

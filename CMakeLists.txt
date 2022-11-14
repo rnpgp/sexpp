@@ -33,6 +33,8 @@ option(WITH_SEXP_CLI "Build sexp console application" ON)
 option(ENABLE_SANITIZERS "Enable ASan and other sanitizers" OFF)
 
 include(GNUInstallDirs)
+include(CheckCXXSourceCompiles)
+
 
 if (ENABLE_SANITIZERS)
     if (NOT CMAKE_CXX_COMPILER_ID MATCHES "Clang")
@@ -55,7 +57,39 @@ if (ENABLE_SANITIZERS)
   link_libraries(-fsanitize=leak,address,undefined)
 endif()
 
-set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/modules")
+# set warning flags at the top level
+if(NOT MSVC)
+  add_compile_options(
+    -Wall -Wextra
+    -Wunreachable-code -Wpointer-arith
+    -Wmissing-declarations
+  )
+# relax some warnings a bit
+  add_compile_options(
+    -Wno-pedantic
+    -Wno-ignored-qualifiers
+    -Wno-unused-parameter
+    -Wno-missing-field-initializers
+  )
+
+endif(NOT MSVC)
+
+
+CHECK_CXX_SOURCE_COMPILES(
+    "#include <memory>
+    int main(int argc, char**argv) {
+        return 0;
+    }
+    std::unique_ptr<int> test(void) {
+        std::unique_ptr<int> p(new int);
+        return p;
+    }"
+    CAN_RETURN_UNIQUE_PTR
+)
+
+if(CAN_RETURN_UNIQUE_PTR)
+    add_compile_definitions(RETURN_UNIQUE_PTR)
+endif(CAN_RETURN_UNIQUE_PTR)
 
 add_library(sexp STATIC
     src/sexp-input.cpp
