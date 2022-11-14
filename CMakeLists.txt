@@ -28,8 +28,8 @@ cmake_minimum_required(VERSION 3.14)
 
 project (sexp VERSION 0.1.0 LANGUAGES C CXX)
 
-option(WITH_TESTS "Build tests" ON)
-option(WITH_APP "Build sexp console application" ON)
+option(WITH_SEXP_TESTS "Build tests" ON)
+option(WITH_SEXP_APP "Build sexp console application" ON)
 
 include(GNUInstallDirs)
 
@@ -55,7 +55,7 @@ add_library(sexp STATIC
 target_compile_features(sexp PUBLIC cxx_std_11)
 target_include_directories (sexp PUBLIC include)
 
-if(${WITH_APP})
+if(${WITH_SEXP_APP})
     add_executable (sexp-cli
                     src/sexp-main.cpp
                     include/sexp/sexp.h
@@ -63,12 +63,12 @@ if(${WITH_APP})
     )
     target_include_directories (sexp-cli PUBLIC include)
     target_link_libraries(sexp-cli PRIVATE sexp)
-endif(${WITH_APP})
+endif(${WITH_SEXP_APP})
 
 target_compile_features(sexp-cli PUBLIC cxx_std_11)
 target_include_directories (sexp-cli PUBLIC include)
 
-if(${WITH_TESTS})
+if(${WITH_SEXP_TESTS})
     include(CTest)
     include(FetchContent)
     include(GoogleTest)
@@ -121,7 +121,7 @@ if(${WITH_TESTS})
     target_compile_features(sexp-tests PUBLIC cxx_std_11)
 
     gtest_discover_tests(sexp-tests)
-endif(${WITH_TESTS})
+endif(${WITH_SEXP_TESTS})
 
 set(CONFIGURED_PC "${CMAKE_CURRENT_BINARY_DIR}/sexp.pc")
 configure_file(
@@ -133,6 +133,6 @@ configure_file(
 install(TARGETS sexp DESTINATION "${CMAKE_INSTALL_LIBDIR}")
 install(DIRECTORY include/ DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
 install(FILES "${CONFIGURED_PC}" DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
-if(${WITH_APP})
+if(${WITH_SEXP_APP})
     install(TARGETS sexp-cli DESTINATION "${CMAKE_INSTALL_BINDIR}")
-endif(${WITH_APP})
+endif(${WITH_SEXP_APP})

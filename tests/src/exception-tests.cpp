@@ -40,7 +40,7 @@ class ExceptionTests : public testing::Test {
         EXPECT_FALSE(ifs.fail());
         if (!ifs.fail()) {
             try {
-                sexpInputStream is(&ifs);
+                sexp_input_stream is(&ifs);
                 is.set_byte_size(8)->get_char()->scan_object();
                 FAIL() << "sexp::sexp_exception expected but has not been thrown";
             } catch (sexp::sexp_exception e) {

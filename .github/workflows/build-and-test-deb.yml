@@ -41,18 +41,20 @@ env:
   CMAKE_VERSION: '3.20.6-2'
 jobs:
   build-and-test:
+    name: ${{ matrix.image }}-${{ matrix.env.CC }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         image: [ 'i386/debian:9', 'i386/debian:11', 'amd64/debian:11' ]
-    container:
-      image: ${{ matrix.image }}
+        env: [ {CC: gcc, CXX: g++}, {CC: clang, CXX: clang++} ]
+    container: ${{ matrix.image }}
+    env: ${{ matrix.env }}
     steps:
       - name: Install packages
         run: |
-          apt update
-          apt -y install sudo git wget build-essential libssl-dev
+          apt-get update
+          apt-get -y install sudo git wget build-essential libssl-dev software-properties-common
 
       - name: Checkout
         # Because i386 support v1 only (no node run-time)
@@ -72,6 +74,13 @@ jobs:
           wget -nv https://github.com/xpack-dev-tools/cmake-xpack/releases/download/v${{ env.CMAKE_VERSION }}/xpack-cmake-${{ env.CMAKE_VERSION }}-linux-x64.tar.gz
           tar -zxf xpack-cmake-${{ env.CMAKE_VERSION }}-linux-x64.tar.gz --directory /usr/local --strip-components=1 --skip-old-files
 
+      - name: Install clang
+        if: matrix.env.CC == 'clang'
+        run: |
+          wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key|sudo apt-key add -
+          apt-add-repository "deb http://apt.llvm.org/stretch/ llvm-toolchain-stretch main"
+          apt-get install -y clang
+
       - name: Adjust environment
         run: echo "SEXP_INSTALL_PATH=$PWD/install" >> $GITHUB_ENV
 
@@ -85,7 +94,7 @@ jobs:
         run: ctest --test-dir build --output-on-failure
 
       - name: Checkout shell test framework/amd64 only
-        # Because i386 support actions/checkout@v1 only (no Node.js 32-bit binary)
+        # i386 supports actions/checkout@v1 only (no Node.js 32-bit binary)
         # and and actions/checkout@v1 has some issues with nested repositories
         if: startsWith(matrix.image, 'amd64')
         uses: actions/checkout@v3

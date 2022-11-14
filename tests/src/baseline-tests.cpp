@@ -65,11 +65,11 @@ TEST_F(BaselineTests, Scan2Canonical)
         EXPECT_FALSE(r);
 
         if (!ifs.fail()) {
-            sexpInputStream is(&ifs);
-            sexpObject *    obj = is.set_byte_size(8)->get_char()->scan_object();
+            sexp_input_stream is(&ifs);
+            sexp_object *     obj = is.set_byte_size(8)->get_char()->scan_object();
 
             std::ostringstream oss(std::ios_base::binary);
-            sexpOutputStream   os(&oss);
+            sexp_output_stream os(&oss);
             os.print_canonical(obj);
 
             std::istringstream iss(oss.str(), std::ios_base::binary);
@@ -85,11 +85,11 @@ TEST_F(BaselineTests, Scan2Base64)
         EXPECT_FALSE(ifs.fail());
 
         if (!ifs.fail()) {
-            sexpInputStream is(&ifs);
-            sexpObject *    object = is.set_byte_size(8)->get_char()->scan_object();
+            sexp_input_stream is(&ifs);
+            sexp_object *     object = is.set_byte_size(8)->get_char()->scan_object();
 
             std::ostringstream oss(std::ios_base::binary);
-            sexpOutputStream   os(&oss);
+            sexp_output_stream os(&oss);
 
             os.set_max_column(0);
             os.print_base64(object);
@@ -108,11 +108,11 @@ TEST_F(BaselineTests, Scan2Advanced)
         EXPECT_FALSE(ifs.fail());
 
         if (!ifs.fail()) {
-            sexpInputStream is(&ifs);
-            sexpObject *    object = is.set_byte_size(8)->get_char()->scan_object();
+            sexp_input_stream is(&ifs);
+            sexp_object *     object = is.set_byte_size(8)->get_char()->scan_object();
 
             std::ostringstream oss(std::ios_base::binary);
-            sexpOutputStream   os(&oss);
+            sexp_output_stream os(&oss);
             os.print_advanced(object);
 
             std::istringstream iss(oss.str(), std::ios_base::binary);

@@ -42,21 +42,21 @@ static const char *base64Digits =
   "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
 /*
- * sexpOutputStream::newSexpOutputStream()
- * Creates and initializes new sexpOutputStream object.
+ * sexp_output_stream::newSexpOutputStream()
+ * Creates and initializes new sexp_output_stream object.
  */
-sexpOutputStream::sexpOutputStream(std::ostream *o)
+sexp_output_stream::sexp_output_stream(std::ostream *o)
     : output_file(o), column(0), max_column(default_line_length), indent(0), byte_size(8),
       bits(0), n_bits(0), mode(canonical)
 {
 }
 
 /*
- * sexpOutputStream::put_char(c)
+ * sexp_output_stream::put_char(c)
  * Puts the character c out on the output stream os.
  * Keeps track of the "column" the next output char will go to.
  */
-sexpOutputStream *sexpOutputStream::put_char(int c)
+sexp_output_stream *sexp_output_stream::put_char(int c)
 {
     output_file->put(c);
     column++;
@@ -64,11 +64,11 @@ sexpOutputStream *sexpOutputStream::put_char(int c)
 }
 
 /*
- * sexpOutputStream::var_put_char(c)
+ * sexp_output_stream::var_put_char(c)
  * put_char with variable sized output bytes considered.
  * int c;  -- this is always an eight-bit byte being output
  */
-sexpOutputStream *sexpOutputStream::var_put_char(int c)
+sexp_output_stream *sexp_output_stream::var_put_char(int c)
 {
     c &= 0xFF;
     bits = (bits << 8) | c;
@@ -91,12 +91,12 @@ sexpOutputStream *sexpOutputStream::var_put_char(int c)
 }
 
 /*
- * sexpOutputStream::change_output_byte_size(newByteSize,newMode)
+ * sexp_output_stream::change_output_byte_size(newByteSize,newMode)
  * Change os->byte_size to newByteSize
  * record mode in output stream for automatic line breaks
  */
-sexpOutputStream *sexpOutputStream::change_output_byte_size(int           newByteSize,
-                                                            sexpPrintMode newMode)
+sexp_output_stream *sexp_output_stream::change_output_byte_size(int           newByteSize,
+                                                                sexpPrintMode newMode)
 {
     if (newByteSize != 4 && newByteSize != 6 && newByteSize != 8)
         sexp_error(sexp_exception::error, "Illegal output base %d", newByteSize, 0, EOF);
@@ -115,10 +115,10 @@ sexpOutputStream *sexpOutputStream::change_output_byte_size(int           newByt
 }
 
 /*
- * sexpOutputStream::flush()
+ * sexp_output_stream::flush()
  * flush out any remaining bits
  */
-sexpOutputStream *sexpOutputStream::flush(void)
+sexp_output_stream *sexp_output_stream::flush(void)
 {
     if (n_bits > 0) {
         if (byte_size == 4)
@@ -142,13 +142,13 @@ sexpOutputStream *sexpOutputStream::flush(void)
 }
 
 /*
- * sexpOutputStream::new_line(mode)
+ * sexp_output_stream::new_line(mode)
  * Outputs a newline symbol to the output stream os.
  * For advanced mode, also outputs indentation as one blank per
  * indentation level (but never indents more than half of max_column).
  * Resets column for next output character.
  */
-sexpOutputStream *sexpOutputStream::new_line(sexpPrintMode mode)
+sexp_output_stream *sexp_output_stream::new_line(sexpPrintMode mode)
 {
     if (mode == advanced || mode == base64) {
         put_char('\n');
@@ -162,10 +162,10 @@ sexpOutputStream *sexpOutputStream::new_line(sexpPrintMode mode)
 }
 
 /*
- * sexpOutputStream::print_decimal(n)
+ * sexp_output_stream::print_decimal(n)
  * print out n in decimal to output stream os
  */
-sexpOutputStream *sexpOutputStream::print_decimal(uint32_t n)
+sexp_output_stream *sexp_output_stream::print_decimal(uint32_t n)
 {
     char buffer[50];
     snprintf(buffer,
@@ -182,7 +182,7 @@ sexpOutputStream *sexpOutputStream::print_decimal(uint32_t n)
  * Same as canonical, except all characters get put out as base 64 ones
  */
 
-sexpOutputStream *sexpOutputStream::print_base64(const sexpObject *object)
+sexp_output_stream *sexp_output_stream::print_base64(const sexp_object *object)
 {
     change_output_byte_size(8, base64)->var_put_char('{')->change_output_byte_size(6, base64);
     print_canonical(object);

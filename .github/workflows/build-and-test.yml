@@ -43,6 +43,11 @@ jobs:
       fail-fast: false
       matrix:
         os: [ ubuntu-20.04, macos-11, windows-2019 ]
+        env: [ { } ]
+        # on macos gcc is an alias to clang by default, so there is no real value in macos clang run
+        include:
+          - { os: ubuntu-20.04, env: { CC: clang, CXX: clang++ } }
+    env: ${{ matrix.env }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3

@@ -39,20 +39,20 @@ namespace sexp {
 
 /*
  * newSexpInputStream()
- * Creates and initializes a new sexpInputStream object.
+ * Creates and initializes a new sexp_input_stream object.
  * (Prefixes stream with one blank, and initializes stream
  *  so that it reads from standard input.)
  */
 
-sexpInputStream::sexpInputStream(std::istream *i)
+sexp_input_stream::sexp_input_stream(std::istream *i)
     : inputFile(i), next_char(' '), count(-1), byte_size(8), bits(0), n_bits(0)
 {
 }
 
 /*
- * sexpInputStream::set_byte_size(newByteSize)
+ * sexp_input_stream::set_byte_size(newByteSize)
  */
-sexpInputStream *sexpInputStream::set_byte_size(uint32_t newByteSize)
+sexp_input_stream *sexp_input_stream::set_byte_size(uint32_t newByteSize)
 {
     byte_size = newByteSize;
     n_bits = 0;
@@ -61,7 +61,7 @@ sexpInputStream *sexpInputStream::set_byte_size(uint32_t newByteSize)
 }
 
 /*
- * sexpInputStream::get_char()
+ * sexp_input_stream::get_char()
  * This is one possible character input routine for an input stream.
  * (This version uses the standard input stream.)
  * get_char places next 8-bit character into is->next_char.
@@ -69,7 +69,7 @@ sexpInputStream *sexpInputStream::set_byte_size(uint32_t newByteSize)
  * The value EOF is obtained when no more input is available.
  * This code handles 4-bit/6-bit/8-bit channels.
  */
-sexpInputStream *sexpInputStream::get_char(void)
+sexp_input_stream *sexp_input_stream::get_char(void)
 {
     int c;
     if (next_char == EOF) {
@@ -124,10 +124,10 @@ sexpInputStream *sexpInputStream::get_char(void)
 }
 
 /*
- * sexpInputStream::skip_white_space
- * Skip over any white space on the given sexpInputStream.
+ * sexp_input_stream::skip_white_space
+ * Skip over any white space on the given sexp_input_stream.
  */
-sexpInputStream *sexpInputStream::skip_white_space(void)
+sexp_input_stream *sexp_input_stream::skip_white_space(void)
 {
     while (is_white_space(next_char))
         get_char();
@@ -135,11 +135,11 @@ sexpInputStream *sexpInputStream::skip_white_space(void)
 }
 
 /*
- * sexpInputStream::skip_char(c)
+ * sexp_input_stream::skip_char(c)
  * Skip the following input character on input stream is, if it is
  * equal to the character c.  If it is not equal, then an error occurs.
  */
-sexpInputStream *sexpInputStream::skip_char(int c)
+sexp_input_stream *sexp_input_stream::skip_char(int c)
 {
     if (next_char != c)
         sexp_error(sexp_exception::error,
@@ -151,10 +151,10 @@ sexpInputStream *sexpInputStream::skip_char(int c)
 }
 
 /*
- * sexpInputStream::scan_token(ss)
+ * sexp_input_stream::scan_token(ss)
  * scan one or more characters into simple string ss as a token.
  */
-void sexpInputStream::scan_token(sexpSimpleString *ss)
+void sexp_input_stream::scan_token(sexp_simple_string *ss)
 {
     skip_white_space();
     while (is_token_char(next_char)) {
@@ -165,14 +165,14 @@ void sexpInputStream::scan_token(sexpSimpleString *ss)
 }
 
 /*
- * sexpInputStream::scan_to_eof(void)
+ * sexp_input_stream::scan_to_eof(void)
  * scan one or more characters (until EOF reached)
  * return an object that is just that string
  */
-sexpObject *sexpInputStream::scan_to_eof(void)
+sexp_object *sexp_input_stream::scan_to_eof(void)
 {
-    sexpSimpleString *ss = new sexpSimpleString();
-    sexpString *      s = new sexpString();
+    sexp_simple_string *ss = new sexp_simple_string();
+    sexp_string *       s = new sexp_string();
     s->set_string(ss);
     skip_white_space();
     while (next_char != EOF) {
@@ -186,7 +186,7 @@ sexpObject *sexpInputStream::scan_to_eof(void)
  * scan_decimal_string(is)
  * returns long integer that is value of decimal number
  */
-int sexpInputStream::scan_decimal_string(void)
+int sexp_input_stream::scan_decimal_string(void)
 {
     int      value = 0;
     uint32_t i = 0;
@@ -201,10 +201,10 @@ int sexpInputStream::scan_decimal_string(void)
 }
 
 /*
- * sexpInputStream::scan_verbatim_string(is,ss,length)
+ * sexp_input_stream::scan_verbatim_string(is,ss,length)
  * Reads verbatim string of given length into simple string ss.
  */
-void sexpInputStream::scan_verbatim_string(sexpSimpleString *ss, int length)
+void sexp_input_stream::scan_verbatim_string(sexp_simple_string *ss, int length)
 {
     skip_white_space()->skip_char(':');
     if (length == -1L) /* no length was specified */
@@ -218,12 +218,12 @@ void sexpInputStream::scan_verbatim_string(sexpSimpleString *ss, int length)
 }
 
 /*
- * sexpInputStream::scan_quoted_string(ss,length)
+ * sexp_input_stream::scan_quoted_string(ss,length)
  * Reads quoted string of given length into simple string ss.
  * Handles ordinary C escapes.
  * If of indefinite length, length is -1.
  */
-void sexpInputStream::scan_quoted_string(sexpSimpleString *ss, int length)
+void sexp_input_stream::scan_quoted_string(sexp_simple_string *ss, int length)
 {
     int c;
     skip_char('"');
@@ -332,7 +332,7 @@ void sexpInputStream::scan_quoted_string(sexpSimpleString *ss, int length)
  * Reads hexadecimal string into simple string ss.
  * String is of given length result, or length = -1 if indefinite length.
  */
-void sexpInputStream::scan_hexadecimal_string(sexpSimpleString *ss, int length)
+void sexp_input_stream::scan_hexadecimal_string(sexp_simple_string *ss, int length)
 {
     set_byte_size(4)->skip_char('#');
     while (next_char != EOF && (next_char != '#' || get_byte_size() == 4)) {
@@ -349,11 +349,11 @@ void sexpInputStream::scan_hexadecimal_string(sexpSimpleString *ss, int length)
 }
 
 /*
- * sexpInputStream::scan_base64_string(ss,length)
+ * sexp_input_stream::scan_base64_string(ss,length)
  * Reads base64 string into simple string ss.
  * String is of given length result, or length = -1 if indefinite length.
  */
-void sexpInputStream::scan_base64_string(sexpSimpleString *ss, int length)
+void sexp_input_stream::scan_base64_string(sexp_simple_string *ss, int length)
 {
     set_byte_size(6)->skip_char('|');
     while (next_char != EOF && (next_char != '|' || get_byte_size() == 6)) {
@@ -370,15 +370,15 @@ void sexpInputStream::scan_base64_string(sexpSimpleString *ss, int length)
 }
 
 /*
- * sexpInputStream::scan_simple_string(void)
+ * sexp_input_stream::scan_simple_string(void)
  * Reads and returns a simple string from the input stream.
  * Determines type of simple string from the initial character, and
  * dispatches to appropriate routine based on that.
  */
-sexpSimpleString *sexpInputStream::scan_simple_string(void)
+sexp_simple_string *sexp_input_stream::scan_simple_string(void)
 {
-    int               length;
-    sexpSimpleString *ss = new sexpSimpleString;
+    int                 length;
+    sexp_simple_string *ss = new sexp_simple_string;
     skip_white_space();
     /* Note that it is important in the following code to test for token-ness
      * before checking the other cases, so that a token may begin with ":",
@@ -412,12 +412,12 @@ sexpSimpleString *sexpInputStream::scan_simple_string(void)
 }
 
 /*
- * sexpInputStream::scan_string(void)
+ * sexp_input_stream::scan_string(void)
  * Reads and returns a string [presentationhint]string from input stream.
  */
-sexpString *sexpInputStream::scan_string(void)
+sexp_string *sexp_input_stream::scan_string(void)
 {
-    sexpString *s = new sexpString();
+    sexp_string *s = new sexp_string();
     if (next_char == '[') { /* scan presentation hint */
         skip_char('[');
         s->set_presentation_hint(scan_simple_string());
@@ -428,12 +428,12 @@ sexpString *sexpInputStream::scan_string(void)
 }
 
 /*
- * sexpInputStream::scan_list(void)
- * Read and return a sexpList from the input stream.
+ * sexp_input_stream::scan_list(void)
+ * Read and return a sexp_list from the input stream.
  */
-sexpList *sexpInputStream::scan_list(void)
+sexp_list *sexp_input_stream::scan_list(void)
 {
-    sexpList *list = new sexpList();
+    sexp_list *list = new sexp_list();
     skip_char('(')->skip_white_space();
     if (next_char == ')') {
         ; /* OK */
@@ -454,12 +454,12 @@ sexpList *sexpInputStream::scan_list(void)
 }
 
 /*
- * sexpInputStream::scan_object(void)
- * Reads and returns a sexpObject from the given input stream.
+ * sexp_input_stream::scan_object(void)
+ * Reads and returns a sexp_object from the given input stream.
  */
-sexpObject *sexpInputStream::scan_object(void)
+sexp_object *sexp_input_stream::scan_object(void)
 {
-    sexpObject *object;
+    sexp_object *object;
     skip_white_space();
     if (next_char == '{') {
         set_byte_size(6)->skip_char('{');

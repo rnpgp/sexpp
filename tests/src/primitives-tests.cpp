@@ -37,11 +37,11 @@ class PrimitivesTests : public testing::Test {
     static void do_test_advanced(const char *str_in, const char *str_out = nullptr)
     {
         std::istringstream iss(str_in);
-        sexpInputStream    is(&iss);
-        sexpObject *       obj = is.set_byte_size(8)->get_char()->scan_object();
+        sexp_input_stream  is(&iss);
+        sexp_object *      obj = is.set_byte_size(8)->get_char()->scan_object();
 
         std::ostringstream oss(std::ios_base::binary);
-        sexpOutputStream   os(&oss);
+        sexp_output_stream os(&oss);
         os.print_advanced(obj);
         const char *sample = str_out == nullptr ? str_in : str_out;
         EXPECT_EQ(oss.str(), sample);
@@ -50,11 +50,11 @@ class PrimitivesTests : public testing::Test {
     static void do_test_canonical(const char *str_in, const char *str_out = nullptr)
     {
         std::istringstream iss(str_in);
-        sexpInputStream    is(&iss);
-        sexpObject *       obj = is.set_byte_size(8)->get_char()->scan_object();
+        sexp_input_stream  is(&iss);
+        sexp_object *      obj = is.set_byte_size(8)->get_char()->scan_object();
 
         std::ostringstream oss(std::ios_base::binary);
-        sexpOutputStream   os(&oss);
+        sexp_output_stream os(&oss);
         os.print_canonical(obj);
         const char *sample = str_out == nullptr ? str_in : str_out;
         EXPECT_EQ(oss.str(), sample);

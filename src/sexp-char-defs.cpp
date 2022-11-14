@@ -40,23 +40,23 @@ namespace sexp {
 /**************************************/
 /* CHARACTER ROUTINES AND DEFINITIONS */
 /**************************************/
-bool sexpCharDefs::initialized = false;
-char sexpCharDefs::upper[256];       /* upper case version of c */
-bool sexpCharDefs::whitespace[256];  /* c is whitespace */
-bool sexpCharDefs::decdigit[256];    /* c is a dec digit */
-char sexpCharDefs::decvalue[256];    /* a value of c as dec digit */
-bool sexpCharDefs::hexdigit[256];    /* c is a hex digit */
-char sexpCharDefs::hexvalue[256];    /* a value of c as a hex digit */
-bool sexpCharDefs::base64digit[256]; /* c is base64 digit */
-char sexpCharDefs::base64value[256]; /* a value of c as base64 digit */
-bool sexpCharDefs::tokenchar[256];   /* c can be in a token */
-bool sexpCharDefs::alpha[256];       /* c is alphabetic A-Z a-z */
+bool sexp_char_defs::initialized = false;
+char sexp_char_defs::upper[256];       /* upper case version of c */
+bool sexp_char_defs::whitespace[256];  /* c is whitespace */
+bool sexp_char_defs::decdigit[256];    /* c is a dec digit */
+char sexp_char_defs::decvalue[256];    /* a value of c as dec digit */
+bool sexp_char_defs::hexdigit[256];    /* c is a hex digit */
+char sexp_char_defs::hexvalue[256];    /* a value of c as a hex digit */
+bool sexp_char_defs::base64digit[256]; /* c is base64 digit */
+char sexp_char_defs::base64value[256]; /* a value of c as base64 digit */
+bool sexp_char_defs::tokenchar[256];   /* c can be in a token */
+bool sexp_char_defs::alpha[256];       /* c is alphabetic A-Z a-z */
 
 /*
- * sexpCharDefs::initializeCharacterTables
+ * sexp_char_defs::initializeCharacterTables
  * initializes all of the above arrays
  */
-void sexpCharDefs::initialize_character_tables()
+void sexp_char_defs::initialize_character_tables()
 {
     int i;
     for (i = 0; i < 256; i++)
@@ -104,55 +104,55 @@ void sexpCharDefs::initialize_character_tables()
 }
 
 /*
- * sexpCharDefs::is_white_space(c)
+ * sexp_char_defs::is_white_space(c)
  * Returns TRUE if c is a whitespace character (space, tab, etc. ).
  */
-bool sexpCharDefs::is_white_space(int c)
+bool sexp_char_defs::is_white_space(int c)
 {
     return ((c >= 0 && c <= 255) && whitespace[c]);
 }
 
 /*
- * sexpCharDefs::is_dec_digit(c)
+ * sexp_char_defs::is_dec_digit(c)
  * Returns TRUE if c is a decimal digit.
  */
-bool sexpCharDefs::is_dec_digit(int c)
+bool sexp_char_defs::is_dec_digit(int c)
 {
     return ((c >= 0 && c <= 255) && decdigit[c]);
 }
 
 /*
- * sexpCharDefs::is_hex_digit(c)
+ * sexp_char_defs::is_hex_digit(c)
  * Returns TRUE if c is a hexadecimal digit.
  */
-bool sexpCharDefs::is_hex_digit(int c)
+bool sexp_char_defs::is_hex_digit(int c)
 {
     return ((c >= 0 && c <= 255) && hexdigit[c]);
 }
 
 /*
- * sexpCharDefs::is_base64_digit(c)
+ * sexp_char_defs::is_base64_digit(c)
  * returns TRUE if c is a base64 digit A-Z,a-Z,0-9,+,/
  */
-bool sexpCharDefs::is_base64_digit(int c)
+bool sexp_char_defs::is_base64_digit(int c)
 {
     return ((c >= 0 && c <= 255) && base64digit[c]);
 }
 
 /*
- * sexpCharDefs::is_token_char(c)
+ * sexp_char_defs::is_token_char(c)
  * Returns TRUE if c is allowed in a token
  */
-bool sexpCharDefs::is_token_char(int c)
+bool sexp_char_defs::is_token_char(int c)
 {
     return ((c >= 0 && c <= 255) && tokenchar[c]);
 }
 
 /*
- * sexpCharDefs::is_alpha(c)
+ * sexp_char_defs::is_alpha(c)
  * Returns TRUE if c is alphabetic
  */
-bool sexpCharDefs::is_alpha(int c)
+bool sexp_char_defs::is_alpha(int c)
 {
     return ((c >= 0 && c <= 255) && alpha[c]);
 }

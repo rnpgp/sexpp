@@ -38,26 +38,28 @@ concurrency:
 
 jobs:
   build-and-test:
+    name: ${{ matrix.image }}-${{ matrix.env.CC }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         image: [ 'centos:7', 'tgagor/centos:stream8', 'quay.io/centos/centos:stream9', 'fedora:35', 'fedora:36' ]
-    container:
-      image: ${{ matrix.image }}
+        env: [ {CC: gcc, CXX: g++}, {CC: clang, CXX: clang++} ]
+    container: ${{ matrix.image }}
+    env: ${{ matrix.env }}
     steps:
       - name: Install packages CentOS 7
         if: matrix.image == 'centos:7'
         run: |
           yum -y install http://opensource.wandisco.com/centos/7/git/x86_64/wandisco-git-release-7-2.noarch.rpm
-          yum -y install sudo git make wget gcc gcc-c++
+          yum -y install sudo git make wget gcc gcc-c++ clang
           wget -nv https://github.com/Kitware/CMake/releases/download/v3.24.3/cmake-3.24.3-linux-x86_64.sh
           chmod a+x cmake-3.24.3-linux-x86_64.sh
           ./cmake-3.24.3-linux-x86_64.sh --skip-license --exclude-subdir --prefix=/usr/local
 
       - name: Install packages not CentOS 7
         if: matrix.image != 'centos:7'
-        run: yum -y install sudo git gcc gcc-c++ make cmake
+        run: yum -y install sudo git gcc gcc-c++ make cmake clang
 
       - name: Checkout
         uses: actions/checkout@v3

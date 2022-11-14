@@ -74,15 +74,15 @@ int main(int argc, char **argv)
     int   i;
     int   ret = -1;
     sexp_exception::set_interactive(true);
-    std::ifstream *   ifs = nullptr;
-    sexpInputStream * is = nullptr;
-    std::ofstream *   ofs = nullptr;
-    sexpOutputStream *os = nullptr;
+    std::ifstream *     ifs = nullptr;
+    sexp_input_stream * is = nullptr;
+    std::ofstream *     ofs = nullptr;
+    sexp_output_stream *os = nullptr;
     try {
-        sexpObject *object;
+        sexp_object *object;
 
-        is = new sexpInputStream(&std::cin);
-        os = new sexpOutputStream(&std::cout);
+        is = new sexp_input_stream(&std::cin);
+        os = new sexp_output_stream(&std::cout);
 
         /* process switches */
         if (argc > 1)
@@ -165,7 +165,7 @@ int main(int argc, char **argv)
                 if (swp) {
                     std::cout << "Canonical output:" << std::endl;
                     std::cout.flush();
-                    os->new_line(sexpOutputStream::advanced);
+                    os->new_line(sexp_output_stream::advanced);
                 }
                 object->print_canonical(os);
                 if (!swl) {
@@ -178,7 +178,7 @@ int main(int argc, char **argv)
                 if (swp) {
                     std::cout << "Base64 (of canonical) output:" << std::endl;
                     std::cout.flush();
-                    os->new_line(sexpOutputStream::advanced);
+                    os->new_line(sexp_output_stream::advanced);
                 }
                 os->print_base64(object);
                 if (!swl) {
@@ -191,7 +191,7 @@ int main(int argc, char **argv)
                 if (swp) {
                     std::cout << "Advanced transport output:" << std::endl;
                     std::cout.flush();
-                    os->new_line(sexpOutputStream::advanced);
+                    os->new_line(sexp_output_stream::advanced);
                 }
                 os->print_advanced(object);
                 if (!swl) {

@@ -42,11 +42,11 @@ TEST_F(CompatTests, Canonical)
     EXPECT_FALSE(ifs.fail());
 
     if (!ifs.fail()) {
-        sexpInputStream is(&ifs);
-        sexpObject *    obj = is.set_byte_size(8)->get_char()->scan_object();
+        sexp_input_stream is(&ifs);
+        sexp_object *     obj = is.set_byte_size(8)->get_char()->scan_object();
 
         std::ostringstream oss(std::ios_base::binary);
-        sexpOutputStream   os(&oss);
+        sexp_output_stream os(&oss);
         os.print_canonical(obj);
 
         std::istringstream iss(oss.str(), std::ios_base::binary);
@@ -62,11 +62,11 @@ TEST_F(CompatTests, Advanced)
     EXPECT_FALSE(ifs.fail());
 
     if (!ifs.fail()) {
-        sexpInputStream is(&ifs);
-        sexpObject *    obj = is.set_byte_size(8)->get_char()->scan_object();
+        sexp_input_stream is(&ifs);
+        sexp_object *     obj = is.set_byte_size(8)->get_char()->scan_object();
 
         std::ostringstream oss(std::ios_base::binary);
-        sexpOutputStream   os(&oss);
+        sexp_output_stream os(&oss);
 
         os.set_max_column(100);
         os.print_advanced(obj);
