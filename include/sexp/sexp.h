@@ -34,6 +34,7 @@
 
 #pragma once
 
+#include <limits>
 #include <memory>
 #include <algorithm>
 #include <fstream>
@@ -41,22 +42,28 @@
 
 namespace sexp {
 
+#ifdef RETURN_UNIQUE_PTR
+#define _return_unique_ptr_(p) return (p)
+#else
+#define _return_unique_ptr_(p) return (std::move(p))
+#endif
+
 /*
  * SEXP octet definitions
  */
 
 class sexp_char_defs {
   protected:
-    static char upper[256];       /* upper[c] is upper case version of c */
-    static bool whitespace[256];  /* whitespace[c] is nonzero if c is whitespace */
-    static bool decdigit[256];    /* decdigit[c] is nonzero if c is a dec digit */
-    static char decvalue[256];    /* decvalue[c] is value of c as dec digit */
-    static bool hexdigit[256];    /* hexdigit[c] is nonzero if c is a hex digit */
-    static char hexvalue[256];    /* hexvalue[c] is value of c as a hex digit */
-    static bool base64digit[256]; /* base64char[c] is nonzero if c is base64 digit */
-    static char base64value[256]; /* base64value[c] is value of c as base64 digit */
-    static bool tokenchar[256];   /* tokenchar[c] is true if c can be in a token */
-    static bool alpha[256];       /* alpha[c] is true if c is alphabetic A-Z a-z */
+    static unsigned char upper[256];       /* upper[c] is upper case version of c */
+    static bool          whitespace[256];  /* whitespace[c] is nonzero if c is whitespace */
+    static bool          decdigit[256];    /* decdigit[c] is nonzero if c is a dec digit */
+    static unsigned char decvalue[256];    /* decvalue[c] is value of c as dec digit */
+    static bool          hexdigit[256];    /* hexdigit[c] is nonzero if c is a hex digit */
+    static unsigned char hexvalue[256];    /* hexvalue[c] is value of c as a hex digit */
+    static bool          base64digit[256]; /* base64char[c] is nonzero if c is base64 digit */
+    static unsigned char base64value[256]; /* base64value[c] is value of c as base64 digit */
+    static bool          tokenchar[256];   /* tokenchar[c] is true if c can be in a token */
+    static bool          alpha[256];       /* alpha[c] is true if c is alphabetic A-Z a-z */
 
     static bool initialized;
     static void initialize_character_tables(void);
@@ -173,7 +180,7 @@ class sexp_list : public sexp_object, public std::vector<std::unique_ptr<sexp_ob
 
 class sexp_input_stream : private sexp_char_defs {
   protected:
-    std::istream *inputFile;
+    std::istream *input_file;
     uint32_t      byte_size; /* 4 or 6 or 8 == currently scanning mode */
     int           next_char; /* character currently being scanned */
     uint32_t      bits;      /* Bits waiting to be used */
@@ -181,7 +188,7 @@ class sexp_input_stream : private sexp_char_defs {
     int           count;     /* number of 8-bit characters output by get_char */
   public:
     sexp_input_stream(std::istream *i);
-    void               set_input(std::istream *i) { inputFile = i; }
+    void               set_input(std::istream *i) { input_file = i; }
     sexp_input_stream *set_byte_size(uint32_t new_byte_size);
     uint32_t           get_byte_size(void) { return byte_size; }
     sexp_input_stream *get_char(void);
@@ -194,11 +201,11 @@ class sexp_input_stream : private sexp_char_defs {
     std::unique_ptr<sexp_object> scan_list(void);
     sexp_simple_string           scan_simple_string(void);
     void                         scan_token(sexp_simple_string &ss);
-    void                         scan_verbatim_string(sexp_simple_string &ss, int length);
-    void                         scan_quoted_string(sexp_simple_string &ss, int length);
-    void                         scan_hexadecimal_string(sexp_simple_string &ss, int length);
-    void                         scan_base64_string(sexp_simple_string &ss, int length);
-    int                          scan_decimal_string(void);
+    void                         scan_verbatim_string(sexp_simple_string &ss, uint32_t length);
+    void                         scan_quoted_string(sexp_simple_string &ss, uint32_t length);
+    void     scan_hexadecimal_string(sexp_simple_string &ss, uint32_t length);
+    void     scan_base64_string(sexp_simple_string &ss, uint32_t length);
+    uint32_t scan_decimal_string(void);
 
     int get_next_char(void) const { return next_char; }
     int set_next_char(int c) { return next_char = c; }
@@ -211,32 +218,32 @@ class sexp_input_stream : private sexp_char_defs {
 class sexp_output_stream {
   public:
     const uint32_t default_line_length = 75;
-    enum sexpPrintMode {                /* PRINTING MODES */
-                         canonical = 1, /* standard for hashing and tranmission */
-                         base64 = 2,    /* base64 version of canonical */
-                         advanced = 3   /* pretty-printed */
+    enum sexp_print_mode {                /* PRINTING MODES */
+                           canonical = 1, /* standard for hashing and tranmission */
+                           base64 = 2,    /* base64 version of canonical */
+                           advanced = 3   /* pretty-printed */
     };
 
   protected:
-    std::ostream *output_file;
-    uint32_t      base64_count; /* number of hex or base64 chars printed this region */
-    uint32_t      byte_size;    /* 4 or 6 or 8 depending on output mode */
-    uint32_t      bits;         /* bits waiting to go out */
-    uint32_t      n_bits;       /* number of bits waiting to go out */
-    sexpPrintMode mode;         /* base64, advanced, or canonical */
-    uint32_t      column;       /* column where next character will go */
-    uint32_t      max_column;   /* max usable column, or 0 if no maximum */
-    uint32_t      indent;       /* current indentation level (starts at 0) */
+    std::ostream *  output_file;
+    uint32_t        base64_count; /* number of hex or base64 chars printed this region */
+    uint32_t        byte_size;    /* 4 or 6 or 8 depending on output mode */
+    uint32_t        bits;         /* bits waiting to go out */
+    uint32_t        n_bits;       /* number of bits waiting to go out */
+    sexp_print_mode mode;         /* base64, advanced, or canonical */
+    uint32_t        column;       /* column where next character will go */
+    uint32_t        max_column;   /* max usable column, or 0 if no maximum */
+    uint32_t        indent;       /* current indentation level (starts at 0) */
   public:
     sexp_output_stream(std::ostream *o);
     void                set_output(std::ostream *o) { output_file = o; }
-    sexp_output_stream *put_char(int c);              /* output a character */
-    sexp_output_stream *new_line(sexpPrintMode mode); /* go to next line (and indent) */
+    sexp_output_stream *put_char(int c);                /* output a character */
+    sexp_output_stream *new_line(sexp_print_mode mode); /* go to next line (and indent) */
     sexp_output_stream *var_put_char(int c);
     sexp_output_stream *flush(void);
     sexp_output_stream *print_decimal(uint32_t n);
 
-    sexp_output_stream *change_output_byte_size(int newByteSize, sexpPrintMode mode);
+    sexp_output_stream *change_output_byte_size(int newByteSize, sexp_print_mode mode);
 
     sexp_output_stream *print_canonical(const std::unique_ptr<sexp_object> &obj)
     {

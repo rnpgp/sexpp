@@ -40,17 +40,17 @@ namespace sexp {
 /**************************************/
 /* CHARACTER ROUTINES AND DEFINITIONS */
 /**************************************/
-bool sexp_char_defs::initialized = false;
-char sexp_char_defs::upper[256];       /* upper case version of c */
-bool sexp_char_defs::whitespace[256];  /* c is whitespace */
-bool sexp_char_defs::decdigit[256];    /* c is a dec digit */
-char sexp_char_defs::decvalue[256];    /* a value of c as dec digit */
-bool sexp_char_defs::hexdigit[256];    /* c is a hex digit */
-char sexp_char_defs::hexvalue[256];    /* a value of c as a hex digit */
-bool sexp_char_defs::base64digit[256]; /* c is base64 digit */
-char sexp_char_defs::base64value[256]; /* a value of c as base64 digit */
-bool sexp_char_defs::tokenchar[256];   /* c can be in a token */
-bool sexp_char_defs::alpha[256];       /* c is alphabetic A-Z a-z */
+bool          sexp_char_defs::initialized = false;
+unsigned char sexp_char_defs::upper[256];       /* upper case version of c */
+bool          sexp_char_defs::whitespace[256];  /* c is whitespace */
+bool          sexp_char_defs::decdigit[256];    /* c is a dec digit */
+unsigned char sexp_char_defs::decvalue[256];    /* a value of c as dec digit */
+bool          sexp_char_defs::hexdigit[256];    /* c is a hex digit */
+unsigned char sexp_char_defs::hexvalue[256];    /* a value of c as a hex digit */
+bool          sexp_char_defs::base64digit[256]; /* c is base64 digit */
+unsigned char sexp_char_defs::base64value[256]; /* a value of c as base64 digit */
+bool          sexp_char_defs::tokenchar[256];   /* c can be in a token */
+bool          sexp_char_defs::alpha[256];       /* c is alphabetic A-Z a-z */
 
 /*
  * sexp_char_defs::initializeCharacterTables

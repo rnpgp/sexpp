@@ -45,3 +45,5 @@ bool compare_text_files(const std::string &filename1, const std::string &filenam
 
 bool compare_binary_files(const std::string &filename1, std::istream &file2);
 bool compare_text_files(const std::string &filename1, std::istream &file2);
+
+std::istream &safe_get_line(std::istream &is, std::string &t);

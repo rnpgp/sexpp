@@ -210,7 +210,7 @@ int main(int argc, char **argv)
             }
         }
         ret = 0;
-    } catch (sexp_exception e) {
+    } catch (sexp_exception &e) {
         std::cout << e.what() << std::endl;
     } catch (...) {
         std::cout << "UNEXPECTED ERROR" << std::endl;

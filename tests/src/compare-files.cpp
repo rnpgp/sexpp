@@ -30,6 +30,8 @@
 #include <algorithm>
 #include <fstream>
 
+#include <sexp-tests.h>
+
 bool compare_binary_files(const std::string &filename1, const std::string &filename2)
 {
     bool          res = false;

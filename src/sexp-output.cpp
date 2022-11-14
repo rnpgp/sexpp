@@ -46,8 +46,9 @@ static const char *base64Digits =
  * Creates and initializes new sexp_output_stream object.
  */
 sexp_output_stream::sexp_output_stream(std::ostream *o)
-    : output_file(o), column(0), max_column(default_line_length), indent(0), byte_size(8),
-      bits(0), n_bits(0), mode(canonical)
+    : output_file{o}, byte_size{8}, bits{0}, n_bits{0}, mode{canonical}, column{0},
+      max_column{default_line_length}, indent{0}
+
 {
 }
 
@@ -95,8 +96,8 @@ sexp_output_stream *sexp_output_stream::var_put_char(int c)
  * Change os->byte_size to newByteSize
  * record mode in output stream for automatic line breaks
  */
-sexp_output_stream *sexp_output_stream::change_output_byte_size(int           newByteSize,
-                                                                sexpPrintMode newMode)
+sexp_output_stream *sexp_output_stream::change_output_byte_size(int             newByteSize,
+                                                                sexp_print_mode newMode)
 {
     if (newByteSize != 4 && newByteSize != 6 && newByteSize != 8)
         sexp_error(sexp_exception::error, "Illegal output base %d", newByteSize, 0, EOF);
@@ -148,14 +149,14 @@ sexp_output_stream *sexp_output_stream::flush(void)
  * indentation level (but never indents more than half of max_column).
  * Resets column for next output character.
  */
-sexp_output_stream *sexp_output_stream::new_line(sexpPrintMode mode)
+sexp_output_stream *sexp_output_stream::new_line(sexp_print_mode mode)
 {
     if (mode == advanced || mode == base64) {
         put_char('\n');
         column = 0;
     }
     if (mode == advanced) {
-        for (int i = 0; i < indent && (4 * i) < max_column; i++)
+        for (uint32_t i = 0; i < indent && (4 * i) < max_column; i++)
             put_char(' ');
     }
     return this;

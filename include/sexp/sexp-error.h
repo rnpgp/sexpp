@@ -42,8 +42,8 @@ class sexp_exception : public std::exception {
     static bool     interactive_;
 
     int         position_; // May be EOF aka -1
-    std::string msg_;
     severity    level_;
+    std::string msg_;
 
   public:
     sexp_exception(std::string message, severity level, int position)
