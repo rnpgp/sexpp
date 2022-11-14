@@ -182,7 +182,8 @@ sexp_output_stream *sexp_output_stream::print_decimal(uint32_t n)
  * Same as canonical, except all characters get put out as base 64 ones
  */
 
-sexp_output_stream *sexp_output_stream::print_base64(const sexp_object *object)
+sexp_output_stream *sexp_output_stream::print_base64(
+  const std::unique_ptr<sexp_object> &object)
 {
     change_output_byte_size(8, base64)->var_put_char('{')->change_output_byte_size(6, base64);
     print_canonical(object);

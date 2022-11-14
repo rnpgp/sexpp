@@ -42,8 +42,9 @@ TEST_F(CompatTests, Canonical)
     EXPECT_FALSE(ifs.fail());
 
     if (!ifs.fail()) {
-        sexp_input_stream is(&ifs);
-        sexp_object *     obj = is.set_byte_size(8)->get_char()->scan_object();
+        sexp_input_stream                  is(&ifs);
+        const std::unique_ptr<sexp_object> obj =
+          is.set_byte_size(8)->get_char()->scan_object();
 
         std::ostringstream oss(std::ios_base::binary);
         sexp_output_stream os(&oss);
@@ -62,8 +63,9 @@ TEST_F(CompatTests, Advanced)
     EXPECT_FALSE(ifs.fail());
 
     if (!ifs.fail()) {
-        sexp_input_stream is(&ifs);
-        sexp_object *     obj = is.set_byte_size(8)->get_char()->scan_object();
+        sexp_input_stream                  is(&ifs);
+        const std::unique_ptr<sexp_object> obj =
+          is.set_byte_size(8)->get_char()->scan_object();
 
         std::ostringstream oss(std::ios_base::binary);
         sexp_output_stream os(&oss);

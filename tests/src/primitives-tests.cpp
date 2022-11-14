@@ -36,9 +36,9 @@ class PrimitivesTests : public testing::Test {
   protected:
     static void do_test_advanced(const char *str_in, const char *str_out = nullptr)
     {
-        std::istringstream iss(str_in);
-        sexp_input_stream  is(&iss);
-        sexp_object *      obj = is.set_byte_size(8)->get_char()->scan_object();
+        std::istringstream           iss(str_in);
+        sexp_input_stream            is(&iss);
+        std::unique_ptr<sexp_object> obj = is.set_byte_size(8)->get_char()->scan_object();
 
         std::ostringstream oss(std::ios_base::binary);
         sexp_output_stream os(&oss);
@@ -49,9 +49,9 @@ class PrimitivesTests : public testing::Test {
 
     static void do_test_canonical(const char *str_in, const char *str_out = nullptr)
     {
-        std::istringstream iss(str_in);
-        sexp_input_stream  is(&iss);
-        sexp_object *      obj = is.set_byte_size(8)->get_char()->scan_object();
+        std::istringstream           iss(str_in);
+        sexp_input_stream            is(&iss);
+        std::unique_ptr<sexp_object> obj = is.set_byte_size(8)->get_char()->scan_object();
 
         std::ostringstream oss(std::ios_base::binary);
         sexp_output_stream os(&oss);

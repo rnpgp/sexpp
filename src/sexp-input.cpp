@@ -154,11 +154,11 @@ sexp_input_stream *sexp_input_stream::skip_char(int c)
  * sexp_input_stream::scan_token(ss)
  * scan one or more characters into simple string ss as a token.
  */
-void sexp_input_stream::scan_token(sexp_simple_string *ss)
+void sexp_input_stream::scan_token(sexp_simple_string &ss)
 {
     skip_white_space();
     while (is_token_char(next_char)) {
-        ss->append(next_char);
+        ss.append(next_char);
         get_char();
     }
     return;
@@ -169,17 +169,17 @@ void sexp_input_stream::scan_token(sexp_simple_string *ss)
  * scan one or more characters (until EOF reached)
  * return an object that is just that string
  */
-sexp_object *sexp_input_stream::scan_to_eof(void)
+std::unique_ptr<sexp_object> sexp_input_stream::scan_to_eof(void)
 {
-    sexp_simple_string *ss = new sexp_simple_string();
-    sexp_string *       s = new sexp_string();
-    s->set_string(ss);
+    sexp_simple_string           ss;
+    std::unique_ptr<sexp_string> s(new sexp_string());
     skip_white_space();
     while (next_char != EOF) {
-        ss->append(next_char);
+        ss.append(next_char);
         get_char();
     }
-    return s;
+    s->set_string(ss);
+    return std::move(s);
 }
 
 /*
@@ -204,14 +204,14 @@ int sexp_input_stream::scan_decimal_string(void)
  * sexp_input_stream::scan_verbatim_string(is,ss,length)
  * Reads verbatim string of given length into simple string ss.
  */
-void sexp_input_stream::scan_verbatim_string(sexp_simple_string *ss, int length)
+void sexp_input_stream::scan_verbatim_string(sexp_simple_string &ss, int length)
 {
     skip_white_space()->skip_char(':');
     if (length == -1L) /* no length was specified */
         sexp_error(
           sexp_exception::error, "Verbatim string had no declared length.", 0, 0, count);
     for (int i = 0; i < length; i++) {
-        ss->append(next_char);
+        ss.append(next_char);
         get_char();
     }
     return;
@@ -223,13 +223,13 @@ void sexp_input_stream::scan_verbatim_string(sexp_simple_string *ss, int length)
  * Handles ordinary C escapes.
  * If of indefinite length, length is -1.
  */
-void sexp_input_stream::scan_quoted_string(sexp_simple_string *ss, int length)
+void sexp_input_stream::scan_quoted_string(sexp_simple_string &ss, int length)
 {
     int c;
     skip_char('"');
-    while (length == -1 || ss->length() <= length) {
+    while (length == -1 || ss.length() <= length) {
         if (next_char == '\"') {
-            if (length == -1 || (ss->length() == length)) {
+            if (length == -1 || (ss.length() == length)) {
                 skip_char('\"');
                 return;
             } else
@@ -243,23 +243,23 @@ void sexp_input_stream::scan_quoted_string(sexp_simple_string *ss, int length)
             get_char();
             c = next_char;
             if (c == 'b')
-                ss->append('\b');
+                ss.append('\b');
             else if (c == 't')
-                ss->append('\t');
+                ss.append('\t');
             else if (c == 'v')
-                ss->append('\v');
+                ss.append('\v');
             else if (c == 'n')
-                ss->append('\n');
+                ss.append('\n');
             else if (c == 'f')
-                ss->append('\f');
+                ss.append('\f');
             else if (c == 'r')
-                ss->append('\r');
+                ss.append('\r');
             else if (c == '\"')
-                ss->append('\"');
+                ss.append('\"');
             else if (c == '\'')
-                ss->append('\'');
+                ss.append('\'');
             else if (c == '\\')
-                ss->append('\\');
+                ss.append('\\');
             else if (c >= '0' && c <= '7') { /* octal number */
                 int j, val;
                 val = 0;
@@ -280,7 +280,7 @@ void sexp_input_stream::scan_quoted_string(sexp_simple_string *ss, int length)
                 if (val > 255)
                     sexp_error(
                       sexp_exception::error, "Octal character \\%o... too big", val, 0, count);
-                ss->append(val);
+                ss.append(val);
             } else if (c == 'x') /* hexadecimal number */
             {
                 int j, val;
@@ -301,7 +301,7 @@ void sexp_input_stream::scan_quoted_string(sexp_simple_string *ss, int length)
                                    0,
                                    count);
                 }
-                ss->append(val);
+                ss.append(val);
             } else if (c == '\n') /* ignore backslash line feed */
             {                     /* also ignore following carriage-return if present */
                 get_char();
@@ -320,7 +320,7 @@ void sexp_input_stream::scan_quoted_string(sexp_simple_string *ss, int length)
         else if (next_char == EOF) {
             sexp_error(sexp_exception::error, "unxpected end of file", 0, 0, count);
         } else {
-            ss->append(next_char);
+            ss.append(next_char);
         }
         get_char();
     } /* end of main while loop */
@@ -332,18 +332,18 @@ void sexp_input_stream::scan_quoted_string(sexp_simple_string *ss, int length)
  * Reads hexadecimal string into simple string ss.
  * String is of given length result, or length = -1 if indefinite length.
  */
-void sexp_input_stream::scan_hexadecimal_string(sexp_simple_string *ss, int length)
+void sexp_input_stream::scan_hexadecimal_string(sexp_simple_string &ss, int length)
 {
     set_byte_size(4)->skip_char('#');
     while (next_char != EOF && (next_char != '#' || get_byte_size() == 4)) {
-        ss->append(next_char);
+        ss.append(next_char);
         get_char();
     }
     skip_char('#');
-    if (ss->length() != length && length >= 0)
+    if (ss.length() != length && length >= 0)
         sexp_error(sexp_exception::warning,
                    "Hex string has length %d different than declared length %d",
-                   ss->length(),
+                   ss.length(),
                    length,
                    count);
 }
@@ -353,18 +353,18 @@ void sexp_input_stream::scan_hexadecimal_string(sexp_simple_string *ss, int leng
  * Reads base64 string into simple string ss.
  * String is of given length result, or length = -1 if indefinite length.
  */
-void sexp_input_stream::scan_base64_string(sexp_simple_string *ss, int length)
+void sexp_input_stream::scan_base64_string(sexp_simple_string &ss, int length)
 {
     set_byte_size(6)->skip_char('|');
     while (next_char != EOF && (next_char != '|' || get_byte_size() == 6)) {
-        ss->append(next_char);
+        ss.append(next_char);
         get_char();
     }
     skip_char('|');
-    if (ss->length() != length && length >= 0)
+    if (ss.length() != length && length >= 0)
         sexp_error(sexp_exception::warning,
                    "Base64 string has length %d different than declared length %d",
-                   ss->length(),
+                   ss.length(),
                    length,
                    count);
 }
@@ -375,10 +375,10 @@ void sexp_input_stream::scan_base64_string(sexp_simple_string *ss, int length)
  * Determines type of simple string from the initial character, and
  * dispatches to appropriate routine based on that.
  */
-sexp_simple_string *sexp_input_stream::scan_simple_string(void)
+sexp_simple_string sexp_input_stream::scan_simple_string(void)
 {
-    int                 length;
-    sexp_simple_string *ss = new sexp_simple_string;
+    int                length;
+    sexp_simple_string ss;
     skip_white_space();
     /* Note that it is important in the following code to test for token-ness
      * before checking the other cases, so that a token may begin with ":",
@@ -406,7 +406,7 @@ sexp_simple_string *sexp_input_stream::scan_simple_string(void)
                                                      "illegal character %d (decimal)";
         sexp_error(sexp_exception::error, msg, next_char, next_char, count);
     }
-    if (ss->length() == 0)
+    if (ss.length() == 0)
         sexp_error(sexp_exception::warning, "Simple string has zero length", 0, 0, count);
     return ss;
 }
@@ -415,25 +415,25 @@ sexp_simple_string *sexp_input_stream::scan_simple_string(void)
  * sexp_input_stream::scan_string(void)
  * Reads and returns a string [presentationhint]string from input stream.
  */
-sexp_string *sexp_input_stream::scan_string(void)
+std::unique_ptr<sexp_object> sexp_input_stream::scan_string(void)
 {
-    sexp_string *s = new sexp_string();
+    std::unique_ptr<sexp_string> s(new sexp_string());
     if (next_char == '[') { /* scan presentation hint */
         skip_char('[');
         s->set_presentation_hint(scan_simple_string());
         skip_white_space()->skip_char(']')->skip_white_space();
     }
     s->set_string(scan_simple_string());
-    return (s);
+    return std::move(s);
 }
 
 /*
  * sexp_input_stream::scan_list(void)
  * Read and return a sexp_list from the input stream.
  */
-sexp_list *sexp_input_stream::scan_list(void)
+std::unique_ptr<sexp_object> sexp_input_stream::scan_list(void)
 {
-    sexp_list *list = new sexp_list();
+    std::unique_ptr<sexp_list> list(new sexp_list());
     skip_char('(')->skip_white_space();
     if (next_char == ')') {
         ; /* OK */
@@ -445,21 +445,21 @@ sexp_list *sexp_input_stream::scan_list(void)
         skip_white_space();
         if (next_char == ')') { /* we just grabbed last element of list */
             skip_char(')');
-            return list;
+            return std::move(list);
         } else {
             list->push_back(scan_object());
         }
     }
-    return list;
+    return std::move(list);
 }
 
 /*
  * sexp_input_stream::scan_object(void)
  * Reads and returns a sexp_object from the given input stream.
  */
-sexp_object *sexp_input_stream::scan_object(void)
+std::unique_ptr<sexp_object> sexp_input_stream::scan_object(void)
 {
-    sexp_object *object;
+    std::unique_ptr<sexp_object> object;
     skip_white_space();
     if (next_char == '{') {
         set_byte_size(6)->skip_char('{');
@@ -471,7 +471,7 @@ sexp_object *sexp_input_stream::scan_object(void)
         else
             object = scan_string();
     }
-    return object;
+    return std::move(object);
 }
 
 } // namespace sexp

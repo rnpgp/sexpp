@@ -43,14 +43,12 @@ namespace sexp {
  */
 sexp_output_stream *sexp_string::print_canonical(sexp_output_stream *os) const
 {
-    if (presentation_hint != NULL) {
+    if (with_presentation_hint) {
         os->var_put_char('[');
-        presentation_hint->print_canonical_verbatim(os);
+        presentation_hint.print_canonical_verbatim(os);
         os->var_put_char(']');
     }
-    if (string == NULL)
-        sexp_error(sexp_exception::error, "NULL string can't be printed", 0, 0, EOF);
-    string->print_canonical_verbatim(os);
+    string.print_canonical_verbatim(os);
     return os;
 }
 
@@ -61,16 +59,12 @@ sexp_output_stream *sexp_string::print_canonical(sexp_output_stream *os) const
 sexp_output_stream *sexp_string::print_advanced(sexp_output_stream *os) const
 {
     sexp_object::print_advanced(os);
-    sexp_simple_string *ph = get_presentation_hint();
-    sexp_simple_string *ss = get_string();
-    if (ph != NULL) {
+    if (with_presentation_hint) {
         os->put_char('[');
-        ph->print_advanced(os);
+        presentation_hint.print_advanced(os);
         os->put_char(']');
     }
-    if (ss == NULL)
-        sexp_error(sexp_exception::error, "NULL string can't be printed", 0, 0, EOF);
-    ss->print_advanced(os);
+    string.print_advanced(os);
     return os;
 }
 
@@ -81,10 +75,9 @@ sexp_output_stream *sexp_string::print_advanced(sexp_output_stream *os) const
 uint32_t sexp_string::advanced_length(sexp_output_stream *os) const
 {
     uint32_t len = 0;
-    if (presentation_hint != NULL)
-        len += 2 + presentation_hint->advanced_length(os);
-    if (string != NULL)
-        len += string->advanced_length(os);
+    if (with_presentation_hint)
+        len += 2 + presentation_hint.advanced_length(os);
+    len += string.advanced_length(os);
     return len;
 }
 
@@ -95,8 +88,9 @@ uint32_t sexp_string::advanced_length(sexp_output_stream *os) const
 sexp_output_stream *sexp_list::print_canonical(sexp_output_stream *os) const
 {
     os->var_put_char('(');
-    std::for_each(
-      begin(), end(), [os](const sexp_object *object) { object->print_canonical(os); });
+    std::for_each(begin(), end(), [os](const std::unique_ptr<sexp_object> &obj) {
+        obj->print_canonical(os);
+    });
     os->var_put_char(')');
     return os;
 }
@@ -117,7 +111,7 @@ sexp_output_stream *sexp_list::print_advanced(sexp_output_stream *os) const
     os->put_char('(')->inc_indent();
     vertical = (advanced_length(os) > os->get_max_column() - os->get_column());
 
-    std::for_each(begin(), end(), [&](const sexp_object *obj) {
+    std::for_each(begin(), end(), [&](const std::unique_ptr<sexp_object> &obj) {
         if (!firstelement) {
             if (vertical)
                 os->new_line(sexp_output_stream::advanced);
@@ -140,8 +134,9 @@ sexp_output_stream *sexp_list::print_advanced(sexp_output_stream *os) const
 uint32_t sexp_list::advanced_length(sexp_output_stream *os) const
 {
     uint32_t len = 1; /* for left paren */
-    std::for_each(
-      begin(), end(), [&](const sexp_object *obj) { len += obj->advanced_length(os); });
+    std::for_each(begin(), end(), [&](const std::unique_ptr<sexp_object> &obj) {
+        len += obj->advanced_length(os);
+    });
     return (len + 1); /* for final paren */
 }
 

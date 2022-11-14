@@ -34,6 +34,7 @@
 
 #pragma once
 
+#include <memory>
 #include <algorithm>
 #include <fstream>
 #include <vector>
@@ -131,25 +132,20 @@ class sexp_object {
 
 class sexp_string : public sexp_object {
   protected:
-    sexp_simple_string *presentation_hint;
-    sexp_simple_string *string;
+    bool               with_presentation_hint;
+    sexp_simple_string presentation_hint;
+    sexp_simple_string string;
 
   public:
-    sexp_string(void) : presentation_hint(NULL), string(NULL) {}
+    sexp_string(void) : with_presentation_hint(false) {}
 
-    virtual ~sexp_string()
+    const bool has_presentation_hint(void) const { return with_presentation_hint; }
+    const sexp_simple_string &get_string(void) const { return string; }
+    const sexp_simple_string &set_string(const sexp_simple_string &ss) { return string = ss; }
+    const sexp_simple_string &get_presentation_hint(void) const { return presentation_hint; }
+    const sexp_simple_string &set_presentation_hint(const sexp_simple_string &ph)
     {
-        if (presentation_hint)
-            delete presentation_hint;
-        if (string)
-            delete string;
-    }
-
-    sexp_simple_string *get_string(void) const { return string; }
-    sexp_simple_string *set_string(sexp_simple_string *ss) { return string = ss; }
-    sexp_simple_string *get_presentation_hint(void) const { return presentation_hint; }
-    sexp_simple_string *set_presentation_hint(sexp_simple_string *ph)
-    {
+        with_presentation_hint = true;
         return presentation_hint = ph;
     }
 
@@ -162,16 +158,9 @@ class sexp_string : public sexp_object {
  * SEXP list
  */
 
-class sexp_list : public sexp_object, public std::vector<sexp_object *> {
+class sexp_list : public sexp_object, public std::vector<std::unique_ptr<sexp_object>> {
   public:
-    virtual ~sexp_list()
-    {
-        sexp_object *pd;
-        for (auto it = begin(); it != end(); ++it) {
-            pd = *it;
-            delete pd;
-        }
-    }
+    virtual ~sexp_list() {}
 
     virtual sexp_output_stream *print_canonical(sexp_output_stream *os) const;
     virtual sexp_output_stream *print_advanced(sexp_output_stream *os) const;
@@ -199,17 +188,17 @@ class sexp_input_stream : private sexp_char_defs {
     sexp_input_stream *skip_white_space(void);
     sexp_input_stream *skip_char(int c);
 
-    sexp_object *       scan_to_eof();
-    sexp_object *       scan_object(void);
-    sexp_string *       scan_string(void);
-    sexp_list *         scan_list(void);
-    sexp_simple_string *scan_simple_string(void);
-    void                scan_token(sexp_simple_string *ss);
-    void                scan_verbatim_string(sexp_simple_string *ss, int length);
-    void                scan_quoted_string(sexp_simple_string *ss, int length);
-    void                scan_hexadecimal_string(sexp_simple_string *ss, int length);
-    void                scan_base64_string(sexp_simple_string *ss, int length);
-    int                 scan_decimal_string(void);
+    std::unique_ptr<sexp_object> scan_to_eof();
+    std::unique_ptr<sexp_object> scan_object(void);
+    std::unique_ptr<sexp_object> scan_string(void);
+    std::unique_ptr<sexp_object> scan_list(void);
+    sexp_simple_string           scan_simple_string(void);
+    void                         scan_token(sexp_simple_string &ss);
+    void                         scan_verbatim_string(sexp_simple_string &ss, int length);
+    void                         scan_quoted_string(sexp_simple_string &ss, int length);
+    void                         scan_hexadecimal_string(sexp_simple_string &ss, int length);
+    void                         scan_base64_string(sexp_simple_string &ss, int length);
+    int                          scan_decimal_string(void);
 
     int get_next_char(void) const { return next_char; }
     int set_next_char(int c) { return next_char = c; }
@@ -249,15 +238,15 @@ class sexp_output_stream {
 
     sexp_output_stream *change_output_byte_size(int newByteSize, sexpPrintMode mode);
 
-    sexp_output_stream *print_canonical(const sexp_object *obj)
+    sexp_output_stream *print_canonical(const std::unique_ptr<sexp_object> &obj)
     {
         return obj->print_canonical(this);
     }
-    sexp_output_stream *print_advanced(const sexp_object *obj)
+    sexp_output_stream *print_advanced(const std::unique_ptr<sexp_object> &obj)
     {
         return obj->print_advanced(this);
     };
-    sexp_output_stream *print_base64(const sexp_object *obj);
+    sexp_output_stream *print_base64(const std::unique_ptr<sexp_object> &obj);
     sexp_output_stream *print_canonical(const sexp_simple_string *ss)
     {
         return ss->print_canonical_verbatim(this);

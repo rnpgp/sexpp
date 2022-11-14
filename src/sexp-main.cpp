@@ -79,7 +79,7 @@ int main(int argc, char **argv)
     std::ofstream *     ofs = nullptr;
     sexp_output_stream *os = nullptr;
     try {
-        sexp_object *object;
+        std::unique_ptr<sexp_object> object;
 
         is = new sexp_input_stream(&std::cin);
         os = new sexp_output_stream(&std::cout);
