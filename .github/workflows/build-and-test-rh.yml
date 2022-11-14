@@ -1,0 +1,93 @@
+#
+# Copyright (c) 2022 [Ribose Inc](https://www.ribose.com).
+# All rights reserved.
+# This file is a part of sexp
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+# 1. Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in the
+#    documentation and/or other materials provided with the distribution.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
+# TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+# PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDERS OR CONTRIBUTORS
+# BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+# CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+
+name: build-and-test-rh
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: '${{ github.workflow }}-${{ github.job }}-${{ github.head_ref || github.ref_name }}'
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    name: ${{ matrix.image }}-${{ matrix.env.CC }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        image: [ 'centos:7', 'tgagor/centos:stream8', 'quay.io/centos/centos:stream9', 'fedora:35', 'fedora:36' ]
+        env: [ {CC: gcc, CXX: g++}, {CC: clang, CXX: clang++} ]
+    container: ${{ matrix.image }}
+    env: ${{ matrix.env }}
+    steps:
+      - name: Install packages CentOS 7
+        if: matrix.image == 'centos:7'
+        run: |
+          yum -y install http://opensource.wandisco.com/centos/7/git/x86_64/wandisco-git-release-7-2.noarch.rpm
+          yum -y install sudo git make wget gcc gcc-c++ clang
+          wget -nv https://github.com/Kitware/CMake/releases/download/v3.24.3/cmake-3.24.3-linux-x86_64.sh
+          chmod a+x cmake-3.24.3-linux-x86_64.sh
+          ./cmake-3.24.3-linux-x86_64.sh --skip-license --exclude-subdir --prefix=/usr/local
+
+      - name: Install packages not CentOS 7
+        if: matrix.image != 'centos:7'
+        run: yum -y install sudo git gcc gcc-c++ make cmake clang
+
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+
+      - name: Adjust environment
+        run: echo "SEXP_INSTALL_PATH=$PWD/install" >> $GITHUB_ENV
+
+      - name: Configure
+        run:  cmake . -Bbuild -DCMAKE_INSTALL_PREFIX=${{ env.SEXP_INSTALL_PATH }} -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        run: cmake --build build --config Release
+
+      - name: Run tests
+        run: ctest --test-dir build --output-on-failure
+
+      - name: Checkout shell test framework
+        uses: actions/checkout@v3
+        with:
+          repository: kward/shunit2
+          path: ${{github.workspace}}/tests/shunit2
+          fetch-depth: 1
+
+      - name: Install
+        run: cmake --install build
+
+      - name: Run additional tests
+        shell: bash
+        run: tests/scripts/tests.sh

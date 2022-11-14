@@ -1,0 +1,113 @@
+#
+# Copyright (c) 2022 [Ribose Inc](https://www.ribose.com).
+# All rights reserved.
+# This file is a part of sexp
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+# 1. Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in the
+#    documentation and/or other materials provided with the distribution.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
+# TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+# PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDERS OR CONTRIBUTORS
+# BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+# CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+
+name: build-and-test-deb
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: '${{ github.workflow }}-${{ github.job }}-${{ github.head_ref || github.ref_name }}'
+  cancel-in-progress: true
+
+env:
+# Looks like the lat version that supports i386
+  CMAKE_VERSION: '3.20.6-2'
+jobs:
+  build-and-test:
+    name: ${{ matrix.image }}-${{ matrix.env.CC }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        image: [ 'i386/debian:9', 'i386/debian:11', 'amd64/debian:11' ]
+        env: [ {CC: gcc, CXX: g++}, {CC: clang, CXX: clang++} ]
+    container: ${{ matrix.image }}
+    env: ${{ matrix.env }}
+    steps:
+      - name: Install packages
+        run: |
+          apt-get update
+          apt-get -y install sudo git wget build-essential libssl-dev software-properties-common
+
+      - name: Checkout
+        # Because i386 support v1 only (no node run-time)
+        uses: actions/checkout@v1
+        with:
+          fetch-depth: 1
+
+      - name: Install cmake/i386
+        if: startsWith(matrix.image, 'i386')
+        run: |
+          wget -nv https://github.com/xpack-dev-tools/cmake-xpack/releases/download/v${{ env.CMAKE_VERSION }}/xpack-cmake-${{ env.CMAKE_VERSION }}-linux-ia32.tar.gz
+          tar -zxf xpack-cmake-${{ env.CMAKE_VERSION }}-linux-ia32.tar.gz --directory /usr/local --strip-components=1 --skip-old-files
+
+      - name: Install cmake/amd64
+        if: startsWith(matrix.image, 'amd64')
+        run: |
+          wget -nv https://github.com/xpack-dev-tools/cmake-xpack/releases/download/v${{ env.CMAKE_VERSION }}/xpack-cmake-${{ env.CMAKE_VERSION }}-linux-x64.tar.gz
+          tar -zxf xpack-cmake-${{ env.CMAKE_VERSION }}-linux-x64.tar.gz --directory /usr/local --strip-components=1 --skip-old-files
+
+      - name: Install clang
+        if: matrix.env.CC == 'clang'
+        run: |
+          wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key|sudo apt-key add -
+          apt-add-repository "deb http://apt.llvm.org/stretch/ llvm-toolchain-stretch main"
+          apt-get install -y clang
+
+      - name: Adjust environment
+        run: echo "SEXP_INSTALL_PATH=$PWD/install" >> $GITHUB_ENV
+
+      - name: Configure
+        run: cmake . -Bbuild -DCMAKE_INSTALL_PREFIX=${{ env.SEXP_INSTALL_PATH }} -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        run: cmake --build build --config Release
+
+      - name: Run tests
+        run: ctest --test-dir build --output-on-failure
+
+      - name: Checkout shell test framework/amd64 only
+        # i386 supports actions/checkout@v1 only (no Node.js 32-bit binary)
+        # and and actions/checkout@v1 has some issues with nested repositories
+        if: startsWith(matrix.image, 'amd64')
+        uses: actions/checkout@v3
+        with:
+          repository: kward/shunit2
+          path: ${{github.workspace}}/tests/shunit2
+          fetch-depth: 1
+
+      - name: Install
+        run: cmake --install build
+
+      - name: Run additional tests
+        # See above, just assume that in i386 config it was installed correctly
+        if: startsWith(matrix.image, 'amd64')
+        shell: bash
+        run: tests/scripts/tests.sh

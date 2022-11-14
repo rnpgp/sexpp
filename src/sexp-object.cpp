@@ -16,14 +16,14 @@
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
  * TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
- * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDERS OR CONTRIBUTORS
- * BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDERS OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+ * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+ * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+ * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  * Original copyright
  *
@@ -38,122 +38,117 @@
 namespace sexp {
 
 /*
- * sexpString::printCanonical(os)
+ * sexp_string::print_canonical(os)
  * Prints out sexp string onto output stream os
  */
-sexpOutputStream* sexpString::printCanonical(sexpOutputStream *os) const
+sexp_output_stream *sexp_string::print_canonical(sexp_output_stream *os) const
 {
-  sexpSimpleString *ph, *ss;
-  ph = getPresentationHint();
-  if (presentationHint != NULL) {
-    os->varPutChar('[');
-    presentationHint->printCanonicalVerbatim(os);
-    os->varPutChar(']');
-  }
-  if (string == NULL) ErrorMessage(sexp_exception::error,
-                                   "NULL string can't be printed",
-                                   0,
-                                   0,
-                                   EOF);
-  string->printCanonicalVerbatim(os);
-  return os;
+    if (with_presentation_hint) {
+        os->var_put_char('[');
+        presentation_hint.print_canonical_verbatim(os);
+        os->var_put_char(']');
+    }
+    string.print_canonical_verbatim(os);
+    return os;
 }
 
 /*
- * sexpString::printAdvanced(os)
+ * sexp_string::print_advanced(os)
  * Prints out sexp string onto output stream os
  */
-sexpOutputStream* sexpString::printAdvanced(sexpOutputStream* os) const
+sexp_output_stream *sexp_string::print_advanced(sexp_output_stream *os) const
 {
-  sexpObject::printAdvanced(os);
-  sexpSimpleString *ph = getPresentationHint();
-  sexpSimpleString *ss = getString();
-  if (ph != NULL) {
-    os->putChar('[');
-    ph->printAdvanced(os);
-    os->putChar(']');
-  }
-  if (ss == NULL)
-    ErrorMessage(sexp_exception::error,"NULL string can't be printed",0, 0, EOF);
-  ss->printAdvanced(os);
-  return os;
+    sexp_object::print_advanced(os);
+    if (with_presentation_hint) {
+        os->put_char('[');
+        presentation_hint.print_advanced(os);
+        os->put_char(']');
+    }
+    string.print_advanced(os);
+    return os;
 }
 
 /*
- * sexpString::advancedLength(os)
+ * sexp_string::advanced_length(os)
  * Returns length of printed image of string
  */
-size_t sexpString::advancedLength(sexpOutputStream *os) const
+uint32_t sexp_string::advanced_length(sexp_output_stream *os) const
 {
-  size_t len = 0;
-  if (presentationHint != NULL) len += 2 + presentationHint->advancedLength(os);
-  if (string != NULL)           len += string->advancedLength(os);
-  return len;
+    uint32_t len = 0;
+    if (with_presentation_hint)
+        len += 2 + presentation_hint.advanced_length(os);
+    len += string.advanced_length(os);
+    return len;
 }
 
 /*
- * sexpList::printCanonical(os)
+ * sexp_list::print_canonical(os)
  * Prints out the list "list" onto output stream os
  */
-sexpOutputStream* sexpList::printCanonical(sexpOutputStream *os) const
+sexp_output_stream *sexp_list::print_canonical(sexp_output_stream *os) const
 {
-  sexpObject *object;
-  os->varPutChar('(');
-  std::for_each(begin(), end(), [os](const sexpObject* object) { object->printCanonical(os); });
-  os->varPutChar(')');
-  return os;
+    os->var_put_char('(');
+    std::for_each(begin(), end(), [os](const std::unique_ptr<sexp_object> &obj) {
+        obj->print_canonical(os);
+    });
+    os->var_put_char(')');
+    return os;
 }
 
 /*
- * sexpList::printAdvanced(os)
+ * sexp_list::print_advanced(os)
  * Prints out the list onto output stream os.
  * Uses print-length to determine length of the image.  If it all fits
  * on the current line, then it is printed that way.  Otherwise, it is
  * written out in "vertical" mode, with items of the list starting in
  * the same column on successive lines.
  */
-sexpOutputStream* sexpList::printAdvanced(sexpOutputStream *os) const
+sexp_output_stream *sexp_list::print_advanced(sexp_output_stream *os) const
 {
-  sexpObject::printAdvanced(os);
-  int vertical = false;
-  int firstelement = true;
-  os->putChar('(')->incIndent();
-  vertical = (advancedLength(os) > os->getMaxColumn() - os->getColumn());
+    sexp_object::print_advanced(os);
+    int vertical = false;
+    int firstelement = true;
+    os->put_char('(')->inc_indent();
+    vertical = (advanced_length(os) > os->get_max_column() - os->get_column());
 
-  std::for_each(begin(), end(), [&] (const sexpObject* obj) {
-    if (!firstelement) {
-      if (vertical) os->newLine(sexpOutputStream::advanced);
-	    else          os->putChar(' ');
-	  }
-	  obj->printAdvanced(os);
-    firstelement = false;
-  });
+    std::for_each(begin(), end(), [&](const std::unique_ptr<sexp_object> &obj) {
+        if (!firstelement) {
+            if (vertical)
+                os->new_line(sexp_output_stream::advanced);
+            else
+                os->put_char(' ');
+        }
+        obj->print_advanced(os);
+        firstelement = false;
+    });
 
-  if (os->getMaxColumn()>0 && os->getColumn()>os->getMaxColumn()-2) os->newLine(sexpOutputStream::advanced);
-  return os->decIndent()->putChar(')');
+    if (os->get_max_column() > 0 && os->get_column() > os->get_max_column() - 2)
+        os->new_line(sexp_output_stream::advanced);
+    return os->dec_indent()->put_char(')');
 }
 
 /*
- * sexpList::advancedLength(os)
+ * sexp_list::advanced_length(os)
  * Returns length of printed image of list given as iterator
  */
-size_t sexpList::advancedLength(sexpOutputStream *os) const
+uint32_t sexp_list::advanced_length(sexp_output_stream *os) const
 {
-  size_t len = 1;                       /* for left paren */
-  std::for_each(begin(), end(), [&] (const sexpObject* obj) {
-    len += obj->advancedLength(os);
-  });
-  return (len+1);  /* for final paren */
+    uint32_t len = 1; /* for left paren */
+    std::for_each(begin(), end(), [&](const std::unique_ptr<sexp_object> &obj) {
+        len += obj->advanced_length(os);
+    });
+    return (len + 1); /* for final paren */
 }
 
 /*
- * sexpObject::printAdvanced(os)
+ * sexp_object::print_advanced(os)
  * Prints out object on output stream os
  */
-sexpOutputStream* sexpObject::printAdvanced(sexpOutputStream* os) const
+sexp_output_stream *sexp_object::print_advanced(sexp_output_stream *os) const
 {
-  if (os->getMaxColumn()>0 && os->getColumn()>os->getMaxColumn()-4) os->newLine(sexpOutputStream::advanced);
-  return os;
+    if (os->get_max_column() > 0 && os->get_column() > os->get_max_column() - 4)
+        os->new_line(sexp_output_stream::advanced);
+    return os;
 }
 
-}
+} // namespace sexp

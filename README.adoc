@@ -1,4 +1,7 @@
-image:https://github.com/rnpgp/sexp/workflows/build-and-test/badge.svg["Ubuntu Build Status", link="https://github.com/rnpgp/sexp/actions?workflow=build-and-test"]
+image:https://github.com/rnpgp/sexp/workflows/build-and-test/badge.svg["Build status Ubuntu/MacOS/Windows", link="https://github.com/rnpgp/sexp/actions?workflow=build-and-test"]
+image:https://github.com/rnpgp/sexp/workflows/build-and-test-rh/badge.svg["Build status CentOS/Fedora", link="https://github.com/rnpgp/sexp/actions?workflow=build-and-test-rh"]
+image:https://github.com/rnpgp/sexp/workflows/build-and-test-deb/badge.svg["Build status Debian", link="https://github.com/rnpgp/sexp/actions?workflow=build-and-test-deb"]
+image:https://github.com/rnpgp/sexp/workflows/build-and-test-msys/badge.svg["Build status MSys", link="https://github.com/rnpgp/sexp/actions?workflow=build-and-test-msys"]
 
 # SEXP---(S-expressions) parser and generator library
 
@@ -21,8 +24,17 @@ The library is a deep rework to C++ of original SEXP library https://people.csai
 While that most applications will not need anything but the simple canonical and transport formats; however, the code here is considerably more complex because it also supports the advanced format, both for input and for output.) The "sexp-main" program also contains some documentation on running the program. (Or just type "sexp -h" to get the help print-out.) The code is available under the "MIT License" (open source).
 
 ## Building and installation
-- mkdir build
-- cd build
-- cmake .. -DWITH_TESTS=OFF
-- cmake --build .
-- cnake --install .
+```
+mkdir build
+cd build
+cmake ..
+cmake --build .
+ctest
+cmake --install .
+```
+
+## CMake script options
+
+- WITH_SEXP_TESTS:BOOL - fetch google test, build tests           - default:ON
+- WITH_SEXP_CLI:BOOL   - build sexp client application            - default:ON
+- WITH_SANITIZERS:BOOL - build with address and other sanitizers  - default:OFF - requires clang compiler

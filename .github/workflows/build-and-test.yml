@@ -38,26 +38,35 @@ concurrency:
 
 jobs:
   build-and-test:
-    runs-on: ubuntu-20.04
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ ubuntu-20.04, macos-11, windows-2019 ]
+        env: [ { } ]
+        # on macos gcc is an alias to clang by default, so there is no real value in macos clang run
+        include:
+          - { os: ubuntu-20.04, env: { CC: clang, CXX: clang++ } }
+    env: ${{ matrix.env }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
 
       - name: Configure
-        run: |
-          mkdir -p build
-          cd build
-          cmake .. -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/install
+        run:  cmake -Bbuild -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/install -DCMAKE_BUILD_TYPE=Release
+
+      - name: Adjust environment
+        if: runner.os == 'Windows'
+        shell: bash
+        run: echo "OSTYPE=windows" >> $GITHUB_ENV
 
       - name: Build
-        run: |
-          cd build
-          cmake --build .
+        run: cmake --build build --config Release
 
       - name: Run tests
-        run: |
-          cd build
-          ctest
+        run: ctest --test-dir build --output-on-failure
 
       - name: Checkout shell test framework
         uses: actions/checkout@v3
@@ -67,9 +76,8 @@ jobs:
           fetch-depth: 1
 
       - name: Install
-        run: |
-          cd build
-          cmake --install .
+        run: cmake --install build
 
       - name: Run additional tests
-        run:  ${{github.workspace}}/tests/scripts/tests.sh
+        shell: bash
+        run: tests/scripts/tests.sh

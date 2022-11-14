@@ -33,62 +33,50 @@ using namespace sexp;
 
 namespace {
 class CompatTests : public testing::Test {
-protected:
-  static void SetUpTestSuite() {
-  };
-
-  static void TearDownTestSuite() {}
 };
 
-TEST_F(CompatTests, Canonical) {
-  std::string keyfile(sexp_samples_folder + "/gpg/canonical.key");
-  std::ifstream ifs(keyfile, std::ifstream::binary);
-  EXPECT_FALSE(ifs.fail());
+TEST_F(CompatTests, Canonical)
+{
+    std::string   keyfile(sexp_samples_folder + "/gpg/canonical.key");
+    std::ifstream ifs(keyfile, std::ifstream::binary);
+    EXPECT_FALSE(ifs.fail());
 
-  if (!ifs.fail()) {
-    sexpInputStream is(&ifs);
-    sexpObject *obj = is.setByteSize(8)->getChar()->scanObject();
+    if (!ifs.fail()) {
+        sexp_input_stream                  is(&ifs);
+        const std::unique_ptr<sexp_object> obj =
+          is.set_byte_size(8)->get_char()->scan_object();
 
-    char fn[L_tmpnam];
-    std::tmpnam(fn);
-    std::ofstream ofs(fn, std::iostream::binary);
-    EXPECT_FALSE(ofs.fail());
+        std::ostringstream oss(std::ios_base::binary);
+        sexp_output_stream os(&oss);
+        os.print_canonical(obj);
 
-    if (!ofs.fail()) {
-      sexpOutputStream os(&ofs);
-      os.printCanonical(obj);
-      ofs.close();
-      EXPECT_TRUE(compare_binary_files(keyfile, fn));
+        std::istringstream iss(oss.str(), std::ios_base::binary);
+        EXPECT_TRUE(compare_binary_files(keyfile, iss));
     }
-    unlink(fn);
-  }
 }
 
-TEST_F(CompatTests, Advanced) {
-  std::string keyfile(sexp_samples_folder + "/gpg/advanced.key");
-  std::string expectedfile(sexp_samples_folder + "/gpg/advanced.expected");
-  std::ifstream ifs(keyfile, std::ifstream::binary);
-  EXPECT_FALSE(ifs.fail());
+TEST_F(CompatTests, Advanced)
+{
+    std::string   keyfile(sexp_samples_folder + "/gpg/advanced.key");
+    std::string   expectedfile(sexp_samples_folder + "/gpg/advanced.expected");
+    std::ifstream ifs(keyfile, std::ifstream::binary);
+    EXPECT_FALSE(ifs.fail());
 
-  if (!ifs.fail()) {
-    sexpInputStream is(&ifs);
-    sexpObject *obj = is.setByteSize(8)->getChar()->scanObject();
+    if (!ifs.fail()) {
+        sexp_input_stream                  is(&ifs);
+        const std::unique_ptr<sexp_object> obj =
+          is.set_byte_size(8)->get_char()->scan_object();
 
-    char fn[L_tmpnam];
-    std::tmpnam(fn);
-    std::ofstream ofs(fn, std::iostream::binary);
-    EXPECT_FALSE(ofs.fail());
+        std::ostringstream oss(std::ios_base::binary);
+        sexp_output_stream os(&oss);
 
-    if (!ofs.fail()) {
-      sexpOutputStream os(&ofs);
-      os.setMaxColumn(100);
-      os.printAdvanced(obj);
-      ofs << std::endl;
-      ofs.close();
-      EXPECT_TRUE(compare_binary_files(expectedfile, fn));
+        os.set_max_column(100);
+        os.print_advanced(obj);
+        oss << std::endl;
+
+        std::istringstream iss(oss.str(), std::ios_base::binary);
+        EXPECT_TRUE(compare_text_files(expectedfile, iss));
     }
-    unlink(fn);
-  }
 }
 
 } // namespace

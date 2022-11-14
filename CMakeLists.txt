@@ -28,15 +28,33 @@ cmake_minimum_required(VERSION 3.14)
 
 project (sexp VERSION 0.1.0 LANGUAGES C CXX)
 
-option(WITH_TESTS "Build tests" ON)
-option(WITH_APP "Build sexp console application" ON)
+option(WITH_SEXP_TESTS "Build tests" ON)
+option(WITH_SEXP_CLI "Build sexp console application" ON)
+option(ENABLE_SANITIZERS "Enable ASan and other sanitizers" OFF)
 
 include(GNUInstallDirs)
-include(CTest)
 
-set(CMAKE_BUILD_TYPE Debug)
-# Due to GTest C++ 11  deprecation
-set(CMAKE_CXX_STANDARD 14)
+if (ENABLE_SANITIZERS)
+    if (NOT CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+        message(FATAL_ERROR "Sanitizers have only been tested with the clang compiler.")
+    endif()
+    if(NOT CMAKE_BUILD_TYPE MATCHES "Debug")
+        message(STATUS "Forcing build type to Debug for sanitizers)")
+        set(CMAKE_BUILD_TYPE Debug CACHE STRING "Build type. Forced to Debug" FORCE)
+    endif()
+endif()
+
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Debug)
+endif(NOT CMAKE_BUILD_TYPE)
+
+message(STATUS "Building ${CMAKE_BUILD_TYPE} configuration")
+
+if (ENABLE_SANITIZERS)
+  add_compile_options(-fsanitize=leak,address,undefined -fno-omit-frame-pointer -fno-common -O1)
+  link_libraries(-fsanitize=leak,address,undefined)
+endif()
+
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/modules")
 
 add_library(sexp STATIC
@@ -44,14 +62,16 @@ add_library(sexp STATIC
     src/sexp-output.cpp
     src/sexp-object.cpp
     src/sexp-simple-string.cpp
+    src/sexp-char-defs.cpp
     src/sexp-error.cpp
     include/sexp/sexp.h
     include/sexp/sexp-error.h
 )
 
+target_compile_features(sexp PUBLIC cxx_std_11)
 target_include_directories (sexp PUBLIC include)
 
-if(${WITH_APP})
+if(${WITH_SEXP_CLI})
     add_executable (sexp-cli
                     src/sexp-main.cpp
                     include/sexp/sexp.h
@@ -59,10 +79,14 @@ if(${WITH_APP})
     )
     target_include_directories (sexp-cli PUBLIC include)
     target_link_libraries(sexp-cli PRIVATE sexp)
-endif(${WITH_APP})
+
+    target_compile_features(sexp-cli PUBLIC cxx_std_11)
+    target_include_directories (sexp-cli PUBLIC include)
+endif(${WITH_SEXP_CLI})
 
 
-if(${WITH_TESTS})
+if(${WITH_SEXP_TESTS})
+    include(CTest)
     include(FetchContent)
     include(GoogleTest)
 
@@ -75,16 +99,19 @@ if(${WITH_TESTS})
     )
 
     message(STATUS "Fetching googletest")
+    # Version 1.8.1 to make it compatible with gcc 4.8.5 which misses some C++11 features
     FetchContent_Declare(
         googletest
         GIT_REPOSITORY https://github.com/google/googletest.git
-        GIT_TAG        release-1.12.1
+        GIT_TAG        release-1.8.1
     )
     # maintain compiler/linker settings on Windows
     set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
     # do not install gtest
     set(INSTALL_GTEST OFF CACHE BOOL "" FORCE)
     # explicitely disable unneeded gmock build
+    set(BUILD_GMOCK OFF CACHE BOOL "" FORCE)
+
     FetchContent_MakeAvailable(googletest)
 
     add_executable(sexp-tests
@@ -99,7 +126,6 @@ if(${WITH_TESTS})
     target_link_libraries(sexp-tests PRIVATE
         sexp
         gtest_main
-        gmock_main
         gtest
     )
 
@@ -109,8 +135,10 @@ if(${WITH_TESTS})
         "${GTEST_INCLUDE_DIRS}"
     )
 
+    target_compile_features(sexp-tests PUBLIC cxx_std_11)
+
     gtest_discover_tests(sexp-tests)
-endif(${WITH_TESTS})
+endif(${WITH_SEXP_TESTS})
 
 set(CONFIGURED_PC "${CMAKE_CURRENT_BINARY_DIR}/sexp.pc")
 configure_file(
@@ -122,6 +150,6 @@ configure_file(
 install(TARGETS sexp DESTINATION "${CMAKE_INSTALL_LIBDIR}")
 install(DIRECTORY include/ DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
 install(FILES "${CONFIGURED_PC}" DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
-if(${WITH_APP})
+if(${WITH_SEXP_CLI})
     install(TARGETS sexp-cli DESTINATION "${CMAKE_INSTALL_BINDIR}")
-endif(${WITH_APP})
+endif(${WITH_SEXP_CLI})
