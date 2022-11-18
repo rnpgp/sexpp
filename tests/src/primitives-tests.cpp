@@ -36,12 +36,12 @@ class PrimitivesTests : public testing::Test {
   protected:
     static void do_test_advanced(const char *str_in, const char *str_out = nullptr)
     {
-        std::istringstream           iss(str_in);
-        sexp_input_stream            is(&iss);
-        std::unique_ptr<sexp_object> obj = is.set_byte_size(8)->get_char()->scan_object();
+        std::istringstream             iss(str_in);
+        sexp_input_stream_t            is(&iss);
+        std::unique_ptr<sexp_object_t> obj = is.set_byte_size(8)->get_char()->scan_object();
 
-        std::ostringstream oss(std::ios_base::binary);
-        sexp_output_stream os(&oss);
+        std::ostringstream   oss(std::ios_base::binary);
+        sexp_output_stream_t os(&oss);
         os.print_advanced(obj);
         const char *sample = str_out == nullptr ? str_in : str_out;
         EXPECT_EQ(oss.str(), sample);
@@ -49,12 +49,12 @@ class PrimitivesTests : public testing::Test {
 
     static void do_test_canonical(const char *str_in, const char *str_out = nullptr)
     {
-        std::istringstream           iss(str_in);
-        sexp_input_stream            is(&iss);
-        std::unique_ptr<sexp_object> obj = is.set_byte_size(8)->get_char()->scan_object();
+        std::istringstream             iss(str_in);
+        sexp_input_stream_t            is(&iss);
+        std::unique_ptr<sexp_object_t> obj = is.set_byte_size(8)->get_char()->scan_object();
 
-        std::ostringstream oss(std::ios_base::binary);
-        sexp_output_stream os(&oss);
+        std::ostringstream   oss(std::ios_base::binary);
+        sexp_output_stream_t os(&oss);
         os.print_canonical(obj);
         const char *sample = str_out == nullptr ? str_in : str_out;
         EXPECT_EQ(oss.str(), sample);
@@ -69,35 +69,35 @@ TEST_F(PrimitivesTests, EmptyList)
 
 TEST_F(PrimitivesTests, EmptyString)
 {
-    sexp::sexp_exception::set_verbosity(sexp::sexp_exception::error);
+    sexp::sexp_exception_t::set_verbosity(sexp::sexp_exception_t::error);
     do_test_canonical("(\"\")", "(0:)");
     do_test_advanced("(\"\")", "(\"\")");
 }
 
 TEST_F(PrimitivesTests, String)
 {
-    sexp::sexp_exception::set_verbosity(sexp::sexp_exception::error);
+    sexp::sexp_exception_t::set_verbosity(sexp::sexp_exception_t::error);
     do_test_canonical("(ab)", "(2:ab)");
     do_test_advanced("(ab)", "(ab)");
 }
 
 TEST_F(PrimitivesTests, QuotedStringWithOctal)
 {
-    sexp::sexp_exception::set_verbosity(sexp::sexp_exception::error);
+    sexp::sexp_exception_t::set_verbosity(sexp::sexp_exception_t::error);
     do_test_canonical("\"ab\\015\"", "3:ab\r");
     do_test_advanced("\"ab\\015\"", "#61620D#");
 }
 
 TEST_F(PrimitivesTests, QuotedStringWithEscape)
 {
-    sexp::sexp_exception::set_verbosity(sexp::sexp_exception::error);
+    sexp::sexp_exception_t::set_verbosity(sexp::sexp_exception_t::error);
     do_test_canonical("\"ab\\tc\"", "4:ab\tc");
     do_test_advanced("4:ab\tc", "#61620963#");
 }
 
 TEST_F(PrimitivesTests, HexString)
 {
-    sexp::sexp_exception::set_verbosity(sexp::sexp_exception::error);
+    sexp::sexp_exception_t::set_verbosity(sexp::sexp_exception_t::error);
     do_test_canonical("#616263#", "3:abc");
     do_test_advanced("#616263#", "abc");
 }
@@ -110,7 +110,7 @@ TEST_F(PrimitivesTests, ListList)
                      "(string-level-1 (string-level-2))");
 }
 
-TEST_F(PrimitivesTests, Base64OfOctet)
+TEST_F(PrimitivesTests, Base64Ofoctet_t)
 {
     do_test_canonical("|YWJj|", "3:abc");
     do_test_advanced("|YWJj|", "abc");

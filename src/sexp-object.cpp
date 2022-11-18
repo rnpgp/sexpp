@@ -38,10 +38,10 @@
 namespace sexp {
 
 /*
- * sexp_string::print_canonical(os)
+ * sexp_string_t::print_canonical(os)
  * Prints out sexp string onto output stream os
  */
-sexp_output_stream *sexp_string::print_canonical(sexp_output_stream *os) const
+sexp_output_stream_t *sexp_string_t::print_canonical(sexp_output_stream_t *os) const
 {
     if (with_presentation_hint) {
         os->var_put_char('[');
@@ -53,12 +53,12 @@ sexp_output_stream *sexp_string::print_canonical(sexp_output_stream *os) const
 }
 
 /*
- * sexp_string::print_advanced(os)
+ * sexp_string_t::print_advanced(os)
  * Prints out sexp string onto output stream os
  */
-sexp_output_stream *sexp_string::print_advanced(sexp_output_stream *os) const
+sexp_output_stream_t *sexp_string_t::print_advanced(sexp_output_stream_t *os) const
 {
-    sexp_object::print_advanced(os);
+    sexp_object_t::print_advanced(os);
     if (with_presentation_hint) {
         os->put_char('[');
         presentation_hint.print_advanced(os);
@@ -69,10 +69,10 @@ sexp_output_stream *sexp_string::print_advanced(sexp_output_stream *os) const
 }
 
 /*
- * sexp_string::advanced_length(os)
+ * sexp_string_t::advanced_length(os)
  * Returns length of printed image of string
  */
-uint32_t sexp_string::advanced_length(sexp_output_stream *os) const
+uint32_t sexp_string_t::advanced_length(sexp_output_stream_t *os) const
 {
     uint32_t len = 0;
     if (with_presentation_hint)
@@ -82,13 +82,13 @@ uint32_t sexp_string::advanced_length(sexp_output_stream *os) const
 }
 
 /*
- * sexp_list::print_canonical(os)
+ * sexp_list_t::print_canonical(os)
  * Prints out the list "list" onto output stream os
  */
-sexp_output_stream *sexp_list::print_canonical(sexp_output_stream *os) const
+sexp_output_stream_t *sexp_list_t::print_canonical(sexp_output_stream_t *os) const
 {
     os->var_put_char('(');
-    std::for_each(begin(), end(), [os](const std::unique_ptr<sexp_object> &obj) {
+    std::for_each(begin(), end(), [os](const std::unique_ptr<sexp_object_t> &obj) {
         obj->print_canonical(os);
     });
     os->var_put_char(')');
@@ -96,25 +96,25 @@ sexp_output_stream *sexp_list::print_canonical(sexp_output_stream *os) const
 }
 
 /*
- * sexp_list::print_advanced(os)
+ * sexp_list_t::print_advanced(os)
  * Prints out the list onto output stream os.
  * Uses print-length to determine length of the image.  If it all fits
  * on the current line, then it is printed that way.  Otherwise, it is
  * written out in "vertical" mode, with items of the list starting in
  * the same column on successive lines.
  */
-sexp_output_stream *sexp_list::print_advanced(sexp_output_stream *os) const
+sexp_output_stream_t *sexp_list_t::print_advanced(sexp_output_stream_t *os) const
 {
-    sexp_object::print_advanced(os);
+    sexp_object_t::print_advanced(os);
     int vertical = false;
     int firstelement = true;
     os->put_char('(')->inc_indent();
     vertical = (advanced_length(os) > os->get_max_column() - os->get_column());
 
-    std::for_each(begin(), end(), [&](const std::unique_ptr<sexp_object> &obj) {
+    std::for_each(begin(), end(), [&](const std::unique_ptr<sexp_object_t> &obj) {
         if (!firstelement) {
             if (vertical)
-                os->new_line(sexp_output_stream::advanced);
+                os->new_line(sexp_output_stream_t::advanced);
             else
                 os->put_char(' ');
         }
@@ -123,31 +123,31 @@ sexp_output_stream *sexp_list::print_advanced(sexp_output_stream *os) const
     });
 
     if (os->get_max_column() > 0 && os->get_column() > os->get_max_column() - 2)
-        os->new_line(sexp_output_stream::advanced);
+        os->new_line(sexp_output_stream_t::advanced);
     return os->dec_indent()->put_char(')');
 }
 
 /*
- * sexp_list::advanced_length(os)
+ * sexp_list_t::advanced_length(os)
  * Returns length of printed image of list given as iterator
  */
-uint32_t sexp_list::advanced_length(sexp_output_stream *os) const
+uint32_t sexp_list_t::advanced_length(sexp_output_stream_t *os) const
 {
     uint32_t len = 1; /* for left paren */
-    std::for_each(begin(), end(), [&](const std::unique_ptr<sexp_object> &obj) {
+    std::for_each(begin(), end(), [&](const std::unique_ptr<sexp_object_t> &obj) {
         len += obj->advanced_length(os);
     });
     return (len + 1); /* for final paren */
 }
 
 /*
- * sexp_object::print_advanced(os)
+ * sexp_object_t::print_advanced(os)
  * Prints out object on output stream os
  */
-sexp_output_stream *sexp_object::print_advanced(sexp_output_stream *os) const
+sexp_output_stream_t *sexp_object_t::print_advanced(sexp_output_stream_t *os) const
 {
     if (os->get_max_column() > 0 && os->get_column() > os->get_max_column() - 4)
-        os->new_line(sexp_output_stream::advanced);
+        os->new_line(sexp_output_stream_t::advanced);
     return os;
 }
 

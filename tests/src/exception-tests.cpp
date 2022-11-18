@@ -40,10 +40,10 @@ class ExceptionTests : public testing::Test {
         EXPECT_FALSE(ifs.fail());
         if (!ifs.fail()) {
             try {
-                sexp_input_stream is(&ifs);
+                sexp_input_stream_t is(&ifs);
                 is.set_byte_size(8)->get_char()->scan_object();
-                FAIL() << "sexp::sexp_exception expected but has not been thrown";
-            } catch (sexp::sexp_exception &e) {
+                FAIL() << "sexp::sexp_exception_t expected but has not been thrown";
+            } catch (sexp::sexp_exception_t &e) {
                 EXPECT_STREQ(e.what(), msg);
             }
         }
@@ -82,7 +82,7 @@ TEST_F(ExceptionTests, IllegalCharacterBase64)
 
 TEST_F(ExceptionTests, UnusedBits)
 {
-    sexp::sexp_exception::set_verbosity(sexp::sexp_exception::warning);
+    sexp::sexp_exception_t::set_verbosity(sexp::sexp_exception_t::warning);
     do_scan_ex("/malformed/sexp-malformed-6",
                "SEXP WARNING: 6-bit region ended with 4 unused bits left-over at position 13");
 }
