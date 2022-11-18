@@ -33,7 +33,7 @@
 
 namespace sexp {
 
-class sexp_exception : public std::exception {
+class sexp_exception_t : public std::exception {
   public:
     enum severity { error = 0, warning = 1 };
 
@@ -46,7 +46,7 @@ class sexp_exception : public std::exception {
     std::string msg_;
 
   public:
-    sexp_exception(std::string message, severity level, int position)
+    sexp_exception_t(std::string message, severity level, int position)
         : position_{position}, level_{level}, msg_{format(message, level, position)} {};
     static std::string format(std::string message, severity level, int position);
     static bool shall_throw(severity level) { return level == error || verbosity_ != error; };
@@ -60,6 +60,6 @@ class sexp_exception : public std::exception {
 };
 
 void sexp_error(
-  sexp_exception::severity level, const char *msg, uint32_t c1, uint32_t c2, int pos);
+  sexp_exception_t::severity level, const char *msg, uint32_t c1, uint32_t c2, int pos);
 
 } // namespace sexp

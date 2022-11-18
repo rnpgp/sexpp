@@ -73,16 +73,16 @@ int main(int argc, char **argv)
     bool  swa = true, swb = true, swc = true, swp = true, sws = false, swx = true, swl = false;
     int   i;
     int   ret = -1;
-    sexp_exception::set_interactive(true);
-    std::ifstream *     ifs = nullptr;
-    sexp_input_stream * is = nullptr;
-    std::ofstream *     ofs = nullptr;
-    sexp_output_stream *os = nullptr;
+    sexp_exception_t::set_interactive(true);
+    std::ifstream *       ifs = nullptr;
+    sexp_input_stream_t * is = nullptr;
+    std::ofstream *       ofs = nullptr;
+    sexp_output_stream_t *os = nullptr;
     try {
-        std::unique_ptr<sexp_object> object;
+        std::unique_ptr<sexp_object_t> object;
 
-        is = new sexp_input_stream(&std::cin);
-        os = new sexp_output_stream(&std::cout);
+        is = new sexp_input_stream_t(&std::cin);
+        os = new sexp_output_stream_t(&std::cout);
 
         /* process switches */
         if (argc > 1)
@@ -90,8 +90,8 @@ int main(int argc, char **argv)
         for (i = 1; i < argc; i++) {
             c = argv[i];
             if (*c != '-')
-                throw sexp_exception(
-                  std::string("Unrecognized switch ") + c, sexp_exception::error, EOF);
+                throw sexp_exception_t(
+                  std::string("Unrecognized switch ") + c, sexp_exception_t::error, EOF);
             c++;
             if (*c == 'a')
                 swa = true; /* advanced output */
@@ -108,7 +108,7 @@ int main(int argc, char **argv)
                     i++;
                 ifs = new std::ifstream(argv[i], std::ifstream::binary);
                 if (ifs->fail())
-                    sexp_error(sexp_exception::error, "Can't open input file.", 0, 0, EOF);
+                    sexp_error(sexp_exception_t::error, "Can't open input file.", 0, 0, EOF);
                 is->set_input(ifs);
             } else if (*c == 'l')
                 swl = true;       /* suppress linefeeds after output */
@@ -117,7 +117,7 @@ int main(int argc, char **argv)
                     i++;
                 ofs = new std::ofstream(argv[i], std::ifstream::binary);
                 if (ofs->fail())
-                    sexp_error(sexp_exception::error, "Can't open output file.", 0, 0, EOF);
+                    sexp_error(sexp_exception_t::error, "Can't open output file.", 0, 0, EOF);
                 os->set_output(ofs);
             } else if (*c == 'p')
                 swp = true; /* prompt for input */
@@ -130,8 +130,8 @@ int main(int argc, char **argv)
             } else if (*c == 'x')
                 swx = true; /* execute repeatedly */
             else
-                throw sexp_exception(
-                  std::string("Unrecognized switch ") + argv[i], sexp_exception::error, EOF);
+                throw sexp_exception_t(
+                  std::string("Unrecognized switch ") + argv[i], sexp_exception_t::error, EOF);
         }
 
         if (swa == false && swb == false && swc == false)
@@ -165,7 +165,7 @@ int main(int argc, char **argv)
                 if (swp) {
                     std::cout << "Canonical output:" << std::endl;
                     std::cout.flush();
-                    os->new_line(sexp_output_stream::advanced);
+                    os->new_line(sexp_output_stream_t::advanced);
                 }
                 object->print_canonical(os);
                 if (!swl) {
@@ -178,7 +178,7 @@ int main(int argc, char **argv)
                 if (swp) {
                     std::cout << "Base64 (of canonical) output:" << std::endl;
                     std::cout.flush();
-                    os->new_line(sexp_output_stream::advanced);
+                    os->new_line(sexp_output_stream_t::advanced);
                 }
                 os->print_base64(object);
                 if (!swl) {
@@ -191,7 +191,7 @@ int main(int argc, char **argv)
                 if (swp) {
                     std::cout << "Advanced transport output:" << std::endl;
                     std::cout.flush();
-                    os->new_line(sexp_output_stream::advanced);
+                    os->new_line(sexp_output_stream_t::advanced);
                 }
                 os->print_advanced(object);
                 if (!swl) {
@@ -210,7 +210,7 @@ int main(int argc, char **argv)
             }
         }
         ret = 0;
-    } catch (sexp_exception &e) {
+    } catch (sexp_exception_t &e) {
         std::cout << e.what() << std::endl;
     } catch (...) {
         std::cout << "UNEXPECTED ERROR" << std::endl;

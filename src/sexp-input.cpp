@@ -39,7 +39,7 @@ namespace sexp {
 
 /*
  * newSexpInputStream()
- * Creates and initializes a new sexp_input_stream object.
+ * Creates and initializes a new sexp_input_stream_t object.
  * (Prefixes stream with one blank, and initializes stream
  *  so that it reads from standard input.)
  */
@@ -50,15 +50,15 @@ uint32_t      bits;      /* Bits waiting to be used */
 uint32_t      n_bits;    /* number of such bits waiting to be used */
 int           count;     /* number of 8-bit characters output by get_char */
 
-sexp_input_stream::sexp_input_stream(std::istream *i)
+sexp_input_stream_t::sexp_input_stream_t(std::istream *i)
     : input_file{i}, byte_size{8}, next_char{' '}, bits{0}, n_bits{0}, count{-1}
 {
 }
 
 /*
- * sexp_input_stream::set_byte_size(newByteSize)
+ * sexp_input_stream_t::set_byte_size(newByteSize)
  */
-sexp_input_stream *sexp_input_stream::set_byte_size(uint32_t newByteSize)
+sexp_input_stream_t *sexp_input_stream_t::set_byte_size(uint32_t newByteSize)
 {
     byte_size = newByteSize;
     n_bits = 0;
@@ -67,7 +67,7 @@ sexp_input_stream *sexp_input_stream::set_byte_size(uint32_t newByteSize)
 }
 
 /*
- * sexp_input_stream::get_char()
+ * sexp_input_stream_t::get_char()
  * This is one possible character input routine for an input stream.
  * (This version uses the standard input stream.)
  * get_char places next 8-bit character into is->next_char.
@@ -75,7 +75,7 @@ sexp_input_stream *sexp_input_stream::set_byte_size(uint32_t newByteSize)
  * The value EOF is obtained when no more input is available.
  * This code handles 4-bit/6-bit/8-bit channels.
  */
-sexp_input_stream *sexp_input_stream::get_char(void)
+sexp_input_stream_t *sexp_input_stream_t::get_char(void)
 {
     int c;
     if (next_char == EOF) {
@@ -91,7 +91,7 @@ sexp_input_stream *sexp_input_stream::get_char(void)
             // end of region reached; return terminating character, after checking for
             // unused bits
             if (n_bits > 0 && (((1 << n_bits) - 1) & bits) != 0) {
-                sexp_error(sexp_exception::warning,
+                sexp_error(sexp_exception_t::warning,
                            "%d-bit region ended with %d unused bits left-over",
                            byte_size,
                            n_bits,
@@ -113,7 +113,7 @@ sexp_input_stream *sexp_input_stream::get_char(void)
             else if (byte_size == 4 && is_hex_digit(c))
                 bits = bits | hexvalue[c];
             else {
-                sexp_error(sexp_exception::error,
+                sexp_error(sexp_exception_t::error,
                            "character '%c' found in %u-bit coding region",
                            next_char,
                            byte_size,
@@ -130,10 +130,10 @@ sexp_input_stream *sexp_input_stream::get_char(void)
 }
 
 /*
- * sexp_input_stream::skip_white_space
- * Skip over any white space on the given sexp_input_stream.
+ * sexp_input_stream_t::skip_white_space
+ * Skip over any white space on the given sexp_input_stream_t.
  */
-sexp_input_stream *sexp_input_stream::skip_white_space(void)
+sexp_input_stream_t *sexp_input_stream_t::skip_white_space(void)
 {
     while (is_white_space(next_char))
         get_char();
@@ -141,14 +141,14 @@ sexp_input_stream *sexp_input_stream::skip_white_space(void)
 }
 
 /*
- * sexp_input_stream::skip_char(c)
+ * sexp_input_stream_t::skip_char(c)
  * Skip the following input character on input stream is, if it is
  * equal to the character c.  If it is not equal, then an error occurs.
  */
-sexp_input_stream *sexp_input_stream::skip_char(int c)
+sexp_input_stream_t *sexp_input_stream_t::skip_char(int c)
 {
     if (next_char != c)
-        sexp_error(sexp_exception::error,
+        sexp_error(sexp_exception_t::error,
                    "character %x (hex) found where %c (char) expected",
                    next_char,
                    c,
@@ -157,10 +157,10 @@ sexp_input_stream *sexp_input_stream::skip_char(int c)
 }
 
 /*
- * sexp_input_stream::scan_token(ss)
+ * sexp_input_stream_t::scan_token(ss)
  * scan one or more characters into simple string ss as a token.
  */
-void sexp_input_stream::scan_token(sexp_simple_string &ss)
+void sexp_input_stream_t::scan_token(sexp_simple_string_t &ss)
 {
     skip_white_space();
     while (is_token_char(next_char)) {
@@ -171,14 +171,14 @@ void sexp_input_stream::scan_token(sexp_simple_string &ss)
 }
 
 /*
- * sexp_input_stream::scan_to_eof(void)
+ * sexp_input_stream_t::scan_to_eof(void)
  * scan one or more characters (until EOF reached)
  * return an object that is just that string
  */
-std::unique_ptr<sexp_object> sexp_input_stream::scan_to_eof(void)
+std::unique_ptr<sexp_object_t> sexp_input_stream_t::scan_to_eof(void)
 {
-    sexp_simple_string           ss;
-    std::unique_ptr<sexp_string> s(new sexp_string());
+    sexp_simple_string_t           ss;
+    std::unique_ptr<sexp_string_t> s(new sexp_string_t());
     skip_white_space();
     while (next_char != EOF) {
         ss.append(next_char);
@@ -192,7 +192,7 @@ std::unique_ptr<sexp_object> sexp_input_stream::scan_to_eof(void)
  * scan_decimal_string(is)
  * returns long integer that is value of decimal number
  */
-uint32_t sexp_input_stream::scan_decimal_string(void)
+uint32_t sexp_input_stream_t::scan_decimal_string(void)
 {
     uint32_t value = 0;
     uint32_t i = 0;
@@ -200,22 +200,25 @@ uint32_t sexp_input_stream::scan_decimal_string(void)
         value = value * 10 + decvalue[next_char];
         get_char();
         if (i++ > 8)
-            sexp_error(
-              sexp_exception::error, "Decimal number %d... too long.", (int) value, 0, count);
+            sexp_error(sexp_exception_t::error,
+                       "Decimal number %d... too long.",
+                       (int) value,
+                       0,
+                       count);
     }
     return value;
 }
 
 /*
- * sexp_input_stream::scan_verbatim_string(is,ss,length)
+ * sexp_input_stream_t::scan_verbatim_string(is,ss,length)
  * Reads verbatim string of given length into simple string ss.
  */
-void sexp_input_stream::scan_verbatim_string(sexp_simple_string &ss, uint32_t length)
+void sexp_input_stream_t::scan_verbatim_string(sexp_simple_string_t &ss, uint32_t length)
 {
     skip_white_space()->skip_char(':');
     if (length == std::numeric_limits<uint32_t>::max()) /* no length was specified */
         sexp_error(
-          sexp_exception::error, "Verbatim string had no declared length.", 0, 0, count);
+          sexp_exception_t::error, "Verbatim string had no declared length.", 0, 0, count);
     for (uint32_t i = 0; i < length; i++) {
         ss.append(next_char);
         get_char();
@@ -224,12 +227,12 @@ void sexp_input_stream::scan_verbatim_string(sexp_simple_string &ss, uint32_t le
 }
 
 /*
- * sexp_input_stream::scan_quoted_string(ss,length)
+ * sexp_input_stream_t::scan_quoted_string(ss,length)
  * Reads quoted string of given length into simple string ss.
  * Handles ordinary C escapes.
  * If of indefinite length, length is std::numeric_limits<uint32_t>::max().
  */
-void sexp_input_stream::scan_quoted_string(sexp_simple_string &ss, uint32_t length)
+void sexp_input_stream_t::scan_quoted_string(sexp_simple_string_t &ss, uint32_t length)
 {
     int c;
     skip_char('"');
@@ -239,7 +242,7 @@ void sexp_input_stream::scan_quoted_string(sexp_simple_string &ss, uint32_t leng
                 skip_char('\"');
                 return;
             } else
-                sexp_error(sexp_exception::error,
+                sexp_error(sexp_exception_t::error,
                            "Quoted string ended too early. Declared length was %d",
                            (int) length,
                            0,
@@ -277,15 +280,18 @@ void sexp_input_stream::scan_quoted_string(sexp_simple_string &ss, uint32_t leng
                             c = next_char;
                         }
                     } else
-                        sexp_error(sexp_exception::error,
+                        sexp_error(sexp_exception_t::error,
                                    "Octal character \\%o... too short",
                                    val,
                                    0,
                                    count);
                 }
                 if (val > 255)
-                    sexp_error(
-                      sexp_exception::error, "Octal character \\%o... too big", val, 0, count);
+                    sexp_error(sexp_exception_t::error,
+                               "Octal character \\%o... too big",
+                               val,
+                               0,
+                               count);
                 ss.append(val);
             } else if (c == 'x') /* hexadecimal number */
             {
@@ -301,7 +307,7 @@ void sexp_input_stream::scan_quoted_string(sexp_simple_string &ss, uint32_t leng
                             c = next_char;
                         }
                     } else
-                        sexp_error(sexp_exception::error,
+                        sexp_error(sexp_exception_t::error,
                                    "Hex character \\x%x... too short",
                                    val,
                                    0,
@@ -321,10 +327,10 @@ void sexp_input_stream::scan_quoted_string(sexp_simple_string &ss, uint32_t leng
                     continue;
             } else
                 sexp_error(
-                  sexp_exception::warning, "Escape character \\%c... unknown.", c, 0, count);
+                  sexp_exception_t::warning, "Escape character \\%c... unknown.", c, 0, count);
         } /* end of handling escape sequence */
         else if (next_char == EOF) {
-            sexp_error(sexp_exception::error, "unxpected end of file", 0, 0, count);
+            sexp_error(sexp_exception_t::error, "unxpected end of file", 0, 0, count);
         } else {
             ss.append(next_char);
         }
@@ -339,7 +345,7 @@ void sexp_input_stream::scan_quoted_string(sexp_simple_string &ss, uint32_t leng
  * String is of given length result, or length = std::numeric_limits<uint32_t>::max()
  * if indefinite length.
  */
-void sexp_input_stream::scan_hexadecimal_string(sexp_simple_string &ss, uint32_t length)
+void sexp_input_stream_t::scan_hexadecimal_string(sexp_simple_string_t &ss, uint32_t length)
 {
     set_byte_size(4)->skip_char('#');
     while (next_char != EOF && (next_char != '#' || get_byte_size() == 4)) {
@@ -348,7 +354,7 @@ void sexp_input_stream::scan_hexadecimal_string(sexp_simple_string &ss, uint32_t
     }
     skip_char('#');
     if (ss.length() != length && length != std::numeric_limits<uint32_t>::max())
-        sexp_error(sexp_exception::warning,
+        sexp_error(sexp_exception_t::warning,
                    "Hex string has length %d different than declared length %d",
                    ss.length(),
                    length,
@@ -356,12 +362,12 @@ void sexp_input_stream::scan_hexadecimal_string(sexp_simple_string &ss, uint32_t
 }
 
 /*
- * sexp_input_stream::scan_base64_string(ss,length)
+ * sexp_input_stream_t::scan_base64_string(ss,length)
  * Reads base64 string into simple string ss.
  * String is of given length result, or length = std::numeric_limits<uint32_t>::max()
  * if indefinite length.
  */
-void sexp_input_stream::scan_base64_string(sexp_simple_string &ss, uint32_t length)
+void sexp_input_stream_t::scan_base64_string(sexp_simple_string_t &ss, uint32_t length)
 {
     set_byte_size(6)->skip_char('|');
     while (next_char != EOF && (next_char != '|' || get_byte_size() == 6)) {
@@ -370,7 +376,7 @@ void sexp_input_stream::scan_base64_string(sexp_simple_string &ss, uint32_t leng
     }
     skip_char('|');
     if (ss.length() != length && length != std::numeric_limits<uint32_t>::max())
-        sexp_error(sexp_exception::warning,
+        sexp_error(sexp_exception_t::warning,
                    "Base64 string has length %d different than declared length %d",
                    ss.length(),
                    length,
@@ -378,15 +384,15 @@ void sexp_input_stream::scan_base64_string(sexp_simple_string &ss, uint32_t leng
 }
 
 /*
- * sexp_input_stream::scan_simple_string(void)
+ * sexp_input_stream_t::scan_simple_string(void)
  * Reads and returns a simple string from the input stream.
  * Determines type of simple string from the initial character, and
  * dispatches to appropriate routine based on that.
  */
-sexp_simple_string sexp_input_stream::scan_simple_string(void)
+sexp_simple_string_t sexp_input_stream_t::scan_simple_string(void)
 {
-    int                length;
-    sexp_simple_string ss;
+    int                  length;
+    sexp_simple_string_t ss;
     skip_white_space();
     /* Note that it is important in the following code to test for token-ness
      * before checking the other cases, so that a token may begin with ":",
@@ -412,20 +418,20 @@ sexp_simple_string sexp_input_stream::scan_simple_string(void)
         const char *const msg = (next_char == EOF) ? "unxpected end of file" :
                                 isprint(next_char) ? "illegal character '%c' (%d decimal)" :
                                                      "illegal character %d (decimal)";
-        sexp_error(sexp_exception::error, msg, next_char, next_char, count);
+        sexp_error(sexp_exception_t::error, msg, next_char, next_char, count);
     }
     if (ss.length() == 0)
-        sexp_error(sexp_exception::warning, "Simple string has zero length", 0, 0, count);
+        sexp_error(sexp_exception_t::warning, "Simple string has zero length", 0, 0, count);
     return ss;
 }
 
 /*
- * sexp_input_stream::scan_string(void)
+ * sexp_input_stream_t::scan_string(void)
  * Reads and returns a string [presentationhint]string from input stream.
  */
-std::unique_ptr<sexp_object> sexp_input_stream::scan_string(void)
+std::unique_ptr<sexp_object_t> sexp_input_stream_t::scan_string(void)
 {
-    std::unique_ptr<sexp_string> s(new sexp_string());
+    std::unique_ptr<sexp_string_t> s(new sexp_string_t());
     if (next_char == '[') { /* scan presentation hint */
         skip_char('[');
         s->set_presentation_hint(scan_simple_string());
@@ -436,12 +442,12 @@ std::unique_ptr<sexp_object> sexp_input_stream::scan_string(void)
 }
 
 /*
- * sexp_input_stream::scan_list(void)
- * Read and return a sexp_list from the input stream.
+ * sexp_input_stream_t::scan_list(void)
+ * Read and return a sexp_list_t from the input stream.
  */
-std::unique_ptr<sexp_object> sexp_input_stream::scan_list(void)
+std::unique_ptr<sexp_object_t> sexp_input_stream_t::scan_list(void)
 {
-    std::unique_ptr<sexp_list> list(new sexp_list());
+    std::unique_ptr<sexp_list_t> list(new sexp_list_t());
     skip_char('(')->skip_white_space();
     if (next_char == ')') {
         ; /* OK */
@@ -463,12 +469,12 @@ std::unique_ptr<sexp_object> sexp_input_stream::scan_list(void)
 }
 
 /*
- * sexp_input_stream::scan_object(void)
- * Reads and returns a sexp_object from the given input stream.
+ * sexp_input_stream_t::scan_object(void)
+ * Reads and returns a sexp_object_t from the given input stream.
  */
-std::unique_ptr<sexp_object> sexp_input_stream::scan_object(void)
+std::unique_ptr<sexp_object_t> sexp_input_stream_t::scan_object(void)
 {
-    std::unique_ptr<sexp_object> object;
+    std::unique_ptr<sexp_object_t> object;
     skip_white_space();
     if (next_char == '{') {
         set_byte_size(6)->skip_char('{');

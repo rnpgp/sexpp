@@ -32,10 +32,10 @@
 
 namespace sexp {
 
-sexp_exception::severity sexp_exception::verbosity_ = sexp_exception::error;
-bool                     sexp_exception::interactive_ = false;
+sexp_exception_t::severity sexp_exception_t::verbosity_ = sexp_exception_t::error;
+bool                       sexp_exception_t::interactive_ = false;
 
-std::string sexp_exception::format(std::string message, severity level, int position)
+std::string sexp_exception_t::format(std::string message, severity level, int position)
 {
     std::string r =
       std::string("SEXP ") + (level == error ? "ERROR: " : "WARNING: ") + message;
@@ -45,16 +45,16 @@ std::string sexp_exception::format(std::string message, severity level, int posi
 };
 
 void sexp_error(
-  sexp_exception::severity level, const char *msg, uint32_t c1, uint32_t c2, int pos)
+  sexp_exception_t::severity level, const char *msg, uint32_t c1, uint32_t c2, int pos)
 {
-    char                     tmp[256];
-    sexp_exception::severity l = (sexp_exception::severity) level;
+    char                       tmp[256];
+    sexp_exception_t::severity l = (sexp_exception_t::severity) level;
     snprintf(tmp, sizeof(tmp) / sizeof(tmp[0]), msg, c1, c2);
-    if (sexp_exception::shall_throw(l))
-        throw sexp_exception(tmp, l, pos);
-    if (sexp_exception::interactive()) {
+    if (sexp_exception_t::shall_throw(l))
+        throw sexp_exception_t(tmp, l, pos);
+    if (sexp_exception_t::interactive()) {
         std::cout.flush() << std::endl
-                          << "*** " << sexp_exception::format(tmp, l, pos) << " ***"
+                          << "*** " << sexp_exception_t::format(tmp, l, pos) << " ***"
                           << std::endl;
     }
 }

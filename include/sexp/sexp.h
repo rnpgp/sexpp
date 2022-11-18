@@ -50,10 +50,10 @@ namespace sexp {
 #endif
 
 /*
- * SEXP octet definitions
+ * SEXP octet_t definitions
  */
 
-class sexp_char_defs {
+class sexp_char_defs_t {
   protected:
     static unsigned char upper[256];       /* upper[c] is upper case version of c */
     static unsigned char decvalue[256];    /* decvalue[c] is value of c as dec digit */
@@ -71,7 +71,7 @@ class sexp_char_defs {
     static bool is_token_char(int c);
     static bool is_alpha(int c);
 
-    sexp_char_defs(void)
+    sexp_char_defs_t(void)
     {
         if (!initialized) {
             initialize_character_tables();
@@ -84,15 +84,15 @@ class sexp_char_defs {
  * SEXP simple string
  */
 
-class sexp_output_stream;
+class sexp_output_stream_t;
 
-typedef uint8_t octet;
+typedef uint8_t octet_t;
 
-class sexp_simple_string : public std::basic_string<octet>, private sexp_char_defs {
+class sexp_simple_string_t : public std::basic_string<octet_t>, private sexp_char_defs_t {
   public:
-    sexp_simple_string &append(int c)
+    sexp_simple_string_t &append(int c)
     {
-        (*this) += (octet)(c & 0xFF);
+        (*this) += (octet_t)(c & 0xFF);
         return *this;
     }
     // Returns length for printing simple string as a token
@@ -103,79 +103,82 @@ class sexp_simple_string : public std::basic_string<octet>, private sexp_char_de
     uint32_t advanced_length_quoted(void) const { return (1 + length() + 1); }
     // Returns length for printing simple string ss in hexadecimal mode
     uint32_t advanced_length_hexadecimal(void) const { return (1 + 2 * length() + 1); }
-    uint32_t advanced_length(sexp_output_stream *os) const;
+    uint32_t advanced_length(sexp_output_stream_t *os) const;
 
-    sexp_output_stream *print_canonical_verbatim(sexp_output_stream *os) const;
-    sexp_output_stream *print_advanced(sexp_output_stream *os) const;
-    sexp_output_stream *print_token(sexp_output_stream *os) const;
-    sexp_output_stream *print_verbatim(sexp_output_stream *os) const;
-    sexp_output_stream *print_quoted(sexp_output_stream *os) const;
-    sexp_output_stream *print_hexadecimal(sexp_output_stream *os) const;
-    sexp_output_stream *print_base64(sexp_output_stream *os) const;
+    sexp_output_stream_t *print_canonical_verbatim(sexp_output_stream_t *os) const;
+    sexp_output_stream_t *print_advanced(sexp_output_stream_t *os) const;
+    sexp_output_stream_t *print_token(sexp_output_stream_t *os) const;
+    sexp_output_stream_t *print_verbatim(sexp_output_stream_t *os) const;
+    sexp_output_stream_t *print_quoted(sexp_output_stream_t *os) const;
+    sexp_output_stream_t *print_hexadecimal(sexp_output_stream_t *os) const;
+    sexp_output_stream_t *print_base64(sexp_output_stream_t *os) const;
 
     bool can_print_as_quoted_string(void) const;
-    bool can_print_as_token(const sexp_output_stream *os) const;
+    bool can_print_as_token(const sexp_output_stream_t *os) const;
 };
 
 /*
  * SEXP object
  */
 
-class sexp_object {
+class sexp_object_t {
   public:
-    virtual ~sexp_object(){};
+    virtual ~sexp_object_t(){};
 
-    virtual sexp_output_stream *print_canonical(sexp_output_stream *os) const = 0;
-    virtual sexp_output_stream *print_advanced(sexp_output_stream *os) const;
-    virtual uint32_t            advanced_length(sexp_output_stream *os) const = 0;
+    virtual sexp_output_stream_t *print_canonical(sexp_output_stream_t *os) const = 0;
+    virtual sexp_output_stream_t *print_advanced(sexp_output_stream_t *os) const;
+    virtual uint32_t              advanced_length(sexp_output_stream_t *os) const = 0;
 };
 
 /*
  * SEXP string
  */
 
-class sexp_string : public sexp_object {
+class sexp_string_t : public sexp_object_t {
   protected:
-    bool               with_presentation_hint;
-    sexp_simple_string presentation_hint;
-    sexp_simple_string string;
+    bool                 with_presentation_hint;
+    sexp_simple_string_t presentation_hint;
+    sexp_simple_string_t string;
 
   public:
-    sexp_string(void) : with_presentation_hint(false) {}
+    sexp_string_t(void) : with_presentation_hint(false) {}
 
     const bool has_presentation_hint(void) const { return with_presentation_hint; }
-    const sexp_simple_string &get_string(void) const { return string; }
-    const sexp_simple_string &set_string(const sexp_simple_string &ss) { return string = ss; }
-    const sexp_simple_string &get_presentation_hint(void) const { return presentation_hint; }
-    const sexp_simple_string &set_presentation_hint(const sexp_simple_string &ph)
+    const sexp_simple_string_t &get_string(void) const { return string; }
+    const sexp_simple_string_t &set_string(const sexp_simple_string_t &ss)
+    {
+        return string = ss;
+    }
+    const sexp_simple_string_t &get_presentation_hint(void) const { return presentation_hint; }
+    const sexp_simple_string_t &set_presentation_hint(const sexp_simple_string_t &ph)
     {
         with_presentation_hint = true;
         return presentation_hint = ph;
     }
 
-    virtual sexp_output_stream *print_canonical(sexp_output_stream *os) const;
-    virtual sexp_output_stream *print_advanced(sexp_output_stream *os) const;
-    virtual uint32_t            advanced_length(sexp_output_stream *os) const;
+    virtual sexp_output_stream_t *print_canonical(sexp_output_stream_t *os) const;
+    virtual sexp_output_stream_t *print_advanced(sexp_output_stream_t *os) const;
+    virtual uint32_t              advanced_length(sexp_output_stream_t *os) const;
 };
 
 /*
  * SEXP list
  */
 
-class sexp_list : public sexp_object, public std::vector<std::unique_ptr<sexp_object>> {
+class sexp_list_t : public sexp_object_t, public std::vector<std::unique_ptr<sexp_object_t>> {
   public:
-    virtual ~sexp_list() {}
+    virtual ~sexp_list_t() {}
 
-    virtual sexp_output_stream *print_canonical(sexp_output_stream *os) const;
-    virtual sexp_output_stream *print_advanced(sexp_output_stream *os) const;
-    virtual uint32_t            advanced_length(sexp_output_stream *os) const;
+    virtual sexp_output_stream_t *print_canonical(sexp_output_stream_t *os) const;
+    virtual sexp_output_stream_t *print_advanced(sexp_output_stream_t *os) const;
+    virtual uint32_t              advanced_length(sexp_output_stream_t *os) const;
 };
 
 /*
  * SEXP input stream
  */
 
-class sexp_input_stream : private sexp_char_defs {
+class sexp_input_stream_t : private sexp_char_defs_t {
   protected:
     std::istream *input_file;
     uint32_t      byte_size; /* 4 or 6 or 8 == currently scanning mode */
@@ -184,24 +187,24 @@ class sexp_input_stream : private sexp_char_defs {
     uint32_t      n_bits;    /* number of such bits waiting to be used */
     int           count;     /* number of 8-bit characters output by get_char */
   public:
-    sexp_input_stream(std::istream *i);
-    void               set_input(std::istream *i) { input_file = i; }
-    sexp_input_stream *set_byte_size(uint32_t new_byte_size);
-    uint32_t           get_byte_size(void) { return byte_size; }
-    sexp_input_stream *get_char(void);
-    sexp_input_stream *skip_white_space(void);
-    sexp_input_stream *skip_char(int c);
+    sexp_input_stream_t(std::istream *i);
+    void                 set_input(std::istream *i) { input_file = i; }
+    sexp_input_stream_t *set_byte_size(uint32_t new_byte_size);
+    uint32_t             get_byte_size(void) { return byte_size; }
+    sexp_input_stream_t *get_char(void);
+    sexp_input_stream_t *skip_white_space(void);
+    sexp_input_stream_t *skip_char(int c);
 
-    std::unique_ptr<sexp_object> scan_to_eof();
-    std::unique_ptr<sexp_object> scan_object(void);
-    std::unique_ptr<sexp_object> scan_string(void);
-    std::unique_ptr<sexp_object> scan_list(void);
-    sexp_simple_string           scan_simple_string(void);
-    void                         scan_token(sexp_simple_string &ss);
-    void                         scan_verbatim_string(sexp_simple_string &ss, uint32_t length);
-    void                         scan_quoted_string(sexp_simple_string &ss, uint32_t length);
-    void     scan_hexadecimal_string(sexp_simple_string &ss, uint32_t length);
-    void     scan_base64_string(sexp_simple_string &ss, uint32_t length);
+    std::unique_ptr<sexp_object_t> scan_to_eof();
+    std::unique_ptr<sexp_object_t> scan_object(void);
+    std::unique_ptr<sexp_object_t> scan_string(void);
+    std::unique_ptr<sexp_object_t> scan_list(void);
+    sexp_simple_string_t           scan_simple_string(void);
+    void                           scan_token(sexp_simple_string_t &ss);
+    void     scan_verbatim_string(sexp_simple_string_t &ss, uint32_t length);
+    void     scan_quoted_string(sexp_simple_string_t &ss, uint32_t length);
+    void     scan_hexadecimal_string(sexp_simple_string_t &ss, uint32_t length);
+    void     scan_base64_string(sexp_simple_string_t &ss, uint32_t length);
     uint32_t scan_decimal_string(void);
 
     int get_next_char(void) const { return next_char; }
@@ -212,7 +215,7 @@ class sexp_input_stream : private sexp_char_defs {
  * SEXP output stream
  */
 
-class sexp_output_stream {
+class sexp_output_stream_t {
   public:
     const uint32_t default_line_length = 75;
     enum sexp_print_mode {                /* PRINTING MODES */
@@ -232,45 +235,45 @@ class sexp_output_stream {
     uint32_t        max_column;   /* max usable column, or 0 if no maximum */
     uint32_t        indent;       /* current indentation level (starts at 0) */
   public:
-    sexp_output_stream(std::ostream *o);
-    void                set_output(std::ostream *o) { output_file = o; }
-    sexp_output_stream *put_char(int c);                /* output a character */
-    sexp_output_stream *new_line(sexp_print_mode mode); /* go to next line (and indent) */
-    sexp_output_stream *var_put_char(int c);
-    sexp_output_stream *flush(void);
-    sexp_output_stream *print_decimal(uint32_t n);
+    sexp_output_stream_t(std::ostream *o);
+    void                  set_output(std::ostream *o) { output_file = o; }
+    sexp_output_stream_t *put_char(int c);                /* output a character */
+    sexp_output_stream_t *new_line(sexp_print_mode mode); /* go to next line (and indent) */
+    sexp_output_stream_t *var_put_char(int c);
+    sexp_output_stream_t *flush(void);
+    sexp_output_stream_t *print_decimal(uint32_t n);
 
-    sexp_output_stream *change_output_byte_size(int newByteSize, sexp_print_mode mode);
+    sexp_output_stream_t *change_output_byte_size(int newByteSize, sexp_print_mode mode);
 
-    sexp_output_stream *print_canonical(const std::unique_ptr<sexp_object> &obj)
+    sexp_output_stream_t *print_canonical(const std::unique_ptr<sexp_object_t> &obj)
     {
         return obj->print_canonical(this);
     }
-    sexp_output_stream *print_advanced(const std::unique_ptr<sexp_object> &obj)
+    sexp_output_stream_t *print_advanced(const std::unique_ptr<sexp_object_t> &obj)
     {
         return obj->print_advanced(this);
     };
-    sexp_output_stream *print_base64(const std::unique_ptr<sexp_object> &obj);
-    sexp_output_stream *print_canonical(const sexp_simple_string *ss)
+    sexp_output_stream_t *print_base64(const std::unique_ptr<sexp_object_t> &obj);
+    sexp_output_stream_t *print_canonical(const sexp_simple_string_t *ss)
     {
         return ss->print_canonical_verbatim(this);
     }
-    sexp_output_stream *print_advanced(const sexp_simple_string *ss)
+    sexp_output_stream_t *print_advanced(const sexp_simple_string_t *ss)
     {
         return ss->print_advanced(this);
     };
 
-    uint32_t            get_byte_size(void) const { return byte_size; }
-    uint32_t            get_column(void) const { return column; }
-    uint32_t            reset_column(void) { return column = 0; }
-    uint32_t            get_max_column(void) const { return max_column; }
-    uint32_t            set_max_column(uint32_t mc) { return max_column = mc; }
-    sexp_output_stream *inc_indent(void)
+    uint32_t              get_byte_size(void) const { return byte_size; }
+    uint32_t              get_column(void) const { return column; }
+    uint32_t              reset_column(void) { return column = 0; }
+    uint32_t              get_max_column(void) const { return max_column; }
+    uint32_t              set_max_column(uint32_t mc) { return max_column = mc; }
+    sexp_output_stream_t *inc_indent(void)
     {
         ++indent;
         return this;
     }
-    sexp_output_stream *dec_indent(void)
+    sexp_output_stream_t *dec_indent(void)
     {
         --indent;
         return this;

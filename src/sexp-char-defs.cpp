@@ -40,19 +40,19 @@ namespace sexp {
 /**************************************/
 /* CHARACTER ROUTINES AND DEFINITIONS */
 /**************************************/
-bool          sexp_char_defs::initialized = false;
-unsigned char sexp_char_defs::upper[256];       /* upper case version of c */
-unsigned char sexp_char_defs::decvalue[256];    /* a value of c as dec digit */
-unsigned char sexp_char_defs::hexvalue[256];    /* a value of c as a hex digit */
-bool          sexp_char_defs::base64digit[256]; /* c is base64 digit */
-unsigned char sexp_char_defs::base64value[256]; /* a value of c as base64 digit */
-bool          sexp_char_defs::tokenchar[256];   /* c can be in a token */
+bool          sexp_char_defs_t::initialized = false;
+unsigned char sexp_char_defs_t::upper[256];       /* upper case version of c */
+unsigned char sexp_char_defs_t::decvalue[256];    /* a value of c as dec digit */
+unsigned char sexp_char_defs_t::hexvalue[256];    /* a value of c as a hex digit */
+bool          sexp_char_defs_t::base64digit[256]; /* c is base64 digit */
+unsigned char sexp_char_defs_t::base64value[256]; /* a value of c as base64 digit */
+bool          sexp_char_defs_t::tokenchar[256];   /* c can be in a token */
 
 /*
- * sexp_char_defs::initializeCharacterTables
+ * sexp_char_defs_t::initializeCharacterTables
  * initializes all of the above arrays
  */
-void sexp_char_defs::initialize_character_tables()
+void sexp_char_defs_t::initialize_character_tables()
 {
     int i;
     for (i = 0; i < 256; i++) {
@@ -94,55 +94,55 @@ void sexp_char_defs::initialize_character_tables()
 }
 
 /*
- * sexp_char_defs::is_white_space(c)
+ * sexp_char_defs_t::is_white_space(c)
  * Returns true if c is a whitespace character (space, tab, etc. ).
  */
-bool sexp_char_defs::is_white_space(int c)
+bool sexp_char_defs_t::is_white_space(int c)
 {
     return ((c >= 0 && c <= 255) && std::isspace(c));
 }
 
 /*
- * sexp_char_defs::is_hex_digit(c)
+ * sexp_char_defs_t::is_hex_digit(c)
  * Returns true if c is a hexadecimal digit.
  */
-bool sexp_char_defs::is_hex_digit(int c)
+bool sexp_char_defs_t::is_hex_digit(int c)
 {
     return ((c >= 0 && c <= 255) && std::isxdigit(c));
 }
 
 /*
- * sexp_char_defs::is_dec_digit(c)
+ * sexp_char_defs_t::is_dec_digit(c)
  * Returns true if c is a decimal digit.
  */
-bool sexp_char_defs::is_dec_digit(int c)
+bool sexp_char_defs_t::is_dec_digit(int c)
 {
     return ((c >= 0 && c <= 255) && std::isdigit(c));
 }
 
 /*
- * sexp_char_defs::is_base64_digit(c)
+ * sexp_char_defs_t::is_base64_digit(c)
  * returns true if c is a base64 digit A-Z,a-Z,0-9,+,/
  */
-bool sexp_char_defs::is_base64_digit(int c)
+bool sexp_char_defs_t::is_base64_digit(int c)
 {
     return ((c >= 0 && c <= 255) && base64digit[c]);
 }
 
 /*
- * sexp_char_defs::is_token_char(c)
+ * sexp_char_defs_t::is_token_char(c)
  * Returns true if c is allowed in a token
  */
-bool sexp_char_defs::is_token_char(int c)
+bool sexp_char_defs_t::is_token_char(int c)
 {
     return ((c >= 0 && c <= 255) && tokenchar[c]);
 }
 
 /*
- * sexp_char_defs::is_alpha(c)
+ * sexp_char_defs_t::is_alpha(c)
  * Returns true if c is alphabetic
  */
-bool sexp_char_defs::is_alpha(int c)
+bool sexp_char_defs_t::is_alpha(int c)
 {
     return ((c >= 0 && c <= 255) && std::isalpha(c));
 }
