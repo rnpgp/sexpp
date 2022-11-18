@@ -170,4 +170,78 @@ TEST_F(PrimitivesTests, Wrap)
     do_test_canonical(reallyLong, stillLong);
     do_test_advanced(reallyLong, broken);
 }
+
+TEST_F(PrimitivesTests, at4rnp)
+{
+    const char *str_in = "(rnp_block (rnp_list1 rnp_list2))";
+
+    std::istringstream  iss(str_in);
+    sexp_input_stream_t is(&iss);
+
+    sexp_list_t lst;
+    lst.parse(is.set_byte_size(8)->get_char());
+
+    EXPECT_EQ(lst.sexp_list_at(0), nullptr);
+    EXPECT_NE(lst.sexp_list_at(1), nullptr);
+
+    EXPECT_NE(lst.sexp_string_at(0), nullptr);
+    EXPECT_EQ(lst.sexp_string_at(1), nullptr);
+
+    const sexp_object_t *obj = lst.sexp_list_at(1);
+
+    if (obj != nullptr) {
+        EXPECT_EQ(obj->sexp_list_at(0), nullptr);
+        EXPECT_EQ(obj->sexp_list_at(1), nullptr);
+    }
+
+    const sexp_string_t *sstr = lst.sexp_string_at(0);
+    EXPECT_STREQ(reinterpret_cast<const char *>(sstr->get_string().c_str()), "rnp_block");
+}
+
+TEST_F(PrimitivesTests, cmp4rnp)
+{
+    const char *str_in = "(rnp_block (rnp_list1 rnp_list2))";
+
+    std::istringstream  iss(str_in);
+    sexp_input_stream_t is(&iss);
+
+    sexp_list_t lst;
+    lst.parse(is.set_byte_size(8)->get_char());
+
+    EXPECT_TRUE(*lst.at(0) == "rnp_block");
+    EXPECT_FALSE(*lst.at(0) == "not_rnp_block");
+    EXPECT_FALSE(*lst.at(1) == "rnp_block");
+    EXPECT_FALSE(*lst.at(1) == "not_rnp_block");
+
+    EXPECT_TRUE(*lst.sexp_string_at(0) == "rnp_block");
+    EXPECT_FALSE(*lst.sexp_string_at(0) == "not_rnp_block");
+    EXPECT_TRUE(*lst.sexp_simple_string_at(0) == "rnp_block");
+    EXPECT_FALSE(*lst.sexp_simple_string_at(0) == "not_rnp_block");
+
+    EXPECT_TRUE(*lst.sexp_list_at(1)->at(0) == "rnp_list1");
+    EXPECT_TRUE(*lst.sexp_list_at(1)->sexp_string_at(1) == "rnp_list2");
+
+    EXPECT_TRUE(lst.sexp_string_at(0) == std::string("rnp_block"));
+    EXPECT_FALSE(lst.sexp_string_at(0) == std::string("not_rnp_block"));
+    EXPECT_TRUE(lst.sexp_simple_string_at(0) == std::string("rnp_block"));
+    EXPECT_FALSE(lst.sexp_simple_string_at(0) == std::string("not_rnp_block"));
+}
+
+TEST_F(PrimitivesTests, u4rnp)
+{
+    const char *str_in1 = "(unsigned_value \"12345\")";
+    const char *str_in2 = "(14:unsigned_value5:54321)";
+
+    std::istringstream iss1(str_in1);
+    std::istringstream iss2(str_in2);
+
+    sexp_input_stream_t is(&iss1);
+    sexp_list_t         lst;
+    lst.parse(is.set_byte_size(8)->get_char());
+    EXPECT_EQ(lst.sexp_string_at(1)->as_unsigned(), 12345);
+
+    lst.clear();
+    lst.parse(is.set_input(&iss2)->set_byte_size(8)->get_char());
+    EXPECT_EQ(lst.sexp_string_at(1)->as_unsigned(), 54321);
+}
 } // namespace

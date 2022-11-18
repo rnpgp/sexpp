@@ -32,6 +32,8 @@
  * 6/29/1997
  **/
 
+#include <fstream>
+
 #include <sexp/sexp-error.h>
 #include <sexp/sexp.h>
 
