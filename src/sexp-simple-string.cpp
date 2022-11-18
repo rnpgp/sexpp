@@ -175,7 +175,7 @@ sexp_output_stream *sexp_simple_string::print_advanced(sexp_output_stream *os) c
 
 /*
  * sexp_simple_string::can_print_as_quoted_string(void)
- * Returns TRUE if simple string can be printed as a quoted string.
+ * Returns true if simple string can be printed as a quoted string.
  * Must have only tokenchars and blanks.
  */
 bool sexp_simple_string::can_print_as_quoted_string(void) const
@@ -190,7 +190,7 @@ bool sexp_simple_string::can_print_as_quoted_string(void) const
 
 /*
  * sexp_simple_string::can_print_as_token(os)
- * Returns TRUE if simple string can be printed as a token.
+ * Returns true if simple string can be printed as a token.
  * Doesn't begin with a digit, and all characters are tokenchars.
  */
 bool sexp_simple_string::can_print_as_token(const sexp_output_stream *os) const

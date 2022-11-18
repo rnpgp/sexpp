@@ -42,15 +42,11 @@ namespace sexp {
 /**************************************/
 bool          sexp_char_defs::initialized = false;
 unsigned char sexp_char_defs::upper[256];       /* upper case version of c */
-bool          sexp_char_defs::whitespace[256];  /* c is whitespace */
-bool          sexp_char_defs::decdigit[256];    /* c is a dec digit */
 unsigned char sexp_char_defs::decvalue[256];    /* a value of c as dec digit */
-bool          sexp_char_defs::hexdigit[256];    /* c is a hex digit */
 unsigned char sexp_char_defs::hexvalue[256];    /* a value of c as a hex digit */
 bool          sexp_char_defs::base64digit[256]; /* c is base64 digit */
 unsigned char sexp_char_defs::base64value[256]; /* a value of c as base64 digit */
 bool          sexp_char_defs::tokenchar[256];   /* c can be in a token */
-bool          sexp_char_defs::alpha[256];       /* c is alphabetic A-Z a-z */
 
 /*
  * sexp_char_defs::initializeCharacterTables
@@ -59,27 +55,23 @@ bool          sexp_char_defs::alpha[256];       /* c is alphabetic A-Z a-z */
 void sexp_char_defs::initialize_character_tables()
 {
     int i;
-    for (i = 0; i < 256; i++)
+    for (i = 0; i < 256; i++) {
         upper[i] = i;
+        base64digit[i] = false;
+        tokenchar[i] = false;
+    }
     for (i = 'a'; i <= 'z'; i++)
         upper[i] = i - 'a' + 'A';
-    for (i = 0; i <= 255; i++) {
-        alpha[i] = base64digit[i] = decdigit[i] = hexdigit[i] = whitespace[i] = false;
-    }
-    whitespace[' '] = whitespace['\n'] = whitespace['\t'] = true;
-    whitespace['\v'] = whitespace['\r'] = whitespace['\f'] = true;
     for (i = '0'; i <= '9'; i++) {
-        base64digit[i] = decdigit[i] = hexdigit[i] = true;
+        base64digit[i] = true;
         decvalue[i] = hexvalue[i] = i - '0';
         base64value[i] = (i - '0') + 52;
     }
     for (i = 'a'; i <= 'f'; i++) {
-        hexdigit[i] = hexdigit[upper[i]] = true;
         hexvalue[i] = hexvalue[upper[i]] = i - 'a' + 10;
     }
     for (i = 'a'; i <= 'z'; i++) {
         base64digit[i] = base64digit[upper[i]] = true;
-        alpha[i] = alpha[upper[i]] = true;
         base64value[i] = i - 'a' + 26;
         base64value[upper[i]] = i - 'a';
     }
@@ -87,8 +79,6 @@ void sexp_char_defs::initialize_character_tables()
     base64value['+'] = 62;
     base64value['/'] = 63;
     base64value['='] = 0;
-    for (i = 0; i < 255; i++)
-        tokenchar[i] = false;
     for (i = 'a'; i <= 'z'; i++)
         tokenchar[i] = tokenchar[upper[i]] = true;
     for (i = '0'; i <= '9'; i++)
@@ -105,34 +95,34 @@ void sexp_char_defs::initialize_character_tables()
 
 /*
  * sexp_char_defs::is_white_space(c)
- * Returns TRUE if c is a whitespace character (space, tab, etc. ).
+ * Returns true if c is a whitespace character (space, tab, etc. ).
  */
 bool sexp_char_defs::is_white_space(int c)
 {
-    return ((c >= 0 && c <= 255) && whitespace[c]);
-}
-
-/*
- * sexp_char_defs::is_dec_digit(c)
- * Returns TRUE if c is a decimal digit.
- */
-bool sexp_char_defs::is_dec_digit(int c)
-{
-    return ((c >= 0 && c <= 255) && decdigit[c]);
+    return ((c >= 0 && c <= 255) && std::isspace(c));
 }
 
 /*
  * sexp_char_defs::is_hex_digit(c)
- * Returns TRUE if c is a hexadecimal digit.
+ * Returns true if c is a hexadecimal digit.
  */
 bool sexp_char_defs::is_hex_digit(int c)
 {
-    return ((c >= 0 && c <= 255) && hexdigit[c]);
+    return ((c >= 0 && c <= 255) && std::isxdigit(c));
+}
+
+/*
+ * sexp_char_defs::is_dec_digit(c)
+ * Returns true if c is a decimal digit.
+ */
+bool sexp_char_defs::is_dec_digit(int c)
+{
+    return ((c >= 0 && c <= 255) && std::isdigit(c));
 }
 
 /*
  * sexp_char_defs::is_base64_digit(c)
- * returns TRUE if c is a base64 digit A-Z,a-Z,0-9,+,/
+ * returns true if c is a base64 digit A-Z,a-Z,0-9,+,/
  */
 bool sexp_char_defs::is_base64_digit(int c)
 {
@@ -141,7 +131,7 @@ bool sexp_char_defs::is_base64_digit(int c)
 
 /*
  * sexp_char_defs::is_token_char(c)
- * Returns TRUE if c is allowed in a token
+ * Returns true if c is allowed in a token
  */
 bool sexp_char_defs::is_token_char(int c)
 {
@@ -150,11 +140,11 @@ bool sexp_char_defs::is_token_char(int c)
 
 /*
  * sexp_char_defs::is_alpha(c)
- * Returns TRUE if c is alphabetic
+ * Returns true if c is alphabetic
  */
 bool sexp_char_defs::is_alpha(int c)
 {
-    return ((c >= 0 && c <= 255) && alpha[c]);
+    return ((c >= 0 && c <= 255) && std::isalpha(c));
 }
 
 } // namespace sexp
