@@ -35,6 +35,7 @@
 #pragma once
 
 #include <limits>
+#include <cctype>
 #include <memory>
 #include <algorithm>
 #include <fstream>
@@ -55,15 +56,11 @@ namespace sexp {
 class sexp_char_defs {
   protected:
     static unsigned char upper[256];       /* upper[c] is upper case version of c */
-    static bool          whitespace[256];  /* whitespace[c] is nonzero if c is whitespace */
-    static bool          decdigit[256];    /* decdigit[c] is nonzero if c is a dec digit */
     static unsigned char decvalue[256];    /* decvalue[c] is value of c as dec digit */
-    static bool          hexdigit[256];    /* hexdigit[c] is nonzero if c is a hex digit */
     static unsigned char hexvalue[256];    /* hexvalue[c] is value of c as a hex digit */
     static bool          base64digit[256]; /* base64char[c] is nonzero if c is base64 digit */
     static unsigned char base64value[256]; /* base64value[c] is value of c as base64 digit */
     static bool          tokenchar[256];   /* tokenchar[c] is true if c can be in a token */
-    static bool          alpha[256];       /* alpha[c] is true if c is alphabetic A-Z a-z */
 
     static bool initialized;
     static void initialize_character_tables(void);
