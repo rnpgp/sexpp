@@ -31,6 +31,7 @@ project (sexp VERSION 0.1.0 LANGUAGES C CXX)
 option(WITH_SEXP_TESTS "Build tests" ON)
 option(WITH_SEXP_CLI "Build sexp console application" ON)
 option(ENABLE_SANITIZERS "Enable ASan and other sanitizers" OFF)
+option(DOWNLOAD_GOOGLETEST "Download googletest" OFF)
 
 include(GNUInstallDirs)
 include(CheckCXXSourceCompiles)
@@ -105,7 +106,7 @@ add_library(sexp STATIC
 target_compile_features(sexp PUBLIC cxx_std_11)
 target_include_directories (sexp PUBLIC include)
 
-if(${WITH_SEXP_CLI})
+if(WITH_SEXP_CLI)
     add_executable (sexp-cli
                     src/sexp-main.cpp
                     include/sexp/sexp.h
@@ -116,12 +117,12 @@ if(${WITH_SEXP_CLI})
 
     target_compile_features(sexp-cli PUBLIC cxx_std_11)
     target_include_directories (sexp-cli PUBLIC include)
-endif(${WITH_SEXP_CLI})
+endif(WITH_SEXP_CLI)
 
 
-if(${WITH_SEXP_TESTS})
+if(WITH_SEXP_TESTS)
     include(CTest)
-    include(FetchContent)
+    enable_testing()
     include(GoogleTest)
 
     set(SEXP_SAMPLES_FOLDER "${CMAKE_CURRENT_SOURCE_DIR}/samples")
@@ -132,22 +133,6 @@ if(${WITH_SEXP_TESTS})
         @ONLY
     )
 
-    message(STATUS "Fetching googletest")
-    # Version 1.8.1 to make it compatible with gcc 4.8.5 which misses some C++11 features
-    FetchContent_Declare(
-        googletest
-        GIT_REPOSITORY https://github.com/google/googletest.git
-        GIT_TAG        release-1.8.1
-    )
-    # maintain compiler/linker settings on Windows
-    set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-    # do not install gtest
-    set(INSTALL_GTEST OFF CACHE BOOL "" FORCE)
-    # explicitely disable unneeded gmock build
-    set(BUILD_GMOCK OFF CACHE BOOL "" FORCE)
-
-    FetchContent_MakeAvailable(googletest)
-
     add_executable(sexp-tests
         tests/src/baseline-tests.cpp
         tests/src/compat-tests.cpp
@@ -157,10 +142,39 @@ if(${WITH_SEXP_TESTS})
         tests/include/sexp-tests.h
     )
 
+    if(DOWNLOAD_GOOGLETEST)
+        message(STATUS "Fetching googletest")
+        include(FetchContent)
+        # Version 1.8.1 to make it compatible with gcc 4.8.5 which misses some C++11 features
+        FetchContent_Declare(
+            googletest
+            GIT_REPOSITORY https://github.com/google/googletest.git
+            GIT_TAG        release-1.8.1
+        )
+        # maintain compiler/linker settings on Windows
+        set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+        # do not install gtest
+        set(INSTALL_GTEST OFF CACHE BOOL "" FORCE)
+        # explicitely disable unneeded gmock build
+        set(BUILD_GMOCK OFF CACHE BOOL "" FORCE)
+
+        FetchContent_MakeAvailable(googletest)
+        set(GTestMain gtest_main)
+        set(GTest gtest)
+    else(DOWNLOAD_GOOGLETEST)
+        find_package(GTest REQUIRED)
+        set(GTestMain GTest::Main)
+        set(GTest GTest::GTest)
+
+        if(NOT MSVC)
+            target_link_libraries(sexp-tests PRIVATE pthread)
+        endif(NOT MSVC)
+    endif(DOWNLOAD_GOOGLETEST)
+
     target_link_libraries(sexp-tests PRIVATE
         sexp
-        gtest_main
-        gtest
+         ${GTestMain}
+         ${GTest}
     )
 
     target_include_directories(sexp-tests PRIVATE
@@ -172,7 +186,7 @@ if(${WITH_SEXP_TESTS})
     target_compile_features(sexp-tests PUBLIC cxx_std_11)
 
     gtest_discover_tests(sexp-tests)
-endif(${WITH_SEXP_TESTS})
+endif(WITH_SEXP_TESTS)
 
 set(CONFIGURED_PC "${CMAKE_CURRENT_BINARY_DIR}/sexp.pc")
 configure_file(
@@ -184,6 +198,6 @@ configure_file(
 install(TARGETS sexp DESTINATION "${CMAKE_INSTALL_LIBDIR}")
 install(DIRECTORY include/ DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
 install(FILES "${CONFIGURED_PC}" DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
-if(${WITH_SEXP_CLI})
+if(WITH_SEXP_CLI)
     install(TARGETS sexp-cli DESTINATION "${CMAKE_INSTALL_BINDIR}")
-endif(${WITH_SEXP_CLI})
+endif(WITH_SEXP_CLI)

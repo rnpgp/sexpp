@@ -2,4 +2,4 @@
 /build
 /baseline
 /tests/include/sexp-samples-folder.h
-#/.vscode
+/.vscode

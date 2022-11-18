@@ -87,4 +87,23 @@ TEST_F(ExceptionTests, UnusedBits)
                "SEXP WARNING: 6-bit region ended with 4 unused bits left-over at position 13");
 }
 
+TEST_F(ExceptionTests, NotAListWhenExpected)
+{
+    std::ifstream ifs(sexp_samples_folder + "/malformed/sexp-not-a-list",
+                      std::ifstream::binary);
+    EXPECT_FALSE(ifs.fail());
+    if (!ifs.fail()) {
+        try {
+            sexp_list_t         a_list;
+            sexp_input_stream_t is(&ifs);
+            a_list.parse(is.set_byte_size(8)->get_char());
+            FAIL() << "sexp::sexp_exception_t expected but has not been thrown";
+        } catch (sexp::sexp_exception_t &e) {
+            EXPECT_STREQ(
+              e.what(),
+              "SEXP ERROR: character '|' found where '(' was expected at position 0");
+        }
+    }
+}
+
 } // namespace

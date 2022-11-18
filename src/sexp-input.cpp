@@ -51,8 +51,23 @@ uint32_t      n_bits;    /* number of such bits waiting to be used */
 int           count;     /* number of 8-bit characters output by get_char */
 
 sexp_input_stream_t::sexp_input_stream_t(std::istream *i)
-    : input_file{i}, byte_size{8}, next_char{' '}, bits{0}, n_bits{0}, count{-1}
 {
+    set_input(i);
+}
+
+/*
+ * sexp_input_stream_t::set_input(std::istream *i)
+ */
+
+sexp_input_stream_t *sexp_input_stream_t::set_input(std::istream *i)
+{
+    input_file = i;
+    byte_size = 8;
+    next_char = ' ';
+    bits = 0;
+    n_bits = 0;
+    count = -1;
+    return this;
 }
 
 /*
@@ -149,7 +164,7 @@ sexp_input_stream_t *sexp_input_stream_t::skip_char(int c)
 {
     if (next_char != c)
         sexp_error(sexp_exception_t::error,
-                   "character %x (hex) found where %c (char) expected",
+                   "character '%c' found where '%c' was expected",
                    next_char,
                    c,
                    count);
@@ -200,11 +215,8 @@ uint32_t sexp_input_stream_t::scan_decimal_string(void)
         value = value * 10 + decvalue[next_char];
         get_char();
         if (i++ > 8)
-            sexp_error(sexp_exception_t::error,
-                       "Decimal number %d... too long.",
-                       (int) value,
-                       0,
-                       count);
+            sexp_error(
+              sexp_exception_t::error, "Decimal number %d... too long", (int) value, 0, count);
     }
     return value;
 }
@@ -429,15 +441,10 @@ sexp_simple_string_t sexp_input_stream_t::scan_simple_string(void)
  * sexp_input_stream_t::scan_string(void)
  * Reads and returns a string [presentationhint]string from input stream.
  */
-std::unique_ptr<sexp_object_t> sexp_input_stream_t::scan_string(void)
+std::unique_ptr<sexp_string_t> sexp_input_stream_t::scan_string(void)
 {
     std::unique_ptr<sexp_string_t> s(new sexp_string_t());
-    if (next_char == '[') { /* scan presentation hint */
-        skip_char('[');
-        s->set_presentation_hint(scan_simple_string());
-        skip_white_space()->skip_char(']')->skip_white_space();
-    }
-    s->set_string(scan_simple_string());
+    s->parse(this);
     _return_unique_ptr_(s);
 }
 
@@ -445,26 +452,10 @@ std::unique_ptr<sexp_object_t> sexp_input_stream_t::scan_string(void)
  * sexp_input_stream_t::scan_list(void)
  * Read and return a sexp_list_t from the input stream.
  */
-std::unique_ptr<sexp_object_t> sexp_input_stream_t::scan_list(void)
+std::unique_ptr<sexp_list_t> sexp_input_stream_t::scan_list(void)
 {
     std::unique_ptr<sexp_list_t> list(new sexp_list_t());
-    skip_char('(')->skip_white_space();
-    if (next_char == ')') {
-        ; /* OK */
-    } else {
-        list->push_back(scan_object());
-    }
-
-    while (true) {
-        skip_white_space();
-        if (next_char == ')') { /* we just grabbed last element of list */
-            skip_char(')');
-            _return_unique_ptr_(list);
-
-        } else {
-            list->push_back(scan_object());
-        }
-    }
+    list->parse(this);
     _return_unique_ptr_(list);
 }
 

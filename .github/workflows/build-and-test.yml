@@ -55,9 +55,9 @@ jobs:
           fetch-depth: 1
 
       - name: Configure
-        run:  cmake -Bbuild -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/install -DCMAKE_BUILD_TYPE=Release
+        run: cmake -Bbuild -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/install -DCMAKE_BUILD_TYPE=Release -DDOWNLOAD_GOOGLETEST=ON
 
-      - name: Adjust environment
+      - name: Adjust environment for Windows build
         if: runner.os == 'Windows'
         shell: bash
         run: echo "OSTYPE=windows" >> $GITHUB_ENV

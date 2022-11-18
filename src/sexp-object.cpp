@@ -38,6 +38,21 @@
 namespace sexp {
 
 /*
+ * sexp_string_t::parse(sis)
+ * Parses the strin from input stream
+ */
+
+void sexp_string_t::parse(sexp_input_stream_t *sis)
+{
+    if (sis->get_next_char() == '[') { /* scan presentation hint */
+        sis->skip_char('[');
+        set_presentation_hint(sis->scan_simple_string());
+        sis->skip_white_space()->skip_char(']')->skip_white_space();
+    }
+    set_string(sis->scan_simple_string());
+}
+
+/*
  * sexp_string_t::print_canonical(os)
  * Prints out sexp string onto output stream os
  */
@@ -48,7 +63,7 @@ sexp_output_stream_t *sexp_string_t::print_canonical(sexp_output_stream_t *os) c
         presentation_hint.print_canonical_verbatim(os);
         os->var_put_char(']');
     }
-    string.print_canonical_verbatim(os);
+    data_string.print_canonical_verbatim(os);
     return os;
 }
 
@@ -64,7 +79,7 @@ sexp_output_stream_t *sexp_string_t::print_advanced(sexp_output_stream_t *os) co
         presentation_hint.print_advanced(os);
         os->put_char(']');
     }
-    string.print_advanced(os);
+    data_string.print_advanced(os);
     return os;
 }
 
@@ -77,8 +92,34 @@ uint32_t sexp_string_t::advanced_length(sexp_output_stream_t *os) const
     uint32_t len = 0;
     if (with_presentation_hint)
         len += 2 + presentation_hint.advanced_length(os);
-    len += string.advanced_length(os);
+    len += data_string.advanced_length(os);
     return len;
+}
+
+/*
+ * sexp_list_t::parse(sis)
+ * Parses the list from input stream
+ */
+
+void sexp_list_t::parse(sexp_input_stream_t *sis)
+{
+    sis->skip_char('(')->skip_white_space();
+    if (sis->get_next_char() == ')') {
+        ; /* OK */
+    } else {
+        push_back(sis->scan_object());
+    }
+
+    while (true) {
+        sis->skip_white_space();
+        if (sis->get_next_char() == ')') { /* we just grabbed last element of list */
+            sis->skip_char(')');
+            return;
+
+        } else {
+            push_back(sis->scan_object());
+        }
+    }
 }
 
 /*

@@ -31,6 +31,7 @@
 
 #include <cstdio>
 #include <iostream>
+#include <fstream>
 #include <string>
 
 #include <gtest/gtest.h>

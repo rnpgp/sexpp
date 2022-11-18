@@ -34,11 +34,14 @@
 
 #pragma once
 
+#include <climits>
 #include <limits>
 #include <cctype>
+#include <cstring>
 #include <memory>
 #include <algorithm>
-#include <fstream>
+#include <iostream>
+#include <string>
 #include <vector>
 
 namespace sexp {
@@ -80,16 +83,23 @@ class sexp_char_defs_t {
     }
 };
 
+class sexp_string_t;
+class sexp_list_t;
+
+class sexp_output_stream_t;
+class sexp_input_stream_t;
+
 /*
  * SEXP simple string
  */
-
-class sexp_output_stream_t;
 
 typedef uint8_t octet_t;
 
 class sexp_simple_string_t : public std::basic_string<octet_t>, private sexp_char_defs_t {
   public:
+    sexp_simple_string_t(void) = default;
+    sexp_simple_string_t(const octet_t *dt) : std::basic_string<octet_t>{dt} {}
+    sexp_simple_string_t(const octet_t *bt, size_t ln) : std::basic_string<octet_t>{bt, ln} {}
     sexp_simple_string_t &append(int c)
     {
         (*this) += (octet_t)(c & 0xFF);
@@ -115,7 +125,22 @@ class sexp_simple_string_t : public std::basic_string<octet_t>, private sexp_cha
 
     bool can_print_as_quoted_string(void) const;
     bool can_print_as_token(const sexp_output_stream_t *os) const;
+
+    bool operator==(const char *right) const noexcept
+    {
+        return length() == std::strlen(right) && std::memcmp(data(), right, length()) == 0;
+    }
+
+    unsigned as_unsigned() const noexcept
+    {
+        return empty() ? UINT_MAX : (unsigned) atoi(reinterpret_cast<const char *>(c_str()));
+    }
 };
+
+inline bool operator==(const sexp_simple_string_t *left, const std::string &right) noexcept
+{
+    return *left == right.c_str();
+}
 
 /*
  * SEXP object
@@ -128,6 +153,29 @@ class sexp_object_t {
     virtual sexp_output_stream_t *print_canonical(sexp_output_stream_t *os) const = 0;
     virtual sexp_output_stream_t *print_advanced(sexp_output_stream_t *os) const;
     virtual uint32_t              advanced_length(sexp_output_stream_t *os) const = 0;
+
+    virtual sexp_list_t *  sexp_list_view(void) noexcept { return nullptr; }
+    virtual sexp_string_t *sexp_string_view(void) noexcept { return nullptr; }
+    virtual bool           is_sexp_list(void) const noexcept { return false; }
+    virtual bool           is_sexp_string(void) const noexcept { return false; }
+
+    virtual const sexp_list_t *sexp_list_at(
+      std::vector<std::unique_ptr<sexp_object_t>>::size_type pos) const noexcept
+    {
+        return nullptr;
+    }
+    virtual const sexp_string_t *sexp_string_at(
+      std::vector<std::unique_ptr<sexp_object_t>>::size_type pos) const noexcept
+    {
+        return nullptr;
+    }
+    virtual const sexp_simple_string_t *sexp_simple_string_at(
+      std::vector<std::unique_ptr<sexp_object_t>>::size_type pos) const noexcept
+    {
+        return nullptr;
+    }
+    virtual bool     operator==(const char *right) const noexcept { return false; }
+    virtual unsigned as_unsigned() const noexcept { return UINT_MAX; }
 };
 
 /*
@@ -138,18 +186,32 @@ class sexp_string_t : public sexp_object_t {
   protected:
     bool                 with_presentation_hint;
     sexp_simple_string_t presentation_hint;
-    sexp_simple_string_t string;
+    sexp_simple_string_t data_string;
 
   public:
+    sexp_string_t(const octet_t *dt) : with_presentation_hint(false), data_string(dt) {}
+    sexp_string_t(const octet_t *bt, size_t ln)
+        : with_presentation_hint(false), data_string(bt, ln)
+    {
+    }
+    sexp_string_t(const std::string &str)
+        : with_presentation_hint(false),
+          data_string(reinterpret_cast<const octet_t *>(str.data()))
+    {
+    }
     sexp_string_t(void) : with_presentation_hint(false) {}
+    sexp_string_t(sexp_input_stream_t *sis) { parse(sis); };
 
-    const bool has_presentation_hint(void) const { return with_presentation_hint; }
-    const sexp_simple_string_t &get_string(void) const { return string; }
+    const bool has_presentation_hint(void) const noexcept { return with_presentation_hint; }
+    const sexp_simple_string_t &get_string(void) const noexcept { return data_string; }
     const sexp_simple_string_t &set_string(const sexp_simple_string_t &ss)
     {
-        return string = ss;
+        return data_string = ss;
     }
-    const sexp_simple_string_t &get_presentation_hint(void) const { return presentation_hint; }
+    const sexp_simple_string_t &get_presentation_hint(void) const noexcept
+    {
+        return presentation_hint;
+    }
     const sexp_simple_string_t &set_presentation_hint(const sexp_simple_string_t &ph)
     {
         with_presentation_hint = true;
@@ -159,7 +221,20 @@ class sexp_string_t : public sexp_object_t {
     virtual sexp_output_stream_t *print_canonical(sexp_output_stream_t *os) const;
     virtual sexp_output_stream_t *print_advanced(sexp_output_stream_t *os) const;
     virtual uint32_t              advanced_length(sexp_output_stream_t *os) const;
+
+    virtual sexp_string_t *sexp_string_view(void) noexcept { return this; }
+    virtual bool           is_sexp_string(void) const noexcept { return true; }
+
+    virtual bool operator==(const char *right) const noexcept { return data_string == right; }
+
+    void             parse(sexp_input_stream_t *sis);
+    virtual unsigned as_unsigned() const noexcept { return data_string.as_unsigned(); }
 };
+
+inline bool operator==(const sexp_string_t *left, const std::string &right) noexcept
+{
+    return *left == right.c_str();
+}
 
 /*
  * SEXP list
@@ -172,6 +247,25 @@ class sexp_list_t : public sexp_object_t, public std::vector<std::unique_ptr<sex
     virtual sexp_output_stream_t *print_canonical(sexp_output_stream_t *os) const;
     virtual sexp_output_stream_t *print_advanced(sexp_output_stream_t *os) const;
     virtual uint32_t              advanced_length(sexp_output_stream_t *os) const;
+
+    virtual sexp_list_t *sexp_list_view(void) noexcept { return this; }
+    virtual bool         is_sexp_list(void) const noexcept { return true; }
+
+    virtual const sexp_list_t *sexp_list_at(size_type pos) const noexcept
+    {
+        return pos < size() ? (*at(pos)).sexp_list_view() : nullptr;
+    }
+    virtual const sexp_string_t *sexp_string_at(size_type pos) const noexcept
+    {
+        return pos < size() ? (*at(pos)).sexp_string_view() : nullptr;
+    }
+    const sexp_simple_string_t *sexp_simple_string_at(size_type pos) const noexcept
+    {
+        auto s = sexp_string_at(pos);
+        return s != nullptr ? &s->get_string() : nullptr;
+    }
+
+    void parse(sexp_input_stream_t *sis);
 };
 
 /*
@@ -188,7 +282,7 @@ class sexp_input_stream_t : private sexp_char_defs_t {
     int           count;     /* number of 8-bit characters output by get_char */
   public:
     sexp_input_stream_t(std::istream *i);
-    void                 set_input(std::istream *i) { input_file = i; }
+    sexp_input_stream_t *set_input(std::istream *i);
     sexp_input_stream_t *set_byte_size(uint32_t new_byte_size);
     uint32_t             get_byte_size(void) { return byte_size; }
     sexp_input_stream_t *get_char(void);
@@ -197,8 +291,8 @@ class sexp_input_stream_t : private sexp_char_defs_t {
 
     std::unique_ptr<sexp_object_t> scan_to_eof();
     std::unique_ptr<sexp_object_t> scan_object(void);
-    std::unique_ptr<sexp_object_t> scan_string(void);
-    std::unique_ptr<sexp_object_t> scan_list(void);
+    std::unique_ptr<sexp_string_t> scan_string(void);
+    std::unique_ptr<sexp_list_t>   scan_list(void);
     sexp_simple_string_t           scan_simple_string(void);
     void                           scan_token(sexp_simple_string_t &ss);
     void     scan_verbatim_string(sexp_simple_string_t &ss, uint32_t length);
