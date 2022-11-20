@@ -30,19 +30,19 @@ project (sexp VERSION 0.1.0 LANGUAGES C CXX)
 
 option(WITH_SEXP_TESTS "Build tests" ON)
 option(WITH_SEXP_CLI "Build sexp console application" ON)
-option(ENABLE_SANITIZERS "Enable ASan and other sanitizers" OFF)
-option(DOWNLOAD_GOOGLETEST "Download googletest" OFF)
+option(WITH_SANITIZERS "Enable ASan and other sanitizers" OFF)
+option(DOWNLOAD_GTEST "Download googletest" ON)
 
 include(GNUInstallDirs)
 include(CheckCXXSourceCompiles)
 
 
-if (ENABLE_SANITIZERS)
+if (WITH_SANITIZERS)
     if (NOT CMAKE_CXX_COMPILER_ID MATCHES "Clang")
         message(FATAL_ERROR "Sanitizers have only been tested with the clang compiler.")
     endif()
     if(NOT CMAKE_BUILD_TYPE MATCHES "Debug")
-        message(STATUS "Forcing build type to Debug for sanitizers)")
+        message(STATUS "Forcing build type to Debug for sanitizers")
         set(CMAKE_BUILD_TYPE Debug CACHE STRING "Build type. Forced to Debug" FORCE)
     endif()
 endif()
@@ -53,7 +53,7 @@ endif(NOT CMAKE_BUILD_TYPE)
 
 message(STATUS "Building ${CMAKE_BUILD_TYPE} configuration")
 
-if (ENABLE_SANITIZERS)
+if (WITH_SANITIZERS)
   add_compile_options(-fsanitize=leak,address,undefined -fno-omit-frame-pointer -fno-common -O1)
   link_libraries(-fsanitize=leak,address,undefined)
 endif()
@@ -142,7 +142,7 @@ if(WITH_SEXP_TESTS)
         tests/include/sexp-tests.h
     )
 
-    if(DOWNLOAD_GOOGLETEST)
+    if(DOWNLOAD_GTEST)
         message(STATUS "Fetching googletest")
         include(FetchContent)
         # Version 1.8.1 to make it compatible with gcc 4.8.5 which misses some C++11 features
@@ -161,7 +161,7 @@ if(WITH_SEXP_TESTS)
         FetchContent_MakeAvailable(googletest)
         set(GTestMain gtest_main)
         set(GTest gtest)
-    else(DOWNLOAD_GOOGLETEST)
+    else(DOWNLOAD_GTEST)
         find_package(GTest REQUIRED)
         set(GTestMain GTest::Main)
         set(GTest GTest::GTest)
@@ -169,7 +169,7 @@ if(WITH_SEXP_TESTS)
         if(NOT MSVC)
             target_link_libraries(sexp-tests PRIVATE pthread)
         endif(NOT MSVC)
-    endif(DOWNLOAD_GOOGLETEST)
+    endif(DOWNLOAD_GTEST)
 
     target_link_libraries(sexp-tests PRIVATE
         sexp
