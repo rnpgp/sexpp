@@ -55,7 +55,7 @@ jobs:
           fetch-depth: 1
 
       - name: Configure
-        run: cmake -Bbuild -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/install -DCMAKE_BUILD_TYPE=Release -DDOWNLOAD_GOOGLETEST=ON
+        run: cmake -Bbuild -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/install -DCMAKE_BUILD_TYPE=Release
 
       - name: Adjust environment for Windows build
         if: runner.os == 'Windows'
@@ -81,3 +81,54 @@ jobs:
       - name: Run additional tests
         shell: bash
         run: tests/scripts/tests.sh
+
+  offline-gtest:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+
+      - name: Install googletest
+        run: |
+          sudo apt-get -y install googletest
+          sudo cmake -B/usr/src/googletest/build /usr/src/googletest
+          sudo cmake --build /usr/src/googletest/build
+          sudo cmake --install /usr/src/googletest/build
+
+      - name: Configure
+        run: |
+          cmake -Bbuild                                                   \
+                -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/install    \
+                -DCMAKE_BUILD_TYPE=Release                                \
+                -DDOWNLOAD_GTEST=OFF
+
+      - name: Build
+        run: cmake --build build
+
+      - name: Run tests
+        run: ctest --test-dir build --output-on-failure
+
+  sanitizers:
+    runs-on: ubuntu-latest
+    env:
+      CC: clang
+      CXX: clang++
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+
+      - name: Configure
+        run: |
+          cmake -Bbuild                                                   \
+                -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/install    \
+                -DWITH_SANITIZERS=ON
+
+      - name: Build
+        run: cmake --build build
+
+      - name: Run tests
+        run: ctest --test-dir build --output-on-failure
