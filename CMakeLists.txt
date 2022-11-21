@@ -26,11 +26,19 @@
 # 3.14 -- FetchContent
 cmake_minimum_required(VERSION 3.14)
 
-project (sexp VERSION 0.1.0 LANGUAGES C CXX)
+include(cmake/version.cmake)
+determine_version("${CMAKE_CURRENT_SOURCE_DIR}" SEXP)
+
+# project name, etc
+project(sexp
+  VERSION "${SEXP_VERSION}"
+  LANGUAGES C CXX
+  DESCRIPTION "S-expressions parser and generator C++ library, fully compliant to [https://people.csail.mit.edu/rivest/Sexp.txt]"
+)
 
 option(WITH_SEXP_TESTS "Build tests" ON)
 option(WITH_SEXP_CLI "Build sexp console application" ON)
-option(WITH_SANITIZERS "Enable ASan and other sanitizers" OFF)
+option(WITH_SANITIZERS "Enable ASAN and other sanitizers" OFF)
 option(DOWNLOAD_GTEST "Download googletest" ON)
 
 include(GNUInstallDirs)

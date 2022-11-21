@@ -61,46 +61,48 @@ void sexp_char_defs_t::initialize_character_tables(void)
     int i;
     for (i = 0; i < 256; i++) {
         upper[i] = i;
-        alpha[i] = base64digit[i] = decdigit[i] = hexdigit[i] = whitespace[i] = tokenchar[i] =
+        alpha[i] = base64digit[i] = decdigit[i] = hexdigit[i] = tokenchar[i] = whitespace[i] =
           false;
     }
+    // Some compilers 'overoptimize' if this loop is merged with the next loop from 'a' to 'z'
+    // We did not try to understand it, just splitted the loops
     for (i = 'a'; i <= 'z'; i++) {
         upper[i] = i - 'a' + 'A';
-        base64digit[i] = base64digit[upper[i]] = true;
-        alpha[i] = alpha[upper[i]] = true;
-        base64value[i] = i - 'a' + 26;
-        base64value[upper[i]] = i - 'a';
-        tokenchar[i] = tokenchar[upper[i]] = true;
     }
-
     for (i = '0'; i <= '9'; i++) {
-        base64digit[i] = decdigit[i] = hexdigit[i] = true;
+        base64digit[i] = decdigit[i] = hexdigit[i] = tokenchar[i] = true;
         decvalue[i] = hexvalue[i] = i - '0';
         base64value[i] = (i - '0') + 52;
-        tokenchar[i] = true;
     }
-
     for (i = 'a'; i <= 'f'; i++) {
         hexdigit[i] = hexdigit[upper[i]] = true;
         hexvalue[i] = hexvalue[upper[i]] = i - 'a' + 10;
     }
+    for (i = 'a'; i <= 'z'; i++) {
+        base64digit[i] = base64digit[upper[i]] = alpha[i] = alpha[upper[i]] = tokenchar[i] =
+          tokenchar[upper[i]] = true;
+        base64value[i] = i - 'a' + 26;
+        base64value[upper[i]] = i - 'a';
+    }
 
-    whitespace[' '] = whitespace['\n'] = whitespace['\t'] = true;
-    whitespace['\v'] = whitespace['\r'] = whitespace['\f'] = true;
+    // Some compilers generate warning about char used as an array index
+    // (though char constant < 127 shall be safe under all circumstances)
+    whitespace[(int) ' '] = whitespace[(int) '\n'] = whitespace[(int) '\t'] = true;
+    whitespace[(int) '\v'] = whitespace[(int) '\r'] = whitespace[(int) '\f'] = true;
 
-    base64digit['+'] = base64digit['/'] = true;
-    base64value['+'] = 62;
-    base64value['/'] = 63;
-    base64value['='] = 0;
+    base64digit[(int) '+'] = base64digit[(int) '/'] = true;
+    base64value[(int) '+'] = 62;
+    base64value[(int) '/'] = 63;
+    base64value[(int) '='] = 0;
 
-    tokenchar['-'] = true;
-    tokenchar['.'] = true;
-    tokenchar['/'] = true;
-    tokenchar['_'] = true;
-    tokenchar[':'] = true;
-    tokenchar['*'] = true;
-    tokenchar['+'] = true;
-    tokenchar['='] = true;
+    tokenchar[(int) '-'] = true;
+    tokenchar[(int) '.'] = true;
+    tokenchar[(int) '/'] = true;
+    tokenchar[(int) '_'] = true;
+    tokenchar[(int) ':'] = true;
+    tokenchar[(int) '*'] = true;
+    tokenchar[(int) '+'] = true;
+    tokenchar[(int) '='] = true;
 }
 
 /*
