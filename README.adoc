@@ -8,7 +8,7 @@ image:https://github.com/rnpgp/sexp/workflows/build-and-test-msys/badge.svg["Bui
 S-expressions are a data structure for representing complex data. They are a variation on LISP S-expressions. (Lisp was invented by John McCarthy).
 S-expressions were adopted for use in http://theory.lcs.mit.edu/~cis/sdsi.html[SDSI] and http://world.std.com/~cme/html/spki.html[SPKI]. The work reported here is, however, application-independent. (That is, we will use S-expressions in the SPKI/SDSI work, but have developed it and presented it in an application-independent manner, so that others may most easily consider adopting it for other applications.)
 
-SDSI has been developed by Professors https://people.csail.mit.edu/rivest/index.html[Ronald L. Rivest] and Butler Lampson of http://www.lcs.mit.edu/[MIT's Laboratory for Computer Science], members of http://theory.lcs.mit.edu/~cis[LCS's Cryptography and Information Security] research group.
+SDSI has been developed by Professors https://people.csail.mit.edu/rivest/index.html[Ronald L. Rivest] and Butler Lampson of http://www.lcs.mit.edu/ [MIT's Laboratory for Computer Science], members of http://theory.lcs.mit.edu/~cis[LCS's Cryptography and Information Security] research group.
 
 SDSI research has been supported by DARPA contract DABT63-96-C-0018, "Security for Distributed Computer Systems".
 
@@ -16,7 +16,7 @@ SPKI has been developed by http://www.clark.net/pub/cme/home.html[Carl Ellison] 
 
 ## References and Documentation
 
-https://people.csail.mit.edu/rivest/Sexp.txt[SEXP 1.0 guide(text)]
+https://people.csail.mit.edu/rivest/Sexp.txt [SEXP 1.0 guide(text)]
 
 ## C++ code
 
