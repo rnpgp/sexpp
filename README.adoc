@@ -83,7 +83,11 @@ cmake --install .
 == CMake script options
 
 `WITH_SEXP_TESTS:BOOL`::
-fetches googletest, build tests (default: `ON`)
+build tests (default: `ON`)
+
+`DOWNLOAD_GTEST`::
+if tests are build download googletest from github (default: `ON`)
+when this option is set to `OFF` googletest binary package is a prerequisite for SEXP tests
 
 `WITH_SEXP_CLI:BOOL`::
 build the `sexp` client application (default: `ON`)
@@ -94,45 +98,86 @@ build with address and other sanitizers (default: `OFF`)
 
 
 
-== Usage of `sexp` command-line executable
+== SEXP command-line utility
 
-The `sexp-cli` command-line executable reads and parses S-expressions. It also
-prints out the S-expressions in a variety of formats.
+The `sexp-cli` command-line utility is reference parser and generator of S-expressions.
+It can read, parse and print out SEXP in all defined formats.
 
-Documentation on how to run the program can be obtained via the help
-functionality, by running `sexp-cli -h`.
+=== sexp-cli switches:
+[options="header"]
+|=======================================================================================================
+| Switch              | Description                                    | Default
+3+| Input
+| -i <filename>       | input file name                                | read input from console (stdin)
+| -p                  | prompt input if reading from console           | disabled
+| -s                  | treat input as a single SEXP string            | disabled, input is treated as S-expression
+3+| Output
+| -o <filename>       | output file name:                              | write output to console (stdout)
+| -a                  | generate advanced transport format             | enabled if no format is specified
+| -b                  | generate base-64 transport format              | disabled
+| -c                  | generate canonical format                      | disabled
+| -l                  | suppress linefeeds after output                | disabled
+| -w <width>          | set output line width (0 implies no constraint)| 75
+3+| Miscellaneous
+| -x                  | execute repeatedly until EOF                   | process single S-expression then exit
+| -h                  | print help message and exit                    |
+|=======================================================================================================
 
-.Output of running `sexp-cli -h`
+Running without switches implies: -p -a -b -c -x
+
+=== Usage examples:
+Prompt for S-expressions input from console, parse and output it to `certificate.dat` in base64 transport format
 [source,sh]
 ----
-$ ./sexp-cli -h
-The program `sexp` reads, parses, and prints out S-expressions.
- INPUT:
-   Input is normally taken from stdin, but this can be changed:
-      -i filename      -- takes input from file instead.
-      -p               -- prompts user for console input
-   Input is normally parsed, but this can be changed:
-      -s               -- treat input up to EOF as a single string
- CONTROL LOOP:
-   The main routine typically reads one S-expression, prints it out again,
-   and stops.  This may be modified:
-      -x               -- execute main loop repeatedly until EOF
- OUTPUT:
-   Output is normally written to stdout, but this can be changed:
-      -o filename      -- write output to file instead
-   The output format is normally canonical, but this can be changed:
-      -a               -- write output in advanced transport format
-      -b               -- write output in base-64 output format
-      -c               -- write output in canonical format
-      -l               -- suppress linefeeds after output
-   More than one output format can be requested at once.
- There is normally a line-width of 75 on output, but:
-      -w width         -- changes line width to specified width.
-                          (0 implies no line-width constraint)
- The default switches are: -p -a -b -c -x
- Typical usage: cat certificate-file | sexp -a -x
+sexp-cli -o certificate.dat -p -b
+> Input:
+> (aa bb (cc dd))
+>
+> Writing base64 (of canonical) output to certificate.dat
 ----
 
+Parse all S-expressions from `certificate.dat`, output them to console in advanced transport format with no prompts
+[source,sh]
+----
+sexp-cli -i certificate.dat -x
+> (2:aa2:bb(2:cc2:dd))
+----
+
+Parse S-expressions from `certificate.dat`, output it to console in canonical, base64 and advanced format with prompts and no width limitation
+[source,sh]
+----
+sexp-cli -i certificate.dat -a -b -c -p -w 0
+> Reading input from certificate.dat
+>
+> Canonical output:
+> (2:aa2:bb(2:cc2:dd))
+> Base64 (of canonical) output:
+> {KDI6YWEyOmJiKDI6Y2MyOmRkKSk=}
+> Advanced transport output:
+> (aa bb (cc dd))
+----
+
+Repeatedly prompt for S-expressions input from console, parse and output it console in advanced, base64 and canonical formats
+[source,sh]
+----
+sexp-cli -p -a -b -c -x
+----
+or just
+----
+sexp-cli
+> Input:
+> (abc def (zxc vbn))
+>
+> Canonical output:
+> (3:abc3:def(3:zxc3:vbn))
+> Base64 (of canonical) output:
+> {KDM6YWJjMzpkZWYoMzp6eGMzOnZibikp}
+> Advanced transport output:
+> (abc def (zxc vbn))
+>
+> Input:
+> ^C
+----
 
 == License
 
