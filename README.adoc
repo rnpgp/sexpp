@@ -1,40 +1,139 @@
-image:https://github.com/rnpgp/sexp/workflows/build-and-test/badge.svg["Build status Ubuntu/MacOS/Windows", link="https://github.com/rnpgp/sexp/actions?workflow=build-and-test"]
+= S-expressions parser and generator library in C\++ (SEXP in C++)
+
+image:https://github.com/rnpgp/sexp/workflows/build-and-test/badge.svg["Build status Ubuntu/macOS/Windows", link="https://github.com/rnpgp/sexp/actions?workflow=build-and-test"]
 image:https://github.com/rnpgp/sexp/workflows/build-and-test-rh/badge.svg["Build status CentOS/Fedora", link="https://github.com/rnpgp/sexp/actions?workflow=build-and-test-rh"]
 image:https://github.com/rnpgp/sexp/workflows/build-and-test-deb/badge.svg["Build status Debian", link="https://github.com/rnpgp/sexp/actions?workflow=build-and-test-deb"]
 image:https://github.com/rnpgp/sexp/workflows/build-and-test-msys/badge.svg["Build status MSys", link="https://github.com/rnpgp/sexp/actions?workflow=build-and-test-msys"]
 
-# SEXP---(S-expressions) parser and generator library
+== Purpose
 
-S-expressions are a data structure for representing complex data. They are a variation on LISP S-expressions. (Lisp was invented by John McCarthy).
-S-expressions were adopted for use in http://theory.lcs.mit.edu/~cis/sdsi.html[SDSI] and http://world.std.com/~cme/html/spki.html[SPKI]. The work reported here is, however, application-independent. (That is, we will use S-expressions in the SPKI/SDSI work, but have developed it and presented it in an application-independent manner, so that others may most easily consider adopting it for other applications.)
+This is a C++ library for working with S-expressions. This implementation
+is derived from the reference SEXP C library developed by Professors Ronald Rivest
+and Butler Lampson of MIT LCS (now CSAIL).
 
-SDSI has been developed by Professors https://people.csail.mit.edu/rivest/index.html[Ronald L. Rivest] and Butler Lampson of http://www.lcs.mit.edu/ [MIT's Laboratory for Computer Science], members of http://theory.lcs.mit.edu/~cis[LCS's Cryptography and Information Security] research group.
+This library differs from the original C implementation in the following ways:
 
-SDSI research has been supported by DARPA contract DABT63-96-C-0018, "Security for Distributed Computer Systems".
+* It aims to be reuseable in C++ implementations and is importable via CMake.
+* It includes a test suite for correctness testing and tests against malformed
+  S-expressions.
+* It supports, and is tested against, all major platforms, including:
+** Ubuntu, Debian, Fedora, CentOS
+** macOS
+** Windows
+** msys
 
-SPKI has been developed by http://www.clark.net/pub/cme/home.html[Carl Ellison] and others in the IETF SPKI working group.
+The original C library is available at:
 
-## References and Documentation
+* http://people.csail.mit.edu/rivest/sexp.html
 
-https://people.csail.mit.edu/rivest/Sexp.txt [SEXP 1.0 guide(text)]
 
-## C++ code
+== Background
 
-The library is a deep rework to C++ of original SEXP library https://people.csail.mit.edu/rivest/sexp.html that maintains full support of original specification. Sample client application  reads and parses S-expressions. It also prints out the S-expressions in a variety of formats.
-While that most applications will not need anything but the simple canonical and transport formats; however, the code here is considerably more complex because it also supports the advanced format, both for input and for output.) The "sexp-main" program also contains some documentation on running the program. (Or just type "sexp -h" to get the help print-out.) The code is available under the "MIT License" (open source).
+S-expressions are a data structure for representing complex data as a variation
+on https://en.wikipedia.org/wiki/Lisp_(programming_language)[LISP] S-expressions.
 
-## Building and installation
-```
+S-expressions were originally adopted for use in
+http://theory.lcs.mit.edu/~cis/sdsi.html[SDSI] and
+http://world.std.com/~cme/html/spki.html[SPKI].
+
+SDSI has been developed by Professors
+https://people.csail.mit.edu/rivest/index.html[Ronald L. Rivest] and Butler
+Lampson of http://www.lcs.mit.edu/[MIT's Laboratory for Computer Science],
+members of
+http://theory.lcs.mit.edu/~cis[LCS's Cryptography and Information Security]
+research group.
+
+NOTE: SDSI research has been supported by DARPA contract DABT63-96-C-0018,
+"Security for Distributed Computer Systems".
+
+NOTE: SPKI has been developed by
+http://www.clark.net/pub/cme/home.html[Carl Ellison] and others in the IETF SPKI
+working group.
+
+
+== Usage guide for S-expressions
+
+* https://people.csail.mit.edu/rivest/Sexp.txt[SEXP 1.0 guide]
+
+
+== Code
+
+The library is a deep rework to C++ of the original
+https://people.csail.mit.edu/rivest/sexp.html[SEXP library] that maintains full
+support of original specification.
+
+While most applications will not need anything but the simple canonical and
+transport formats; however, the code here is considerably more complex because
+it also supports the advanced format, both for input and for output.
+
+
+== Building and installation
+
+[source,sh]
+----
 mkdir build
 cd build
 cmake ..
 cmake --build .
 ctest
 cmake --install .
-```
+----
 
-## CMake script options
 
-- WITH_SEXP_TESTS:BOOL - fetch google test, build tests           - default:ON
-- WITH_SEXP_CLI:BOOL   - build sexp client application            - default:ON
-- WITH_SANITIZERS:BOOL - build with address and other sanitizers  - default:OFF - requires clang compiler
+== CMake script options
+
+`WITH_SEXP_TESTS:BOOL`::
+fetches googletest, build tests (default: `ON`)
+
+`WITH_SEXP_CLI:BOOL`::
+build the `sexp` client application (default: `ON`)
+
+`WITH_SANITIZERS:BOOL`::
+build with address and other sanitizers (default: `OFF`)
+(requires clang compiler)
+
+
+
+== Usage of `sexp` command-line executable
+
+The `sexp-cli` command-line executable reads and parses S-expressions. It also
+prints out the S-expressions in a variety of formats.
+
+Documentation on how to run the program can be obtained via the help
+functionality, by running `sexp-cli -h`.
+
+.Output of running `sexp-cli -h`
+[source,sh]
+----
+$ ./sexp-cli -h
+The program `sexp` reads, parses, and prints out S-expressions.
+ INPUT:
+   Input is normally taken from stdin, but this can be changed:
+      -i filename      -- takes input from file instead.
+      -p               -- prompts user for console input
+   Input is normally parsed, but this can be changed:
+      -s               -- treat input up to EOF as a single string
+ CONTROL LOOP:
+   The main routine typically reads one S-expression, prints it out again,
+   and stops.  This may be modified:
+      -x               -- execute main loop repeatedly until EOF
+ OUTPUT:
+   Output is normally written to stdout, but this can be changed:
+      -o filename      -- write output to file instead
+   The output format is normally canonical, but this can be changed:
+      -a               -- write output in advanced transport format
+      -b               -- write output in base-64 output format
+      -c               -- write output in canonical format
+      -l               -- suppress linefeeds after output
+   More than one output format can be requested at once.
+ There is normally a line-width of 75 on output, but:
+      -w width         -- changes line width to specified width.
+                          (0 implies no line-width constraint)
+ The default switches are: -p -a -b -c -x
+ Typical usage: cat certificate-file | sexp -a -x
+----
+
+
+== License
+
+The code is made available as open-source software under the MIT License.
