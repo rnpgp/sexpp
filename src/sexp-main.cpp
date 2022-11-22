@@ -39,7 +39,7 @@
 
 using namespace sexp;
 
-const char *help = "The program `sexp' reads, parses, and prints out S-expressions.\n"
+const char *help = "The program `sexp-cli' reads, parses, and prints out S-expressions.\n"
                    " INPUT:\n"
                    "   Input is normally taken from stdin, but this can be changed:\n"
                    "      -i filename      -- takes input from file instead.\n"
@@ -63,8 +63,8 @@ const char *help = "The program `sexp' reads, parses, and prints out S-expressio
                    " There is normally a line-width of 75 on output, but:\n"
                    "      -w width         -- changes line width to specified width.\n"
                    "                          (0 implies no line-width constraint)\n"
-                   " The default switches are: -p -a -b -c -x\n"
-                   " Typical usage: cat certificate-file | sexp -a -x \n";
+                   " Running without switches implies: -p -a -b -c -x\n"
+                   " Typical usage: cat certificate-file | sexp-cli -a -x \n";
 
 /*************************************************************************/
 /* main(argc,argv)
@@ -80,15 +80,16 @@ int main(int argc, char **argv)
     sexp_input_stream_t * is = nullptr;
     std::ofstream *       ofs = nullptr;
     sexp_output_stream_t *os = nullptr;
+    std::string ofname;
+    std::string ifname;
     try {
         std::unique_ptr<sexp_object_t> object;
 
         is = new sexp_input_stream_t(&std::cin);
         os = new sexp_output_stream_t(&std::cout);
 
-        /* process switches */
         if (argc > 1)
-            swa = swb = swc = swp = sws = swx = swl = false;
+           swa = swb = swc = swp = sws = swx = swl = false;
         for (i = 1; i < argc; i++) {
             c = argv[i];
             if (*c != '-')
@@ -103,7 +104,6 @@ int main(int argc, char **argv)
                 swc = true;       /* canonical output */
             else if (*c == 'h') { /* help */
                 std::cout << help;
-                std::cout.flush();
                 exit(0);
             } else if (*c == 'i') { /* input file */
                 if (i + 1 < argc)
@@ -112,6 +112,7 @@ int main(int argc, char **argv)
                 if (ifs->fail())
                     sexp_error(sexp_exception_t::error, "Can't open input file.", 0, 0, EOF);
                 is->set_input(ifs);
+                ifname = argv[i];
             } else if (*c == 'l')
                 swl = true;       /* suppress linefeeds after output */
             else if (*c == 'o') { /* output file */
@@ -121,6 +122,7 @@ int main(int argc, char **argv)
                 if (ofs->fail())
                     sexp_error(sexp_exception_t::error, "Can't open output file.", 0, 0, EOF);
                 os->set_output(ofs);
+                ofname = argv[i];
             } else if (*c == 'p')
                 swp = true; /* prompt for input */
             else if (*c == 's')
@@ -146,7 +148,11 @@ int main(int argc, char **argv)
             is->set_next_char(-2); /* this is not EOF */
         while (is->get_next_char() != EOF) {
             if (swp) {
-                std::cout << "Input:" << std::endl;
+                if (ifname.empty())
+                    std::cout << "Input:";
+                else
+                    std::cout << "Reading input from " << ifname;
+                std::cout << std::endl;
                 std::cout.flush();
             }
 
@@ -163,24 +169,30 @@ int main(int argc, char **argv)
             else
                 object = is->scan_to_eof();
 
+            if (swp)
+                std::cout << std::endl;
+
             if (swc) {
                 if (swp) {
-                    std::cout << "Canonical output:" << std::endl;
-                    std::cout.flush();
+                    if (ofname.empty())
+                        std::cout << "Canonical output:";
+                    else
+                        std::cout << "Writing canonical output to " << ofname;
                     os->new_line(sexp_output_stream_t::advanced);
                 }
                 object->print_canonical(os);
                 if (!swl) {
                     std::cout << std::endl;
-                    std::cout.flush();
                 }
             }
 
             if (swb) {
                 if (swp) {
-                    std::cout << "Base64 (of canonical) output:" << std::endl;
-                    std::cout.flush();
-                    os->new_line(sexp_output_stream_t::advanced);
+                    if (ofname.empty())
+                        std::cout << "Base64 (of canonical) output:";
+                    else
+                        std::cout << "Writing base64 (of canonical) output to " << ofname;
+                    os->new_line(sexp_output_stream_t::base64);
                 }
                 os->print_base64(object);
                 if (!swl) {
@@ -191,8 +203,10 @@ int main(int argc, char **argv)
 
             if (swa) {
                 if (swp) {
-                    std::cout << "Advanced transport output:" << std::endl;
-                    std::cout.flush();
+                    if (ofname.empty())
+                        std::cout << "Advanced transport output:";
+                    else
+                        std::cout << "Writing advanced transport output to " << ofname;
                     os->new_line(sexp_output_stream_t::advanced);
                 }
                 os->print_advanced(object);
