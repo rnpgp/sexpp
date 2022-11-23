@@ -138,6 +138,11 @@ class sexp_simple_string_t : public std::basic_string<octet_t>, private sexp_cha
         return length() == std::strlen(right) && std::memcmp(data(), right, length()) == 0;
     }
 
+    bool operator!=(const char *right) const noexcept
+    {
+        return length() != std::strlen(right) || std::memcmp(data(), right, length()) != 0;
+    }
+
     unsigned as_unsigned() const noexcept
     {
         return empty() ? UINT_MAX : (unsigned) atoi(reinterpret_cast<const char *>(c_str()));
@@ -147,6 +152,11 @@ class sexp_simple_string_t : public std::basic_string<octet_t>, private sexp_cha
 inline bool operator==(const sexp_simple_string_t *left, const std::string &right) noexcept
 {
     return *left == right.c_str();
+}
+
+inline bool operator!=(const sexp_simple_string_t *left, const std::string &right) noexcept
+{
+    return *left != right.c_str();
 }
 
 /*
@@ -182,6 +192,7 @@ class sexp_object_t {
         return nullptr;
     }
     virtual bool     operator==(const char *right) const noexcept { return false; }
+    virtual bool     operator!=(const char *right) const noexcept { return true; }
     virtual unsigned as_unsigned() const noexcept { return UINT_MAX; }
 };
 
@@ -233,6 +244,7 @@ class sexp_string_t : public sexp_object_t {
     virtual bool           is_sexp_string(void) const noexcept { return true; }
 
     virtual bool operator==(const char *right) const noexcept { return data_string == right; }
+    virtual bool operator!=(const char *right) const noexcept { return data_string != right; }
 
     void             parse(sexp_input_stream_t *sis);
     virtual unsigned as_unsigned() const noexcept { return data_string.as_unsigned(); }
@@ -241,6 +253,11 @@ class sexp_string_t : public sexp_object_t {
 inline bool operator==(const sexp_string_t *left, const std::string &right) noexcept
 {
     return *left == right.c_str();
+}
+
+inline bool operator!=(const sexp_string_t *left, const std::string &right) noexcept
+{
+    return *left != right.c_str();
 }
 
 /*
@@ -287,14 +304,25 @@ class sexp_input_stream_t : private sexp_char_defs_t {
     uint32_t      bits;      /* Bits waiting to be used */
     uint32_t      n_bits;    /* number of such bits waiting to be used */
     int           count;     /* number of 8-bit characters output by get_char */
+    size_t        depth;     /* current depth of nested SEXP lists */
+    size_t        max_depth; /* maximum allowed depth of nested SEXP lists, 0 if no limit */
   public:
-    sexp_input_stream_t(std::istream *i);
-    sexp_input_stream_t *set_input(std::istream *i);
+    sexp_input_stream_t(std::istream *i, size_t max_depth = 0);
+    sexp_input_stream_t *set_input(std::istream *i, size_t max_depth = 0);
     sexp_input_stream_t *set_byte_size(uint32_t new_byte_size);
     uint32_t             get_byte_size(void) { return byte_size; }
     sexp_input_stream_t *get_char(void);
     sexp_input_stream_t *skip_white_space(void);
     sexp_input_stream_t *skip_char(int c);
+    sexp_input_stream_t *increase_depth(void) {
+        if (max_depth != 0 && ++depth > max_depth)
+            sexp_error(sexp_exception_t::error, "Maximum allowed SEXP list depth (%u) is exceeded", max_depth, 0, count);
+        return this;
+    }
+    sexp_input_stream_t *decrease_depth(void) {
+        depth--;
+        return this;
+    }
 
     std::unique_ptr<sexp_object_t> scan_to_eof();
     std::unique_ptr<sexp_object_t> scan_object(void);
@@ -310,6 +338,7 @@ class sexp_input_stream_t : private sexp_char_defs_t {
 
     int get_next_char(void) const { return next_char; }
     int set_next_char(int c) { return next_char = c; }
+
 };
 
 /*
