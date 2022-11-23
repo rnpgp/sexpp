@@ -100,10 +100,10 @@ build with address and other sanitizers (default: `OFF`)
 
 == SEXP command-line utility
 
-The `sexp-cli` command-line utility is reference parser and generator of S-expressions.
+The `sexp` command-line utility is reference parser and generator of S-expressions.
 It can read, parse and print out SEXP in all defined formats.
 
-=== sexp-cli switches:
+=== sexp switches:
 [options="header"]
 |=======================================================================================================
 | Switch              | Description                                    | Default
@@ -127,26 +127,29 @@ Running without switches implies: -p -a -b -c -x
 
 === Usage examples:
 Prompt for S-expressions input from console, parse and output it to `certificate.dat` in base64 transport format
-[source,sh]
+[source]
 ----
-sexp-cli -o certificate.dat -p -b
+sexp -o certificate.dat -p -b
+
 > Input:
 > (aa bb (cc dd))
 >
-> Writing base64 (of canonical) output to certificate.dat
+> Writing base64 (of canonical) output to 'certificate.dat'
 ----
 
 Parse all S-expressions from `certificate.dat`, output them to console in advanced transport format with no prompts
-[source,sh]
+[source]
 ----
-sexp-cli -i certificate.dat -x
+sexp -i certificate.dat -x
+
 > (2:aa2:bb(2:cc2:dd))
 ----
 
 Parse S-expressions from `certificate.dat`, output it to console in canonical, base64 and advanced format with prompts and no width limitation
-[source,sh]
+[source]
 ----
-sexp-cli -i certificate.dat -a -b -c -p -w 0
+sexp -i certificate.dat -a -b -c -p -w 0
+
 > Reading input from certificate.dat
 >
 > Canonical output:
@@ -158,22 +161,23 @@ sexp-cli -i certificate.dat -a -b -c -p -w 0
 ----
 
 Repeatedly prompt for S-expressions input from console, parse and output it console in advanced, base64 and canonical formats
-[source,sh]
+[source]
 ----
-sexp-cli -p -a -b -c -x
+sexp -p -a -b -c -x
 ----
 or just
 ----
-sexp-cli
+sexp
+
 > Input:
-> (abc def (zxc vbn))
+> (abc def (ghi jkl))
 >
 > Canonical output:
-> (3:abc3:def(3:zxc3:vbn))
+> (3:abc3:def(3:ghi3:jkl))
 > Base64 (of canonical) output:
-> {KDM6YWJjMzpkZWYoMzp6eGMzOnZibikp}
+> {KDM6YWJjMzpkZWYoMzpnaGkzOmprbCkp}
 > Advanced transport output:
-> (abc def (zxc vbn))
+> (abc def (ghi jkl))
 >
 > Input:
 > ^C
