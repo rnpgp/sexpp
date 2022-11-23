@@ -113,14 +113,14 @@ class sexp_simple_string_t : public std::basic_string<octet_t>, private sexp_cha
         return *this;
     }
     // Returns length for printing simple string as a token
-    uint32_t advanced_length_token(void) const { return length(); }
+    size_t advanced_length_token(void) const { return length(); }
     // Returns length for printing simple string as a base64 string
-    uint32_t advanced_length_base64(void) const { return (2 + 4 * ((length() + 2) / 3)); }
+    size_t advanced_length_base64(void) const { return (2 + 4 * ((length() + 2) / 3)); }
     // Returns length for printing simple string ss in quoted-string mode
-    uint32_t advanced_length_quoted(void) const { return (1 + length() + 1); }
+    size_t advanced_length_quoted(void) const { return (1 + length() + 1); }
     // Returns length for printing simple string ss in hexadecimal mode
-    uint32_t advanced_length_hexadecimal(void) const { return (1 + 2 * length() + 1); }
-    uint32_t advanced_length(sexp_output_stream_t *os) const;
+    size_t advanced_length_hexadecimal(void) const { return (1 + 2 * length() + 1); }
+    size_t advanced_length(sexp_output_stream_t *os) const;
 
     sexp_output_stream_t *print_canonical_verbatim(sexp_output_stream_t *os) const;
     sexp_output_stream_t *print_advanced(sexp_output_stream_t *os) const;
@@ -314,12 +314,18 @@ class sexp_input_stream_t : private sexp_char_defs_t {
     sexp_input_stream_t *get_char(void);
     sexp_input_stream_t *skip_white_space(void);
     sexp_input_stream_t *skip_char(int c);
-    sexp_input_stream_t *increase_depth(void) {
+    sexp_input_stream_t *increase_depth(void)
+    {
         if (max_depth != 0 && ++depth > max_depth)
-            sexp_error(sexp_exception_t::error, "Maximum allowed SEXP list depth (%u) is exceeded", max_depth, 0, count);
+            sexp_error(sexp_exception_t::error,
+                       "Maximum allowed SEXP list depth (%u) is exceeded",
+                       max_depth,
+                       0,
+                       count);
         return this;
     }
-    sexp_input_stream_t *decrease_depth(void) {
+    sexp_input_stream_t *decrease_depth(void)
+    {
         depth--;
         return this;
     }
@@ -338,7 +344,6 @@ class sexp_input_stream_t : private sexp_char_defs_t {
 
     int get_next_char(void) const { return next_char; }
     int set_next_char(int c) { return next_char = c; }
-
 };
 
 /*

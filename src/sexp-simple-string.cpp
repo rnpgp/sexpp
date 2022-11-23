@@ -56,7 +56,7 @@ sexp_output_stream_t *sexp_simple_string_t::print_canonical_verbatim(
  * sexp_simple_string_t::advanced_length(os)
  * Returns length of printed image of s
  */
-uint32_t sexp_simple_string_t::advanced_length(sexp_output_stream_t *os) const
+size_t sexp_simple_string_t::advanced_length(sexp_output_stream_t *os) const
 {
     if (can_print_as_token(os))
         return advanced_length_token();
