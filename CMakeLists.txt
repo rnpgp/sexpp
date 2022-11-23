@@ -122,9 +122,8 @@ if(WITH_SEXP_CLI)
     )
     target_include_directories (sexp-cli PUBLIC include)
     target_link_libraries(sexp-cli PRIVATE sexp)
-
     target_compile_features(sexp-cli PUBLIC cxx_std_11)
-    target_include_directories (sexp-cli PUBLIC include)
+    set_target_properties(sexp-cli PROPERTIES RUNTIME_OUTPUT_NAME sexp)
 endif(WITH_SEXP_CLI)
 
 

@@ -43,7 +43,6 @@ assert_installed_var() {
 test_install_script() {
    echo "==> Install script test"
 
-   DIR_INSTALL="$DIR_ROOT/install"
    DIR_INS_B="$DIR_INSTALL/bin"
    DIR_INS_L="$DIR_INSTALL/lib"
    DIR_INS_L64="$DIR_INSTALL/lib64"
@@ -52,10 +51,10 @@ test_install_script() {
    DIR_INS_I="$DIR_INSTALL/include/sexp"
 
    if [[ "$OSTYPE" == "windows" ]]; then
-      assert_installed "$DIR_INS_B/sexp-cli.exe"
+      assert_installed "$DIR_INS_B/sexp.exe"
       assert_installed "$DIR_INS_L/sexp.lib"
    else
-      assert_installed "$DIR_INS_B/sexp-cli"
+      assert_installed "$DIR_INS_B/sexp"
       assert_installed_var "$DIR_INS_L" "$DIR_INS_L64" "libsexp.a"
    fi
 
@@ -64,11 +63,22 @@ test_install_script() {
    assert_installed "$DIR_INS_I/sexp-error.h"
 }
 
+test_sexp_cli() {
+# shellcheck disable=SC2251
+! IFS= read -r -d '' expected << EOM
+Input:
+
+Writing base64 (of canonical) output to certificate.dat
+EOM
+   output=`./sexp -o certificate.dat -p -b <<<"(aa bb (cc dd))"`
+   assertEqual "$expected" "$output"
+}
 # ......................................................................
 # main
-DIR0="$( cd "$( dirname "$0" )" && pwd )"
+DIR0="$( cd $( dirname $0 ) && pwd )"
 DIR1="${DIR_ROOT:="$DIR0/../.."}"
 DIR_ROOT="$( cd "$DIR1" && pwd )"
+DIR_INSTALL="$DIR_ROOT/install"
 
 DIR_TESTS="$( cd "$DIR0/.." && pwd)"
 
