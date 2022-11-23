@@ -106,63 +106,57 @@ TEST_F(ExceptionTests, NotAListWhenExpected)
     }
 }
 
+static void do_parse_list_from_string(const char *str)
+{
+    std::istringstream  iss(str);
+    sexp_input_stream_t is(&iss);
+    sexp_list_t         lst;
+    lst.parse(is.set_byte_size(8)->get_char());
+}
+
+static void do_parse_list_from_string_with_limit(const char *str, size_t m_depth)
+{
+    std::istringstream  iss(str);
+    sexp_input_stream_t is(&iss, m_depth);
+    sexp_list_t         lst;
+    lst.parse(is.set_byte_size(8)->get_char());
+}
+
 TEST_F(ExceptionTests, MaxDepth)
 {
     const char *depth_1 = "(sexp_list_1)";
     const char *depth_4 = "(sexp_list_1 (sexp_list_2 (sexp_list_3 (sexp_list_4))))";
     const char *depth_4e = "(sexp_list_1 (sexp_list_2 (sexp_list_3 ())))";
-    const char *depth_5 = "(sexp_list_1 (sexp_list_2 (sexp_list_3 (sexp_list_4 (sexp_list_5)))))";
+    const char *depth_5 =
+      "(sexp_list_1 (sexp_list_2 (sexp_list_3 (sexp_list_4 (sexp_list_5)))))";
     const char *depth_5e = "(sexp_list_1 (sexp_list_2 (sexp_list_3 (sexp_list_4 ()))))";
 
-    std::istringstream  iss(depth_1);
-    sexp_list_t lst;
+    do_parse_list_from_string(depth_1);
+    do_parse_list_from_string(depth_4);
+    do_parse_list_from_string(depth_4e);
+    do_parse_list_from_string(depth_5);
+    do_parse_list_from_string(depth_5e);
 
-    sexp_input_stream_t is(&iss);
-    lst.parse(is.set_byte_size(8)->get_char());
-    /* no exception */
-    iss = std::istringstream(depth_4);
-    is.set_input(&iss);
-    lst.parse(is.set_byte_size(8)->get_char());
-    /* no exception */
-    iss = std::istringstream(depth_5);
-    is.set_input(&iss);
-    lst.parse(is.set_byte_size(8)->get_char());
+    do_parse_list_from_string_with_limit(depth_1, 4);
+    do_parse_list_from_string_with_limit(depth_4, 4);
+    do_parse_list_from_string_with_limit(depth_4e, 4);
 
-    /* no exception */
-    iss = std::istringstream(depth_1);
-    is.set_input(&iss, 4);
-    lst.parse(is.set_byte_size(8)->get_char());
-    /* no exception */
-    iss = std::istringstream(depth_4);
-    is.set_input(&iss, 4);
-    lst.parse(is.set_byte_size(8)->get_char());
-    /* no exception */
-    iss = std::istringstream(depth_4e);
-    is.set_input(&iss, 4);
-    lst.parse(is.set_byte_size(8)->get_char());
-
-    iss = std::istringstream(depth_5);
-    is.set_input(&iss, 4);
     try {
-        lst.parse(is.set_byte_size(8)->get_char());
-            FAIL() << "sexp::sexp_exception_t expected but has not been thrown";
-        }
-    catch (sexp::sexp_exception_t &e) {
-            EXPECT_STREQ(
-              e.what(),
-              "SEXP ERROR: Maximum allowed SEXP list depth (4) is exceeded at position 53");
+        do_parse_list_from_string_with_limit(depth_5, 4);
+        FAIL() << "sexp::sexp_exception_t expected but has not been thrown";
+    } catch (sexp::sexp_exception_t &e) {
+        EXPECT_STREQ(
+          e.what(),
+          "SEXP ERROR: Maximum allowed SEXP list depth (4) is exceeded at position 53");
     }
 
-    iss = std::istringstream(depth_5e);
-    is.set_input(&iss, 4);
     try {
-        lst.parse(is.set_byte_size(8)->get_char());
-            FAIL() << "sexp::sexp_exception_t expected but has not been thrown";
-        }
-    catch (sexp::sexp_exception_t &e) {
-            EXPECT_STREQ(
-              e.what(),
-              "SEXP ERROR: Maximum allowed SEXP list depth (4) is exceeded at position 53");
+        do_parse_list_from_string_with_limit(depth_5e, 4);
+        FAIL() << "sexp::sexp_exception_t expected but has not been thrown";
+    } catch (sexp::sexp_exception_t &e) {
+        EXPECT_STREQ(
+          e.what(),
+          "SEXP ERROR: Maximum allowed SEXP list depth (4) is exceeded at position 53");
     }
 }
 } // namespace
