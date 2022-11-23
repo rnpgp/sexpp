@@ -39,7 +39,7 @@
 
 using namespace sexp;
 
-const char *help = "The program `sexp' reads, parses, and prints out S-expressions.\n"
+const char *help = "The program 'sexp' reads, parses, and prints out S-expressions.\n"
                    " INPUT:\n"
                    "   Input is normally taken from stdin, but this can be changed:\n"
                    "      -i filename      -- takes input from file instead.\n"
@@ -190,7 +190,8 @@ int main(int argc, char **argv)
                     if (ofname.empty())
                         std::cout << "Base64 (of canonical) output:" << std::endl;
                     else
-                        std::cout << "Writing base64 (of canonical) output to '" << ofname << "'";
+                        std::cout << "Writing base64 (of canonical) output to '" << ofname
+                                  << "'";
                 }
                 os->print_base64(object);
                 if (!swl) {
@@ -202,7 +203,7 @@ int main(int argc, char **argv)
             if (swa) {
                 if (swp) {
                     if (ofname.empty())
-                        std::cout << "Advanced transport output:"  << std::endl;
+                        std::cout << "Advanced transport output:" << std::endl;
                     else
                         std::cout << "Writing advanced transport output to '" << ofname << "'";
                 }
