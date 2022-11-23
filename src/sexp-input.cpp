@@ -50,16 +50,16 @@ uint32_t      bits;      /* Bits waiting to be used */
 uint32_t      n_bits;    /* number of such bits waiting to be used */
 int           count;     /* number of 8-bit characters output by get_char */
 
-sexp_input_stream_t::sexp_input_stream_t(std::istream *i)
+sexp_input_stream_t::sexp_input_stream_t(std::istream *i, size_t m_depth)
 {
-    set_input(i);
+    set_input(i, m_depth);
 }
 
 /*
  * sexp_input_stream_t::set_input(std::istream *i)
  */
 
-sexp_input_stream_t *sexp_input_stream_t::set_input(std::istream *i)
+sexp_input_stream_t *sexp_input_stream_t::set_input(std::istream *i, size_t m_depth)
 {
     input_file = i;
     byte_size = 8;
@@ -67,6 +67,8 @@ sexp_input_stream_t *sexp_input_stream_t::set_input(std::istream *i)
     bits = 0;
     n_bits = 0;
     count = -1;
+    depth = 0;
+    max_depth = m_depth;
     return this;
 }
 

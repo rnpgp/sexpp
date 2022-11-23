@@ -198,7 +198,7 @@ TEST_F(PrimitivesTests, at4rnp)
     EXPECT_STREQ(reinterpret_cast<const char *>(sstr->get_string().c_str()), "rnp_block");
 }
 
-TEST_F(PrimitivesTests, cmp4rnp)
+TEST_F(PrimitivesTests, eq4rnp)
 {
     const char *str_in = "(rnp_block (rnp_list1 rnp_list2))";
 
@@ -225,6 +225,35 @@ TEST_F(PrimitivesTests, cmp4rnp)
     EXPECT_FALSE(lst.sexp_string_at(0) == std::string("not_rnp_block"));
     EXPECT_TRUE(lst.sexp_simple_string_at(0) == std::string("rnp_block"));
     EXPECT_FALSE(lst.sexp_simple_string_at(0) == std::string("not_rnp_block"));
+}
+
+TEST_F(PrimitivesTests, ne4rnp)
+{
+    const char *str_in = "(rnp_block (rnp_list1 rnp_list2))";
+
+    std::istringstream  iss(str_in);
+    sexp_input_stream_t is(&iss);
+
+    sexp_list_t lst;
+    lst.parse(is.set_byte_size(8)->get_char());
+
+    EXPECT_FALSE(*lst.at(0) != "rnp_block");
+    EXPECT_TRUE(*lst.at(0) != "not_rnp_block");
+    EXPECT_TRUE(*lst.at(1) != "rnp_block");
+    EXPECT_TRUE(*lst.at(1) != "not_rnp_block");
+
+    EXPECT_FALSE(*lst.sexp_string_at(0) != "rnp_block");
+    EXPECT_TRUE(*lst.sexp_string_at(0) != "not_rnp_block");
+    EXPECT_FALSE(*lst.sexp_simple_string_at(0) != "rnp_block");
+    EXPECT_TRUE(*lst.sexp_simple_string_at(0) != "not_rnp_block");
+
+    EXPECT_FALSE(*lst.sexp_list_at(1)->at(0) != "rnp_list1");
+    EXPECT_FALSE(*lst.sexp_list_at(1)->sexp_string_at(1) != "rnp_list2");
+
+    EXPECT_FALSE(lst.sexp_string_at(0) != std::string("rnp_block"));
+    EXPECT_TRUE(lst.sexp_string_at(0) != std::string("not_rnp_block"));
+    EXPECT_FALSE(lst.sexp_simple_string_at(0) != std::string("rnp_block"));
+    EXPECT_TRUE(lst.sexp_simple_string_at(0) != std::string("not_rnp_block"));
 }
 
 TEST_F(PrimitivesTests, u4rnp)

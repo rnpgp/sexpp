@@ -106,4 +106,63 @@ TEST_F(ExceptionTests, NotAListWhenExpected)
     }
 }
 
+TEST_F(ExceptionTests, MaxDepth)
+{
+    const char *depth_1 = "(sexp_list_1)";
+    const char *depth_4 = "(sexp_list_1 (sexp_list_2 (sexp_list_3 (sexp_list_4))))";
+    const char *depth_4e = "(sexp_list_1 (sexp_list_2 (sexp_list_3 ())))";
+    const char *depth_5 = "(sexp_list_1 (sexp_list_2 (sexp_list_3 (sexp_list_4 (sexp_list_5)))))";
+    const char *depth_5e = "(sexp_list_1 (sexp_list_2 (sexp_list_3 (sexp_list_4 ()))))";
+
+    std::istringstream  iss(depth_1);
+    sexp_list_t lst;
+
+    sexp_input_stream_t is(&iss);
+    lst.parse(is.set_byte_size(8)->get_char());
+    /* no exception */
+    iss = std::istringstream(depth_4);
+    is.set_input(&iss);
+    lst.parse(is.set_byte_size(8)->get_char());
+    /* no exception */
+    iss = std::istringstream(depth_5);
+    is.set_input(&iss);
+    lst.parse(is.set_byte_size(8)->get_char());
+
+    /* no exception */
+    iss = std::istringstream(depth_1);
+    is.set_input(&iss, 4);
+    lst.parse(is.set_byte_size(8)->get_char());
+    /* no exception */
+    iss = std::istringstream(depth_4);
+    is.set_input(&iss, 4);
+    lst.parse(is.set_byte_size(8)->get_char());
+    /* no exception */
+    iss = std::istringstream(depth_4e);
+    is.set_input(&iss, 4);
+    lst.parse(is.set_byte_size(8)->get_char());
+
+    iss = std::istringstream(depth_5);
+    is.set_input(&iss, 4);
+    try {
+        lst.parse(is.set_byte_size(8)->get_char());
+            FAIL() << "sexp::sexp_exception_t expected but has not been thrown";
+        }
+    catch (sexp::sexp_exception_t &e) {
+            EXPECT_STREQ(
+              e.what(),
+              "SEXP ERROR: Maximum allowed SEXP list depth (4) is exceeded at position 53");
+    }
+
+    iss = std::istringstream(depth_5e);
+    is.set_input(&iss, 4);
+    try {
+        lst.parse(is.set_byte_size(8)->get_char());
+            FAIL() << "sexp::sexp_exception_t expected but has not been thrown";
+        }
+    catch (sexp::sexp_exception_t &e) {
+            EXPECT_STREQ(
+              e.what(),
+              "SEXP ERROR: Maximum allowed SEXP list depth (4) is exceeded at position 53");
+    }
+}
 } // namespace

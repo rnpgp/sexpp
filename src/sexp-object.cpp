@@ -103,9 +103,9 @@ uint32_t sexp_string_t::advanced_length(sexp_output_stream_t *os) const
 
 void sexp_list_t::parse(sexp_input_stream_t *sis)
 {
-    sis->skip_char('(')->skip_white_space();
+    sis->skip_char('(')->increase_depth()->skip_white_space();
     if (sis->get_next_char() == ')') {
-        ; /* OK */
+        ;
     } else {
         push_back(sis->scan_object());
     }
@@ -113,7 +113,7 @@ void sexp_list_t::parse(sexp_input_stream_t *sis)
     while (true) {
         sis->skip_white_space();
         if (sis->get_next_char() == ')') { /* we just grabbed last element of list */
-            sis->skip_char(')');
+            sis->skip_char(')')->decrease_depth();
             return;
 
         } else {
