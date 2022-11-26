@@ -115,7 +115,6 @@ target_compile_features(sexp PUBLIC cxx_std_11)
 target_include_directories (sexp PUBLIC include)
 set_target_properties(sexp PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
-
 if(WITH_SEXP_CLI)
     add_executable (sexp-cli
                     src/sexp-main.cpp

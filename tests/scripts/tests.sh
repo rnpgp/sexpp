@@ -76,8 +76,7 @@ Input:
 Writing base64 (of canonical) output to certificate.dat
 EOM
    echo "(aa bb (cc dd))" > input1.dat
-   "$app" -o certificate.dat -p -b < input1.dat
-   output=$("$app" -o certificate.dat -p -b < input.dat)
+   output=$("$app" -o certificate.dat -p -b < input1.dat)
 #  $expected possibly includes extra EOL at the end -- it depends on OS
    assertContains "$expected" "$output"
    output=$(cat certificate.dat)
@@ -126,11 +125,15 @@ EOM
 
 # ......................................................................
 # main
+
 DIR0="$( cd "$( dirname "$0" )" && pwd )"
 DIR1="${DIR_ROOT:="$DIR0/../.."}"
 DIR_ROOT="$( cd "$DIR1" && pwd )"
 
-DIR_INSTALL="$DIR_ROOT/install"
+if [[ -z "${DIR_INSTALL:-}" ]]; then
+   DIR_INSTALL="$DIR_ROOT/install"
+fi
+
 DIR_INS_B="$DIR_INSTALL/bin"
 DIR_INS_L="$DIR_INSTALL/lib"
 DIR_INS_L64="$DIR_INSTALL/lib64"
