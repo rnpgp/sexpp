@@ -53,13 +53,13 @@ class ExceptionTests : public testing::Test {
 TEST_F(ExceptionTests, UnexpectedEof)
 {
     do_scan_ex("/malformed/sexp-malformed-1",
-               "SEXP ERROR: unxpected end of file at position 19");
+               "SEXP ERROR: unxpected end of file at position 20");
 }
 
 TEST_F(ExceptionTests, UnexpectedCharacter4bit)
 {
     do_scan_ex("/malformed/sexp-malformed-2",
-               "SEXP ERROR: character ')' found in 4-bit coding region at position 21");
+               "SEXP ERROR: character ')' found in 4-bit coding region at position 22");
 }
 
 TEST_F(ExceptionTests, IllegalCharacter)
@@ -71,20 +71,20 @@ TEST_F(ExceptionTests, IllegalCharacter)
 TEST_F(ExceptionTests, UnexpectedEofAfterQoute)
 {
     do_scan_ex("/malformed/sexp-malformed-4",
-               "SEXP ERROR: unxpected end of file at position 3");
+               "SEXP ERROR: unxpected end of file at position 4");
 }
 
 TEST_F(ExceptionTests, IllegalCharacterBase64)
 {
     do_scan_ex("/malformed/sexp-malformed-5",
-               "SEXP ERROR: illegal character '}' (125 decimal) at position 27");
+               "SEXP ERROR: illegal character '}' (125 decimal) at position 35");
 }
 
 TEST_F(ExceptionTests, UnusedBits)
 {
     sexp::sexp_exception_t::set_verbosity(sexp::sexp_exception_t::warning);
     do_scan_ex("/malformed/sexp-malformed-6",
-               "SEXP WARNING: 6-bit region ended with 4 unused bits left-over at position 13");
+               "SEXP WARNING: 6-bit region ended with 4 unused bits left-over at position 17");
 }
 
 TEST_F(ExceptionTests, NotAListWhenExpected)

@@ -32,7 +32,6 @@
  * 7/21/1997
  */
 
-#include <sexp/sexp-error.h>
 #include <sexp/sexp.h>
 
 namespace sexp {
@@ -83,6 +82,12 @@ sexp_input_stream_t *sexp_input_stream_t::set_byte_size(uint32_t newByteSize)
     return this;
 }
 
+int sexp_input_stream_t::read_char(void)
+{
+    count++;
+    return input_file->get();
+}
+
 /*
  * sexp_input_stream_t::get_char()
  * This is one possible character input routine for an input stream.
@@ -101,7 +106,7 @@ sexp_input_stream_t *sexp_input_stream_t::get_char(void)
     }
 
     while (true) {
-        c = next_char = input_file->get();
+        c = next_char = read_char();
         if (c == EOF)
             return this;
         if ((byte_size == 6 && (c == '|' || c == '}')) || (byte_size == 4 && (c == '#'))) {
@@ -120,7 +125,6 @@ sexp_input_stream_t *sexp_input_stream_t::get_char(void)
         else if (byte_size == 6 && c == '=')
             ; /* ignore equals signs in base64 regions */
         else if (byte_size == 8) {
-            count++;
             return this;
         } else if (byte_size < 8) {
             bits = bits << byte_size;
@@ -139,7 +143,6 @@ sexp_input_stream_t *sexp_input_stream_t::get_char(void)
             if (n_bits >= 8) {
                 next_char = (bits >> (n_bits - 8)) & 0xFF;
                 n_bits -= 8;
-                count++;
                 return this;
             }
         }

@@ -45,9 +45,9 @@ class BaselineTests : public testing::Test {
 
     BaselineTests()
     {
-        base_samples[base_sample_advanced] = sexp_samples_folder + "/sexp-sample-a";
-        base_samples[base_sample_base64] = sexp_samples_folder + "/sexp-sample-b";
-        base_samples[base_sample_canonical] = sexp_samples_folder + "/sexp-sample-c";
+        base_samples[base_sample_advanced] = sexp_samples_folder + "/baseline/sexp-sample-a";
+        base_samples[base_sample_base64] = sexp_samples_folder + "/baseline/sexp-sample-b";
+        base_samples[base_sample_canonical] = sexp_samples_folder + "/baseline/sexp-sample-c";
     };
 };
 

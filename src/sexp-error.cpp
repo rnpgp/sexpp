@@ -28,17 +28,18 @@
  */
 
 #include <sexp/sexp-error.h>
-#include <sexp/sexp.h>
 
 namespace sexp {
 
-sexp_exception_t::severity sexp_exception_t::verbosity_ = sexp_exception_t::error;
-bool                       sexp_exception_t::interactive_ = false;
+sexp_exception_t::severity sexp_exception_t::vrb = sexp_exception_t::error;
+bool                       sexp_exception_t::intr = false;
 
-std::string sexp_exception_t::format(std::string message, severity level, int position)
+std::string sexp_exception_t::format(std::string prf,
+                                     std::string message,
+                                     severity    level,
+                                     int         position)
 {
-    std::string r =
-      std::string("SEXP ") + (level == error ? "ERROR: " : "WARNING: ") + message;
+    std::string r = prf + (level == error ? " ERROR: " : " WARNING: ") + message;
     if (position >= 0)
         r += " at position " + std::to_string(position);
     return r;
@@ -54,7 +55,7 @@ void sexp_error(
         throw sexp_exception_t(tmp, l, pos);
     if (sexp_exception_t::interactive()) {
         std::cout.flush() << std::endl
-                          << "*** " << sexp_exception_t::format(tmp, l, pos) << " ***"
+                          << "*** " << sexp_exception_t::format("SEXP", tmp, l, pos) << " ***"
                           << std::endl;
     }
 }

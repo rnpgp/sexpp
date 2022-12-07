@@ -36,7 +36,6 @@
 
 #include <gtest/gtest.h>
 
-#include <sexp/sexp-error.h>
 #include <sexp/sexp.h>
 
 #include <sexp-samples-folder.h>

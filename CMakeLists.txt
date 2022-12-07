@@ -101,19 +101,21 @@ if(CAN_RETURN_UNIQUE_PTR)
 endif(CAN_RETURN_UNIQUE_PTR)
 
 add_library(sexp STATIC
-    src/sexp-input.cpp
-    src/sexp-output.cpp
-    src/sexp-object.cpp
-    src/sexp-simple-string.cpp
-    src/sexp-char-defs.cpp
-    src/sexp-error.cpp
-    include/sexp/sexp.h
-    include/sexp/sexp-error.h
+    "src/sexp-input.cpp"
+    "src/sexp-output.cpp"
+    "src/sexp-object.cpp"
+    "src/sexp-simple-string.cpp"
+    "src/sexp-char-defs.cpp"
+    "src/sexp-error.cpp"
+    "src/g23-input.cpp"
+    "include/sexp/sexp.h"
+    "include/sexp/sexp-error.h"
+    "include/sexp/g23-input.h"
 )
 
 target_compile_features(sexp PUBLIC cxx_std_11)
 target_include_directories (sexp PUBLIC include)
-set_target_properties(sexp PROPERTIES POSITION_INDEPENDENT_CODE ON)
+set_target_properties(sexp PROPERTIES posINDEPENDENT_CODE ON)
 
 if(WITH_SEXP_CLI)
     add_executable (sexp-cli
@@ -142,12 +144,13 @@ if(WITH_SEXP_TESTS)
     )
 
     add_executable(sexp-tests
-        tests/src/baseline-tests.cpp
-        tests/src/compat-tests.cpp
-        tests/src/exception-tests.cpp
-        tests/src/primitives-tests.cpp
-        tests/src/compare-files.cpp
-        tests/include/sexp-tests.h
+        "tests/src/baseline-tests.cpp"
+        "tests/src/exception-tests.cpp"
+        "tests/src/primitives-tests.cpp"
+        "tests/src/g10-compat-tests.cpp"
+        "tests/src/g23-compat-tests.cpp"
+        "tests/src/compare-files.cpp"
+        "tests/include/sexp-tests.h"
     )
 
     if(DOWNLOAD_GTEST)

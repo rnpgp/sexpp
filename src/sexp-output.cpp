@@ -32,7 +32,6 @@
  * 5/5/1997
  */
 
-#include <sexp/sexp-error.h>
 #include <sexp/sexp.h>
 
 namespace sexp {
@@ -166,12 +165,12 @@ sexp_output_stream_t *sexp_output_stream_t::new_line(sexp_print_mode mode)
  * sexp_output_stream_t::print_decimal(n)
  * print out n in decimal to output stream os
  */
-sexp_output_stream_t *sexp_output_stream_t::print_decimal(uint32_t n)
+sexp_output_stream_t *sexp_output_stream_t::print_decimal(uint64_t n)
 {
-    char buffer[50];
+    char buffer[20]; // 64*ln(2)/ln(10)
     snprintf(buffer,
              sizeof(buffer) / sizeof(buffer[0]),
-             "%u",
+             "%lu",
              n); // since itoa is not a part of any standard
     for (uint32_t i = 0; buffer[i] != 0; i++)
         var_put_char(buffer[i]);

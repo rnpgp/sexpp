@@ -32,7 +32,6 @@
  * 5/5/1997
  */
 
-#include <sexp/sexp-error.h>
 #include <sexp/sexp.h>
 
 namespace sexp {

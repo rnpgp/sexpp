@@ -34,7 +34,6 @@
 
 #include <fstream>
 
-#include <sexp/sexp-error.h>
 #include <sexp/sexp.h>
 
 using namespace sexp;

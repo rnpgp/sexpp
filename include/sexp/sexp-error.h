@@ -40,25 +40,31 @@ class sexp_exception_t : public std::exception {
     enum severity { error = 0, warning = 1 };
 
   protected:
-    static severity verbosity_;
-    static bool     interactive_;
+    static severity vrb;
+    static bool     intr;
 
-    int         position_; // May be EOF aka -1
-    severity    level_;
-    std::string msg_;
+    int         pos; // May be EOF aka -1
+    severity    lev;
+    std::string msg;
 
   public:
-    sexp_exception_t(std::string message, severity level, int position)
-        : position_{position}, level_{level}, msg_{format(message, level, position)} {};
-    static std::string format(std::string message, severity level, int position);
-    static bool shall_throw(severity level) { return level == error || verbosity_ != error; };
-    virtual const char *what() const throw() { return msg_.c_str(); };
-    severity            level() const { return level_; };
-    uint32_t            position() const { return position_; };
-    static severity     verbosity() { return verbosity_; };
-    static bool         interactive() { return interactive_; };
-    static void         set_verbosity(severity vrb) { verbosity_ = vrb; };
-    static void         set_interactive(bool intr) { interactive_ = intr; };
+    sexp_exception_t(std::string message,
+                     severity    level,
+                     int         position,
+                     const char *prefix = "SEXP")
+        : pos{position}, lev{level}, msg{format(prefix, message, level, position)} {};
+    static std::string  format(std::string prf,
+                               std::string message,
+                               severity    level,
+                               int         position);
+    static bool         shall_throw(severity level) { return level == error || vrb != error; };
+    virtual const char *what(void) const throw() { return msg.c_str(); };
+    severity            level(void) const { return lev; };
+    uint32_t            position(void) const { return pos; };
+    static severity     verbosity(void) { return vrb; };
+    static bool         interactive(void) { return intr; };
+    static void         set_verbosity(severity verbosity) { vrb = verbosity; };
+    static void         set_interactive(bool interactive) { intr = interactive; };
 };
 
 void sexp_error(
