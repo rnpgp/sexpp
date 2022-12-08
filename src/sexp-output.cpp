@@ -41,14 +41,29 @@ static const char *base64Digits =
   "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
 /*
- * sexp_output_stream_t::newSexpOutputStream()
+ * sexp_output_stream_t::sexp_output_stream_t
  * Creates and initializes new sexp_output_stream_t object.
  */
 sexp_output_stream_t::sexp_output_stream_t(std::ostream *o)
-    : output_file{o}, byte_size{8}, bits{0}, n_bits{0}, mode{canonical}, column{0},
-      max_column{default_line_length}, indent{0}
-
 {
+    set_output(o);
+}
+
+/*
+ * sexp_output_stream_t::set_output
+ * Re-initializes new sexp_output_stream_t object.
+ */
+sexp_output_stream_t *sexp_output_stream_t::set_output(std::ostream *o)
+{
+    output_file = o;
+    byte_size = 8;
+    bits = 0;
+    n_bits = 0;
+    mode = canonical;
+    column = 0;
+    max_column = default_line_length;
+    indent = 0;
+    return this;
 }
 
 /*
@@ -121,12 +136,8 @@ sexp_output_stream_t *sexp_output_stream_t::change_output_byte_size(int newByteS
 sexp_output_stream_t *sexp_output_stream_t::flush(void)
 {
     if (n_bits > 0) {
-        if (byte_size == 4)
-            put_char(hexDigits[(bits << (4 - n_bits)) & 0x0F]);
-        else if (byte_size == 6)
-            put_char(base64Digits[(bits << (6 - n_bits)) & 0x3F]);
-        else if (byte_size == 8)
-            put_char(bits & 0xFF);
+        assert(byte_size == 6);
+        put_char(base64Digits[(bits << (6 - n_bits)) & 0x3F]);
         n_bits = 0;
         base64_count++;
     }

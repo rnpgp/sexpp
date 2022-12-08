@@ -39,6 +39,8 @@ concurrency:
 env:
 # Looks like the last version that supports i386
   CMAKE_VERSION: '3.20.6-2'
+  MAKEFLAGS: j4
+
 jobs:
   build-and-test:
     name: ${{ matrix.image }}-${{ matrix.env.CC }}

@@ -28,10 +28,10 @@
  */
 
 #include <sexp-tests.h>
-#include <sexp/g23-input.h>
+#include <sexp/ext-key-format.h>
 
 using namespace sexp;
-using namespace g23;
+using namespace ext_key_format;
 
 using ::testing::UnitTest;
 
@@ -45,8 +45,8 @@ class G23CompatTests : public testing::Test {
         EXPECT_FALSE(r);
 
         if (!ifs.fail()) {
-            g23_input_stream_t         is(&ifs);
-            g23_extended_private_key_t extended_key;
+            ext_key_input_stream_t is(&ifs);
+            extended_private_key_t extended_key;
             is.scan(extended_key);
             EXPECT_EQ(extended_key.fields.size(), 2);
             EXPECT_EQ(extended_key.fields.count("Created"), 1);
@@ -56,22 +56,6 @@ class G23CompatTests : public testing::Test {
             auto search = extended_key.fields.find("Created");
             if (search != extended_key.fields.end()) {
                 EXPECT_EQ(search->second, "20221130T160847");
-            }
-        }
-    }
-
-    static void do_scan_ex(const char *fn, const char *msg)
-    {
-        std::ifstream ifs(sexp_samples_folder + "/compat/g23/" + fn, std::ifstream::binary);
-        EXPECT_FALSE(ifs.fail());
-        if (!ifs.fail()) {
-            try {
-                g23_input_stream_t         is(&ifs);
-                g23_extended_private_key_t extended_key;
-                is.scan(extended_key);
-                FAIL() << "sexp::sexp_exception_t expected but has not been thrown";
-            } catch (sexp::sexp_exception_t &e) {
-                EXPECT_STREQ(e.what(), msg);
             }
         }
     }
@@ -85,8 +69,8 @@ TEST_F(G23CompatTests, G10Test)
     EXPECT_FALSE(r);
 
     if (!ifs.fail()) {
-        g23_input_stream_t         is(&ifs);
-        g23_extended_private_key_t extended_key;
+        ext_key_input_stream_t is(&ifs);
+        extended_private_key_t extended_key;
         is.scan(extended_key);
         EXPECT_EQ(extended_key.fields.size(), 0);
     }
@@ -110,10 +94,22 @@ TEST_F(G23CompatTests, G23CorrectWithComment)
     scan_and_check_correct("correct_with_comment.key");
 }
 
-// Correct extended key format, with an empty line (wich is comment a well)
+// Correct extended key format, with an empty line (which is comment a well)
+TEST_F(G23CompatTests, G23CorrectWithTwoEmptyLines)
+{
+    scan_and_check_correct("correct_with_two_empty_lines.key");
+}
+
+// Correct extended key format, with two empty linea
 TEST_F(G23CompatTests, G23CorrectWithEmptyLine)
 {
     scan_and_check_correct("correct_with_empty_line.key");
+}
+
+// Correct extended key format, witg windows line endings
+TEST_F(G23CompatTests, G23CorrectWithWindowsEol)
+{
+    scan_and_check_correct("correct_with_windows_eol.key");
 }
 
 // Correct extended key format, with a comment at the end of file
@@ -131,9 +127,9 @@ TEST_F(G23CompatTests, G23CorrectWithMultFields)
     EXPECT_FALSE(r);
 
     if (!ifs.fail()) {
-        g23_input_stream_t         is(&ifs);
-        g23_extended_private_key_t extended_key;
-        is.scan(extended_key);
+        ext_key_input_stream_t is(&ifs);
+        extended_private_key_t extended_key;
+        extended_key.parse(is);
         EXPECT_EQ(extended_key.fields.size(), 4);
         EXPECT_EQ(extended_key.fields.count("Created"), 1);
         EXPECT_EQ(extended_key.fields.count("Description"), 3);
@@ -145,50 +141,4 @@ TEST_F(G23CompatTests, G23CorrectWithMultFields)
         }
     }
 }
-
-// Malformed extended key format, line break inside name
-TEST_F(G23CompatTests, G23MalformedNameBreak)
-{
-    do_scan_ex("malformed_name_break.key",
-               "EXTENDED KEY FORMAT ERROR: unexpected end of line at position 5");
-}
-
-// Malformed extended key format, eof break inside name
-TEST_F(G23CompatTests, G23MalformedNameEof)
-{
-    do_scan_ex("malformed_name_eof.key",
-               "EXTENDED KEY FORMAT ERROR: unexpected end of file at position 2800");
-}
-
-// Malformed extended key format, invalid character name
-TEST_F(G23CompatTests, G23MalformedInvalidNameChar)
-{
-    do_scan_ex("malformed_invalid_name_char.key",
-               "EXTENDED KEY FORMAT ERROR: unxpected character '0x40' found in a name field "
-               "at position 28");
-}
-
-// Malformed extended key format, invalid character name
-TEST_F(G23CompatTests, G23MalformedInvalidNameFirstChar)
-{
-    do_scan_ex(
-      "malformed_invalid_name_first_char.key",
-      "EXTENDED KEY FORMAT ERROR: unexpected character '0x31' found starting a name field "
-      "at position 21");
-}
-
-// Malformed extended key format, no key field
-TEST_F(G23CompatTests, G23MalformedNoKey)
-{
-    do_scan_ex("malformed_no_key.key",
-               "EXTENDED KEY FORMAT ERROR: missing mandatory 'key' field at position 2821");
-}
-
-// Malformed extended key format, two key fields
-TEST_F(G23CompatTests, G23MalformedTwoKeys)
-{
-    do_scan_ex("malformed_two_keys.key",
-               "EXTENDED KEY FORMAT ERROR: 'key' field must occur only once at position 2822");
-}
-
 } // namespace

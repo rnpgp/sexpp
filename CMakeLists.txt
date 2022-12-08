@@ -126,15 +126,15 @@ add_library(sexp STATIC
     "src/sexp-simple-string.cpp"
     "src/sexp-char-defs.cpp"
     "src/sexp-error.cpp"
-    "src/g23-input.cpp"
+    "src/ext-key-format.cpp"
     "include/sexp/sexp.h"
     "include/sexp/sexp-error.h"
-    "include/sexp/g23-input.h"
+    "include/sexp/ext-key-format.h"
 )
 
 target_compile_features(sexp PUBLIC cxx_std_11)
 target_include_directories (sexp PUBLIC include)
-set_target_properties(sexp PROPERTIES posINDEPENDENT_CODE ON)
+set_target_properties(sexp PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 if(WITH_SEXP_CLI)
     add_executable (sexp-cli
@@ -190,6 +190,7 @@ if(WITH_SEXP_TESTS)
         "tests/src/primitives-tests.cpp"
         "tests/src/g10-compat-tests.cpp"
         "tests/src/g23-compat-tests.cpp"
+        "tests/src/g23-exception-tests.cpp"
         "tests/src/compare-files.cpp"
         "tests/include/sexp-tests.h"
     )

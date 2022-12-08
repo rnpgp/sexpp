@@ -32,9 +32,14 @@
 #include <map>
 #include "sexp.h"
 
-namespace g23 {
+namespace ext_key_format {
 
-class g23_extended_private_key_t {
+void ext_key_error(
+  sexp::sexp_exception_t::severity level, const char *msg, size_t c1, size_t c2, int pos);
+
+class ext_key_input_stream_t;
+
+class extended_private_key_t {
   public:
     // Comparison of names is done case insensitively !!!
     struct ci_less {
@@ -64,9 +69,11 @@ class g23_extended_private_key_t {
 
     sexp::sexp_list_t key;
     fields_map_t      fields;
+
+    void parse(ext_key_input_stream_t &is);
 };
 
-class g23_input_stream_t : public sexp::sexp_input_stream_t {
+class ext_key_input_stream_t : public sexp::sexp_input_stream_t {
   private:
     static bool initialized;
     static bool namechar[256]; /* true if allowed in the name field */
@@ -83,8 +90,8 @@ class g23_input_stream_t : public sexp::sexp_input_stream_t {
     std::string scan_value(void);
 
   public:
-    g23_input_stream_t(std::istream *i, size_t md = 0);
-    virtual ~g23_input_stream_t() = default;
-    void scan(g23_extended_private_key_t &extended_key);
+    ext_key_input_stream_t(std::istream *i, size_t md = 0);
+    virtual ~ext_key_input_stream_t() = default;
+    void scan(extended_private_key_t &extended_key);
 };
-} // namespace g23
+} // namespace ext_key_format

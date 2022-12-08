@@ -163,10 +163,7 @@ int main(int argc, char **argv)
             if (is->get_next_char() == EOF)
                 break;
 
-            if (sws == false)
-                object = is->scan_object();
-            else
-                object = is->scan_to_eof();
+            object = sws ? is->scan_to_eof() : is->scan_object();
 
             if (swp)
                 std::cout << std::endl;
@@ -174,7 +171,7 @@ int main(int argc, char **argv)
             if (swc) {
                 if (swp) {
                     if (ofname.empty())
-                        std::cout << "Canonical output:";
+                        std::cout << "Canonical output:" << std::endl;
                     else
                         std::cout << "Writing canonical output to '" << ofname << "'";
                 }
@@ -192,7 +189,7 @@ int main(int argc, char **argv)
                         std::cout << "Writing base64 (of canonical) output to '" << ofname
                                   << "'";
                 }
-                os->print_base64(object);
+                os->set_output(ofs ? ofs : &std::cout)->print_base64(object);
                 if (!swl) {
                     std::cout << std::endl;
                     std::cout.flush();
@@ -206,7 +203,7 @@ int main(int argc, char **argv)
                     else
                         std::cout << "Writing advanced transport output to '" << ofname << "'";
                 }
-                os->print_advanced(object);
+                os->set_output(ofs ? ofs : &std::cout)->print_advanced(object);
                 if (!swl) {
                     std::cout << std::endl;
                     std::cout.flush();

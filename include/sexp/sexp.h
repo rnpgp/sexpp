@@ -43,6 +43,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <cassert>
 
 #include "sexp-error.h"
 
@@ -127,7 +128,6 @@ class sexp_simple_string_t : public std::basic_string<octet_t>, private sexp_cha
     sexp_output_stream_t *print_canonical_verbatim(sexp_output_stream_t *os) const;
     sexp_output_stream_t *print_advanced(sexp_output_stream_t *os) const;
     sexp_output_stream_t *print_token(sexp_output_stream_t *os) const;
-    sexp_output_stream_t *print_verbatim(sexp_output_stream_t *os) const;
     sexp_output_stream_t *print_quoted(sexp_output_stream_t *os) const;
     sexp_output_stream_t *print_hexadecimal(sexp_output_stream_t *os) const;
     sexp_output_stream_t *print_base64(sexp_output_stream_t *os) const;
@@ -147,7 +147,8 @@ class sexp_simple_string_t : public std::basic_string<octet_t>, private sexp_cha
 
     unsigned as_unsigned() const noexcept
     {
-        return empty() ? UINT_MAX : (unsigned) atoi(reinterpret_cast<const char *>(c_str()));
+        return empty() ? std::numeric_limits<uint32_t>::max() :
+                         (unsigned) atoi(reinterpret_cast<const char *>(c_str()));
     }
 };
 
@@ -195,7 +196,10 @@ class sexp_object_t {
     }
     virtual bool     operator==(const char *right) const noexcept { return false; }
     virtual bool     operator!=(const char *right) const noexcept { return true; }
-    virtual unsigned as_unsigned() const noexcept { return UINT_MAX; }
+    virtual unsigned as_unsigned() const noexcept
+    {
+        return std::numeric_limits<uint32_t>::max();
+    }
 };
 
 /*
@@ -377,7 +381,7 @@ class sexp_output_stream_t {
     uint32_t        indent;       /* current indentation level (starts at 0) */
   public:
     sexp_output_stream_t(std::ostream *o);
-    void                  set_output(std::ostream *o) { output_file = o; }
+    sexp_output_stream_t *set_output(std::ostream *o);
     sexp_output_stream_t *put_char(int c);                /* output a character */
     sexp_output_stream_t *new_line(sexp_print_mode mode); /* go to next line (and indent) */
     sexp_output_stream_t *var_put_char(int c);
@@ -406,9 +410,17 @@ class sexp_output_stream_t {
 
     uint32_t              get_byte_size(void) const { return byte_size; }
     uint32_t              get_column(void) const { return column; }
-    uint32_t              reset_column(void) { return column = 0; }
+    sexp_output_stream_t *reset_column(void)
+    {
+        column = 0;
+        return this;
+    }
     uint32_t              get_max_column(void) const { return max_column; }
-    uint32_t              set_max_column(uint32_t mc) { return max_column = mc; }
+    sexp_output_stream_t *set_max_column(uint32_t mc)
+    {
+        max_column = mc;
+        return this;
+    }
     sexp_output_stream_t *inc_indent(void)
     {
         ++indent;

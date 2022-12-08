@@ -93,8 +93,7 @@ TEST_F(BaselineTests, Scan2Base64)
             std::ostringstream   oss(std::ios_base::binary);
             sexp_output_stream_t os(&oss);
 
-            os.set_max_column(0);
-            os.print_base64(obj);
+            os.set_max_column(0)->print_base64(obj);
             oss << std::endl;
 
             std::istringstream iss(oss.str(), std::ios_base::binary);

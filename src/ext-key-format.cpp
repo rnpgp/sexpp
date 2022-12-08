@@ -27,13 +27,13 @@
  *
  */
 
-#include <sexp/g23-input.h>
+#include <sexp/ext-key-format.h>
 
 using namespace sexp;
 
-namespace g23 {
+namespace ext_key_format {
 
-static void g23_error(
+void ext_key_error(
   sexp_exception_t::severity level, const char *msg, size_t c1, size_t c2, int pos)
 {
     char                       tmp[256];
@@ -49,15 +49,15 @@ static void g23_error(
     }
 }
 
-bool g23_input_stream_t::initialized = false;
+bool ext_key_input_stream_t::initialized = false;
 // Valid characters are all ASCII letters, numbers and the hyphen.
 // true if allowed in the name field
-bool g23_input_stream_t::namechar[256];
+bool ext_key_input_stream_t::namechar[256];
 
 /*
- * g23_input_stream_t::initializeCharacterTables
+ * ext_key_input_stream_t::initializeCharacterTables
  */
-g23_input_stream_t::g23_input_stream_t(std::istream *i, size_t md)
+ext_key_input_stream_t::ext_key_input_stream_t(std::istream *i, size_t md)
     : sexp_input_stream_t(i, md), is_scanning_value(false), has_key(false)
 {
     if (!initialized) {
@@ -77,9 +77,9 @@ g23_input_stream_t::g23_input_stream_t(std::istream *i, size_t md)
 }
 
 /*
- * g23_input_stream_t::skip_line
+ * ext_key_input_stream_t::skip_line
  */
-int g23_input_stream_t::skip_line(void)
+int ext_key_input_stream_t::skip_line(void)
 {
     int c;
     do {
@@ -89,9 +89,9 @@ int g23_input_stream_t::skip_line(void)
 }
 
 /*
- * g23_input_stream_t::read_char
+ * ext_key_input_stream_t::read_char
  */
-int g23_input_stream_t::read_char(void)
+int ext_key_input_stream_t::read_char(void)
 {
     int lookahead_1 = input_file->get();
     count++;
@@ -125,38 +125,42 @@ int g23_input_stream_t::read_char(void)
 }
 
 /*
- * g23_input_stream_t::scan_name
+ * ext_key_input_stream_t::scan_name
  * A name must start with a letter and end with a colon. Valid characters are all ASCII
  * letters, numbers and the hyphen. Comparison of names is done case insensitively. Names may
  * be used several times to represent an array of values. Note that the name “Key” is special
  * in that it is madandory must occur only once.
  */
 
-std::string g23_input_stream_t::scan_name(int c)
+std::string ext_key_input_stream_t::scan_name(int c)
 {
     std::string name;
     if (!is_alpha(c)) {
-        g23_error(sexp_exception_t::error,
-                  "unexpected character '0x%x' found starting a name field",
-                  c,
-                  0,
-                  count);
+        ext_key_error(sexp_exception_t::error,
+                      isprint(next_char) ?
+                        "unexpected character '%c' (0x%x) found starting a name field" :
+                        "unexpected character '0x%x' found starting a name field",
+                      c,
+                      c,
+                      count);
     } else {
         name += (char) c;
         c = read_char();
         while (c != ':') {
             if (c == EOF) {
-                g23_error(sexp_exception_t::error, "unexpected end of file", 0, 0, count);
+                ext_key_error(sexp_exception_t::error, "unexpected end of file", 0, 0, count);
             }
             if (is_newline_char(c)) {
-                g23_error(sexp_exception_t::error, "unexpected end of line", 0, 0, count);
+                ext_key_error(sexp_exception_t::error, "unexpected end of line", 0, 0, count);
             }
             if (!is_namechar(c)) {
-                g23_error(sexp_exception_t::error,
-                          "unxpected character '0x%x' found in a name field",
-                          c,
-                          0,
-                          count);
+                ext_key_error(sexp_exception_t::error,
+                              isprint(next_char) ?
+                                "unexpected character '%c' (0x%x) found in a name field" :
+                                "unexpected character '0x%x' found in a name field",
+                              c,
+                              c,
+                              count);
             }
             name += (int) c;
             c = read_char();
@@ -166,13 +170,13 @@ std::string g23_input_stream_t::scan_name(int c)
 }
 
 /*
- * g23_input_stream_t::scan_value
+ * ext_key_input_stream_t::scan_value
  * Values are UTF-8 encoded strings. Values can be wrapped at any point, and continued in
  * the next line indicated by leading whitespace. A continuation line with one leading space
  * does not introduce a blank so that the lines can be effectively concatenated. A blank
  * line as part of a continuation line encodes a newline.
  */
-std::string g23_input_stream_t::scan_value(void)
+std::string ext_key_input_stream_t::scan_value(void)
 {
     std::string value;
     int         c;
@@ -187,12 +191,12 @@ std::string g23_input_stream_t::scan_value(void)
 }
 
 /*
- * g23_input_stream_t::scan
+ * ext_key_input_stream_t::scan
  * GnuPG 2.3+ uses a new format to store private keys that is both more flexible and easier to
  * read and edit by human beings. The new format stores name, value-pairs using the common mail
  * and http header convention.
  */
-void g23_input_stream_t::scan(g23_extended_private_key_t &res)
+void ext_key_input_stream_t::scan(extended_private_key_t &res)
 {
     set_byte_size(8);
     int c = read_char();
@@ -210,13 +214,13 @@ void g23_input_stream_t::scan(g23_extended_private_key_t &res)
             // (GCRYSEXP_FMT_ADVANCED) that avoids non-printable characters so that the file
             // can be easily inspected and edited.
             is_scanning_value = true;
-            if (g23_extended_private_key_t::iequals(name, "key")) {
+            if (extended_private_key_t::iequals(name, "key")) {
                 if (has_key) {
-                    g23_error(sexp_exception_t::error,
-                              "'key' field must occur only once",
-                              0,
-                              0,
-                              count);
+                    ext_key_error(sexp_exception_t::error,
+                                  "'key' field must occur only once",
+                                  0,
+                                  0,
+                                  count);
                 }
                 do {
                     c = read_char();
@@ -233,8 +237,16 @@ void g23_input_stream_t::scan(g23_extended_private_key_t &res)
         }
     }
     if (!has_key) {
-        g23_error(sexp_exception_t::error, "missing mandatory 'key' field", 0, 0, count);
+        ext_key_error(sexp_exception_t::error, "missing mandatory 'key' field", 0, 0, count);
     }
 }
 
-} // namespace g23
+/*
+ * extended_private_key_t::parse
+ */
+void extended_private_key_t::parse(ext_key_input_stream_t &is)
+{
+    is.scan(*this);
+}
+
+} // namespace ext_key_format
