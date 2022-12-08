@@ -39,6 +39,7 @@ project(sexp
 option(WITH_SEXP_TESTS "Build tests" ON)
 option(WITH_SEXP_CLI "Build sexp console application" ON)
 option(WITH_SANITIZERS "Enable ASAN and other sanitizers" OFF)
+option(WITH_COVERAGE "Enable coverage report" OFF)
 option(DOWNLOAD_GTEST "Download googletest" ON)
 
 include(GNUInstallDirs)
@@ -47,15 +48,28 @@ include(CheckCXXSourceCompiles)
 
 if (WITH_SANITIZERS)
     if (NOT CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-        message(FATAL_ERROR "Sanitizers have only been tested with the clang compiler.")
+        message(FATAL_ERROR "Sanitizers work with clang compiler only.")
     endif()
     if(NOT CMAKE_BUILD_TYPE MATCHES "Debug")
         message(STATUS "Forcing build type to Debug for sanitizers")
         set(CMAKE_BUILD_TYPE Debug CACHE STRING "Build type. Forced to Debug" FORCE)
+        set(WITH_TESTS ON CACHE STRING "BForced to ON" FORCE)
+    endif()
+endif()
+
+if (WITH_COVERAGE)
+    if (NOT CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+        message(FATAL_ERROR "Coverage works with GNU compiler only.")
+    endif()
+    if(NOT CMAKE_BUILD_TYPE MATCHES "Debug")
+        message(STATUS "Forcing build type to Debug for coverage")
+        set(CMAKE_BUILD_TYPE Debug CACHE STRING "Build type. Forced to Debug" FORCE)
+        set(WITH_TESTS ON CACHE STRING "BForced to ON" FORCE)
     endif()
 endif()
 
 if(NOT CMAKE_BUILD_TYPE)
+    message(STATUS "Defaulting build type to Debug")
     set(CMAKE_BUILD_TYPE Debug)
 endif(NOT CMAKE_BUILD_TYPE)
 
@@ -64,7 +78,12 @@ message(STATUS "Building ${CMAKE_BUILD_TYPE} configuration")
 if (WITH_SANITIZERS)
   add_compile_options(-fsanitize=leak,address,undefined -fno-omit-frame-pointer -fno-common -O1)
   link_libraries(-fsanitize=leak,address,undefined)
-endif()
+endif(WITH_SANITIZERS)
+
+if (WITH_COVERAGE)
+    add_compile_options(--coverage -O0)
+    link_libraries(--coverage)
+endif(WITH_COVERAGE)
 
 # set warning flags at the top level
 if(NOT MSVC)
@@ -131,6 +150,28 @@ endif(WITH_SEXP_CLI)
 
 
 if(WITH_SEXP_TESTS)
+    CHECK_CXX_SOURCE_COMPILES(
+       "#include <iostream>
+        #include <type_traits>
+        struct test_struct {
+            std::string str;
+        };
+        int main() {
+            bool b = std::is_copy_constructible<test_struct>::value;
+            return b ? 0 : -1 ;
+        }"
+        CAN_USE_NEW_GTEST
+    )
+
+    if(CAN_USE_NEW_GTEST)
+        set(GTEST_TAG "release-1.12.1")
+    else(CAN_USE_NEW_GTEST)
+        if(WITH_COVERAGE)
+            message(FATAL_ERROR "Coverage requires newer version of GTest that won't compile with your toolset")
+        endif(WITH_COVERAGE)
+        set(GTEST_TAG "release-1.8.1")
+    endif(CAN_USE_NEW_GTEST)
+
     include(CTest)
     enable_testing()
     include(GoogleTest)
@@ -156,11 +197,10 @@ if(WITH_SEXP_TESTS)
     if(DOWNLOAD_GTEST)
         message(STATUS "Fetching googletest")
         include(FetchContent)
-        # Version 1.8.1 to make it compatible with gcc 4.8.5 which misses some C++11 features
         FetchContent_Declare(
             googletest
             GIT_REPOSITORY https://github.com/google/googletest.git
-            GIT_TAG        release-1.8.1
+            GIT_TAG        ${GTEST_TAG}
         )
         # maintain compiler/linker settings on Windows
         set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)

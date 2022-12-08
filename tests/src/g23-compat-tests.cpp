@@ -168,6 +168,15 @@ TEST_F(G23CompatTests, G23MalformedInvalidNameChar)
                "at position 28");
 }
 
+// Malformed extended key format, invalid character name
+TEST_F(G23CompatTests, G23MalformedInvalidNameFirstChar)
+{
+    do_scan_ex(
+      "malformed_invalid_name_first_char.key",
+      "EXTENDED KEY FORMAT ERROR: unexpected character '0x31' found starting a name field "
+      "at position 21");
+}
+
 // Malformed extended key format, no key field
 TEST_F(G23CompatTests, G23MalformedNoKey)
 {

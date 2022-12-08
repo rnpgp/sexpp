@@ -49,15 +49,15 @@ class g23_extended_private_key_t {
     };
 
     // C++ 11 compatible version (no std::equals)
-    static bool iequals(const std::string& a, const std::string& b)
+    static bool iequals(const std::string &a, const std::string &b)
     {
-      unsigned int sz = a.size();
-      if (b.size() != sz)
-          return false;
-      for (unsigned int i = 0; i < sz; ++i)
-        if (tolower(a[i]) != tolower(b[i]))
+        unsigned int sz = a.size();
+        if (b.size() != sz)
             return false;
-      return true;
+        for (unsigned int i = 0; i < sz; ++i)
+            if (tolower(a[i]) != tolower(b[i]))
+                return false;
+        return true;
     }
 
     typedef std::multimap<std::string, std::string, ci_less> fields_map_t;

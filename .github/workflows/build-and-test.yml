@@ -132,3 +132,40 @@ jobs:
 
       - name: Run tests
         run: ctest --test-dir build --output-on-failure
+
+  coverage:
+    runs-on: ubuntu-latest
+    env:
+      CC: gcc
+      CXX: g++
+      CODECOV_TOKEN: dbb06ac6-97ef-4d04-a0c6-24f7e3d8e1d6
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+
+      - name: Configure
+        run: |
+          cmake -Bbuild                                                   \
+                -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/install    \
+                -DWITH_COVERAGE=ON
+
+      - name: Build
+        run: cmake --build build
+
+      - name: Run tests
+        run: ctest --test-dir build --output-on-failure
+
+      - name: Upload to codecov.io
+        run: |
+          curl -Os https://uploader.codecov.io/latest/linux/codecov
+          curl https://uploader.codecov.io/verification.gpg | gpg --no-default-keyring --keyring trustedkeys.gpg --import
+          curl -Os https://uploader.codecov.io/latest/linux/codecov
+          curl -Os https://uploader.codecov.io/latest/linux/codecov.SHA256SUM
+          curl -Os https://uploader.codecov.io/latest/linux/codecov.SHA256SUM.sig
+          gpgv codecov.SHA256SUM.sig codecov.SHA256SUM
+          shasum -a 256 -c codecov.SHA256SUM
+          find "build" -type f -name '*.gcno' -exec gcov -p {} +
+          chmod +x codecov
+          ./codecov -t ${{ env.CODECOV_TOKEN }}

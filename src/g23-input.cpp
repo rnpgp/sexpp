@@ -137,7 +137,7 @@ std::string g23_input_stream_t::scan_name(int c)
     std::string name;
     if (!is_alpha(c)) {
         g23_error(sexp_exception_t::error,
-                  "unxpected character '0x%x' found starting a name field",
+                  "unexpected character '0x%x' found starting a name field",
                   c,
                   0,
                   count);
