@@ -1,0 +1,89 @@
+#
+# Copyright (c) 2022 [Ribose Inc](https://www.ribose.com).
+# All rights reserved.
+# This file is a part of sexp
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+# 1. Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in the
+#    documentation and/or other materials provided with the distribution.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
+# TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+# PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDERS OR CONTRIBUTORS
+# BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+# CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+
+name: coverity
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: '${{ github.workflow }}-${{ github.job }}-${{ github.head_ref || github.ref_name }}'
+  cancel-in-progress: true
+
+jobs:
+  coverity:
+    runs-on: ubuntu-latest
+    env:
+      CC: gcc
+      CXX: g++
+      COVERITY_TOKEN: AK2euT-neBcvZB1g_m3pbg
+      MAKEFLAGS: j4
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+
+      - name: Install googletest
+        run: |
+          sudo apt-get -y install googletest
+          sudo cmake -B/usr/src/googletest/build /usr/src/googletest
+          sudo cmake --build /usr/src/googletest/build
+          sudo cmake --install /usr/src/googletest/build
+
+      - name: Configure
+        run: cmake -Bbuild -DDOWNLOAD_GTEST=OFF
+
+      - name: Download Coverity
+        env:
+          TOKEN: AK2euT-neBcvZB1g_m3pbg
+        run: |
+          wget -q https://scan.coverity.com/download/cxx/linux64 --post-data "token=$TOKEN&project=$GITHUB_REPOSITORY" -O cov-analysis-linux64.tar.gz
+          mkdir cov-analysis-linux64
+          tar xzf cov-analysis-linux64.tar.gz --strip 1 -C cov-analysis-linux64
+
+      - name: Build
+        run: |
+          set -x
+          export PATH="$PWD/cov-analysis-linux64/bin:$PATH"
+          cov-build --dir cov-int cmake --build build
+
+      - name: Submit
+        env:
+          TOKEN: AK2euT-neBcvZB1g_m3pbg
+        run: |
+          tar czvf results.tgz cov-int
+          curl \
+            --form project=$GITHUB_REPOSITORY \
+            --form token=$TOKEN \
+            --form email=m.samsonov@computer.org \
+            --form file=@results.tgz \
+            --form version=$GITHUB_REF \
+            --form description=$GITHUB_SHA \
+            https://scan.coverity.com/builds?project=$GITHUB_REPOSITORY

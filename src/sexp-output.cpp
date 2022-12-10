@@ -63,6 +63,7 @@ sexp_output_stream_t *sexp_output_stream_t::set_output(std::ostream *o)
     column = 0;
     max_column = default_line_length;
     indent = 0;
+    base64_count = 0;
     return this;
 }
 
