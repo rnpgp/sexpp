@@ -83,7 +83,8 @@ class sexp_char_defs_t {
     };
     static bool is_base64_digit(int c) { return c >= 0 && c <= 255 && base64digit[c]; };
     static bool is_token_char(int c) { return c >= 0 && c <= 255 && tokenchar[c]; };
-    static bool is_alpha(int c) {
+    static bool is_alpha(int c)
+    {
         return c >= 0 && c <= 255 && std::isalpha((char) c, c_locale);
     };
 
