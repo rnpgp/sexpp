@@ -130,9 +130,9 @@ sexp_input_stream_t *sexp_input_stream_t::get_char(void)
             bits = bits << byte_size;
             n_bits += byte_size;
             if (byte_size == 6 && is_base64_digit(c))
-                bits = bits | base64value[c];
+                bits = bits | base64value(c);
             else if (byte_size == 4 && is_hex_digit(c))
-                bits = bits | hexvalue[c];
+                bits = bits | hexvalue(c);
             else {
                 sexp_error(sexp_exception_t::error,
                            "character '%c' found in %u-bit coding region",
@@ -216,7 +216,7 @@ uint32_t sexp_input_stream_t::scan_decimal_string(void)
     uint32_t value = 0;
     uint32_t i = 0;
     while (is_dec_digit(next_char)) {
-        value = value * 10 + decvalue[next_char];
+        value = value * 10 + decvalue(next_char);
         get_char();
         if (i++ > 8)
             sexp_error(sexp_exception_t::error, "Decimal number is too long", 0, 0, count);
@@ -298,7 +298,7 @@ void sexp_input_stream_t::scan_quoted_string(sexp_simple_string_t &ss, uint32_t 
                 get_char();
                 for (j = 0; j < 2; j++) {
                     if (is_hex_digit(next_char)) {
-                        val = ((val << 4) | hexvalue[next_char]);
+                        val = ((val << 4) | hexvalue(next_char));
                         if (j < 1) {
                             get_char();
                         }

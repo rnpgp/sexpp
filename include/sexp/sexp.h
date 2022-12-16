@@ -37,6 +37,7 @@
 #include <climits>
 #include <limits>
 #include <cctype>
+#include <locale>
 #include <cstring>
 #include <memory>
 #include <algorithm>
@@ -63,34 +64,38 @@ namespace sexp {
 
 class sexp_char_defs_t {
   protected:
-    static bool base64digit[256]; /* true if c is base64 digit */
-    static bool tokenchar[256];   /* true if c can be in a token */
-    static bool alpha[256];       /* true if c is alphabetic A-Z a-z */
-    static bool whitespace[256];  /* true if c is whitespace */
-    static bool decdigit[256];    /* true if c is a dec digit */
-    static bool hexdigit[256];    /* true if c is a hex digit */
+    static const bool          base64digit[256]; /* true if c is base64 digit */
+    static const bool          tokenchar[256];   /* true if c can be in a token */
+    static const unsigned char values[256][3]; /* values of c as { dec. hex, base64 } digit */
+    static std::locale         c_locale;
 
-    static unsigned char upper[256];       /* upper[c] is upper case version of c */
-    static unsigned char decvalue[256];    /* decvalue[c] is value of c as dec digit */
-    static unsigned char hexvalue[256];    /* hexvalue[c] is value of c as a hex digit */
-    static unsigned char base64value[256]; /* base64value[c] is value of c as base64 digit */
-
-    static bool initialized;
-    static void initialize_character_tables(void);
-    static bool is_white_space(int c);
-    static bool is_dec_digit(int c);
-    static bool is_hex_digit(int c);
-    static bool is_base64_digit(int c);
-    static bool is_token_char(int c);
-    static bool is_alpha(int c);
-
-    sexp_char_defs_t(void)
+    static bool is_white_space(int c)
     {
-        if (!initialized) {
-            initialize_character_tables();
-            initialized = true;
-        }
-    }
+        return c >= 0 && c <= 255 && std::isspace((char) c, c_locale);
+    };
+    static bool is_dec_digit(int c)
+    {
+        return c >= 0 && c <= 255 && std::isdigit((char) c, c_locale);
+    };
+    static bool is_hex_digit(int c)
+    {
+        return c >= 0 && c <= 255 && std::isxdigit((char) c, c_locale);
+    };
+    static bool is_base64_digit(int c) { return c >= 0 && c <= 255 && base64digit[c]; };
+    static bool is_token_char(int c) { return c >= 0 && c <= 255 && tokenchar[c]; };
+    static bool is_alpha(int c) {
+        return c >= 0 && c <= 255 && std::isalpha((char) c, c_locale);
+    };
+
+    /* decvalue(c) is value of c as dec digit */
+    static unsigned char decvalue(int c) { return (c >= 0 && c <= 255) ? values[c][0] : 0; };
+    /* hexvalue(c) is value of c as a hex digit */
+    static unsigned char hexvalue(int c) { return (c >= 0 && c <= 255) ? values[c][1] : 0; };
+    /* base64value(c) is value of c as base64 digit */
+    static unsigned char base64value(int c)
+    {
+        return (c >= 0 && c <= 255) ? values[c][2] : 0;
+    };
 };
 
 class sexp_string_t;

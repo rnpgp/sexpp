@@ -56,10 +56,10 @@ class extended_private_key_t {
     // C++ 11 compatible version (no std::equals)
     static bool iequals(const std::string &a, const std::string &b)
     {
-        unsigned int sz = a.size();
+        size_t sz = a.size();
         if (b.size() != sz)
             return false;
-        for (unsigned int i = 0; i < sz; ++i)
+        for (size_t i = 0; i < sz; ++i)
             if (tolower(a[i]) != tolower(b[i]))
                 return false;
         return true;
@@ -75,8 +75,7 @@ class extended_private_key_t {
 
 class ext_key_input_stream_t : public sexp::sexp_input_stream_t {
   private:
-    static bool initialized;
-    static bool namechar[256]; /* true if allowed in the name field */
+    static const bool namechar[256]; /* true if allowed in the name field */
 
     static bool is_newline_char(int c) { return c == '\r' || c == '\n'; };
     static bool is_namechar(int c) { return ((c >= 0 && c <= 255) && namechar[c]); }
@@ -90,7 +89,10 @@ class ext_key_input_stream_t : public sexp::sexp_input_stream_t {
     std::string scan_value(void);
 
   public:
-    ext_key_input_stream_t(std::istream *i, size_t md = 0);
+    ext_key_input_stream_t(std::istream *i, size_t md = 0)
+        : sexp_input_stream_t(i, md), is_scanning_value(false), has_key(false)
+    {
+    }
     virtual ~ext_key_input_stream_t() = default;
     void scan(extended_private_key_t &extended_key);
 };

@@ -141,4 +141,5 @@ TEST_F(G23CompatTests, G23CorrectWithMultFields)
         }
     }
 }
+
 } // namespace

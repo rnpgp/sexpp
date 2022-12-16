@@ -40,31 +40,34 @@ class sexp_exception_t : public std::exception {
     enum severity { error = 0, warning = 1 };
 
   protected:
-    static severity vrb;
-    static bool     intr;
+    static severity verbosity;
+    static bool     interactive;
 
-    int         pos; // May be EOF aka -1
-    severity    lev;
-    std::string msg;
+    int         position; // May be EOF aka -1
+    severity    level;
+    std::string message;
 
   public:
-    sexp_exception_t(std::string message,
-                     severity    level,
-                     int         position,
+    sexp_exception_t(std::string error_message,
+                     severity    error_level,
+                     int         error_position,
                      const char *prefix = "SEXP")
-        : pos{position}, lev{level}, msg{format(prefix, message, level, position)} {};
-    static std::string  format(std::string prf,
-                               std::string message,
-                               severity    level,
-                               int         position);
-    static bool         shall_throw(severity level) { return level == error || vrb != error; };
-    virtual const char *what(void) const throw() { return msg.c_str(); };
-    severity            level(void) const { return lev; };
-    uint32_t            position(void) const { return pos; };
-    static severity     verbosity(void) { return vrb; };
-    static bool         interactive(void) { return intr; };
-    static void         set_verbosity(severity verbosity) { vrb = verbosity; };
-    static void         set_interactive(bool interactive) { intr = interactive; };
+        : position{error_position}, level{error_level},
+          message{format(prefix, error_message, error_level, error_position)} {};
+
+    static std::string format(std::string prf,
+                              std::string message,
+                              severity    level,
+                              int         position);
+
+    static bool shall_throw(severity level) { return level == error || verbosity != error; };
+    virtual const char *what(void) const throw() { return message.c_str(); };
+    severity            get_level(void) const { return level; };
+    uint32_t            get_position(void) const { return position; };
+    static severity     get_verbosity(void) { return verbosity; };
+    static bool         is_interactive(void) { return interactive; };
+    static void         set_verbosity(severity new_verbosity) { verbosity = new_verbosity; };
+    static void set_interactive(bool new_interactive) { interactive = new_interactive; };
 };
 
 void sexp_error(

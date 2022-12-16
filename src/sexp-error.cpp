@@ -31,8 +31,8 @@
 
 namespace sexp {
 
-sexp_exception_t::severity sexp_exception_t::vrb = sexp_exception_t::error;
-bool                       sexp_exception_t::intr = false;
+sexp_exception_t::severity sexp_exception_t::verbosity = sexp_exception_t::error;
+bool                       sexp_exception_t::interactive = false;
 
 std::string sexp_exception_t::format(std::string prf,
                                      std::string message,
@@ -53,7 +53,7 @@ void sexp_error(
     snprintf(tmp, sizeof(tmp) / sizeof(tmp[0]), msg, c1, c2);
     if (sexp_exception_t::shall_throw(l))
         throw sexp_exception_t(tmp, l, pos);
-    if (sexp_exception_t::interactive()) {
+    if (sexp_exception_t::is_interactive()) {
         std::cout.flush() << std::endl
                           << "*** " << sexp_exception_t::format("SEXP", tmp, l, pos) << " ***"
                           << std::endl;
