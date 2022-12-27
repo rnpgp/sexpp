@@ -36,6 +36,9 @@ concurrency:
   group: '${{ github.workflow }}-${{ github.job }}-${{ github.head_ref || github.ref_name }}'
   cancel-in-progress: true
 
+env:
+  MAKEFLAGS: j4
+
 jobs:
   build-and-test:
     runs-on: ${{ matrix.os }}

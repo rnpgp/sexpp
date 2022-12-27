@@ -40,25 +40,34 @@ class sexp_exception_t : public std::exception {
     enum severity { error = 0, warning = 1 };
 
   protected:
-    static severity verbosity_;
-    static bool     interactive_;
+    static severity verbosity;
+    static bool     interactive;
 
-    int         position_; // May be EOF aka -1
-    severity    level_;
-    std::string msg_;
+    int         position; // May be EOF aka -1
+    severity    level;
+    std::string message;
 
   public:
-    sexp_exception_t(std::string message, severity level, int position)
-        : position_{position}, level_{level}, msg_{format(message, level, position)} {};
-    static std::string format(std::string message, severity level, int position);
-    static bool shall_throw(severity level) { return level == error || verbosity_ != error; };
-    virtual const char *what() const throw() { return msg_.c_str(); };
-    severity            level() const { return level_; };
-    uint32_t            position() const { return position_; };
-    static severity     verbosity() { return verbosity_; };
-    static bool         interactive() { return interactive_; };
-    static void         set_verbosity(severity vrb) { verbosity_ = vrb; };
-    static void         set_interactive(bool intr) { interactive_ = intr; };
+    sexp_exception_t(std::string error_message,
+                     severity    error_level,
+                     int         error_position,
+                     const char *prefix = "SEXP")
+        : position{error_position}, level{error_level},
+          message{format(prefix, error_message, error_level, error_position)} {};
+
+    static std::string format(std::string prf,
+                              std::string message,
+                              severity    level,
+                              int         position);
+
+    static bool shall_throw(severity level) { return level == error || verbosity != error; };
+    virtual const char *what(void) const throw() { return message.c_str(); };
+    severity            get_level(void) const { return level; };
+    uint32_t            get_position(void) const { return position; };
+    static severity     get_verbosity(void) { return verbosity; };
+    static bool         is_interactive(void) { return interactive; };
+    static void         set_verbosity(severity new_verbosity) { verbosity = new_verbosity; };
+    static void set_interactive(bool new_interactive) { interactive = new_interactive; };
 };
 
 void sexp_error(

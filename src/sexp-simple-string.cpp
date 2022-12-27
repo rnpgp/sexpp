@@ -32,7 +32,6 @@
  * 5/5/1997
  */
 
-#include <sexp/sexp-error.h>
 #include <sexp/sexp.h>
 
 namespace sexp {
@@ -82,21 +81,6 @@ sexp_output_stream_t *sexp_simple_string_t::print_token(sexp_output_stream_t *os
         os->new_line(sexp_output_stream_t::advanced);
     for (uint32_t i = 0; i < length(); i++)
         os->put_char((int) (*c++));
-    return os;
-}
-
-/*
- * sexp_simple_string_t::print_verbatim(os)
- * Print out simple string ss on output stream os as verbatim string.
- * Again, can't fragment string, so max-column is just a suggestion...
- */
-sexp_output_stream_t *sexp_simple_string_t::print_verbatim(sexp_output_stream_t *os) const
-{
-    const octet_t *c = c_str();
-    if (os->get_max_column() > 0 && os->get_column() > (os->get_max_column() - length()))
-        os->new_line(sexp_output_stream_t::advanced)->print_decimal(length())->put_char(':');
-    for (uint32_t i = 0; i < length(); i++)
-        os->put_char((int) *c++);
     return os;
 }
 
@@ -167,7 +151,7 @@ sexp_output_stream_t *sexp_simple_string_t::print_advanced(sexp_output_stream_t 
         print_base64(os);
     else
         sexp_error(sexp_exception_t::error,
-                   "Can't print advanced mode with restricted output character set",
+                   "Can't print in advanced mode with restricted output character set",
                    0,
                    0,
                    EOF);

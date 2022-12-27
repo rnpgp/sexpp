@@ -24,7 +24,7 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-name: build-and-test-msys
+name: coverity
 
 on:
   push:
@@ -36,56 +36,54 @@ concurrency:
   group: '${{ github.workflow }}-${{ github.job }}-${{ github.head_ref || github.ref_name }}'
   cancel-in-progress: true
 
-env:
-  MAKEFLAGS: j4
-
-defaults:
-  run:
-    shell: msys2 {0}
 jobs:
-  build-and-test:
-    runs-on: windows-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        msystem: [ ucrt64, mingw64, clang64 ]
+  coverity:
+    runs-on: ubuntu-latest
+    env:
+      CC: gcc
+      CXX: g++
+      COVERITY_TOKEN: AK2euT-neBcvZB1g_m3pbg
+      MAKEFLAGS: j4
     steps:
       - name: Checkout
         uses: actions/checkout@v3
         with:
           fetch-depth: 1
 
-      - name: Install MSys
-        uses: msys2/setup-msys2@v2
-        with:
-          msystem: ${{ matrix.msystem }}
-          pacboy: >-
-            toolchain:p
-            cmake:p
-          path-type: minimal
-
-      - name: Adjust environment
-        shell: bash
-        run: echo "SEXP_INSTALL_PATH=$(cygpath -u $PWD/install)" >> $GITHUB_ENV
+      - name: Install googletest
+        run: |
+          sudo apt-get -y install googletest
+          sudo cmake -B/usr/src/googletest/build /usr/src/googletest
+          sudo cmake --build /usr/src/googletest/build
+          sudo cmake --install /usr/src/googletest/build
 
       - name: Configure
-        run:  cmake -Bbuild -DCMAKE_INSTALL_PREFIX=${{ env.SEXP_INSTALL_PATH }} -DCMAKE_BUILD_TYPE=Release
+        run: cmake -Bbuild -DDOWNLOAD_GTEST=OFF
+
+      - name: Download Coverity
+        env:
+          TOKEN: AK2euT-neBcvZB1g_m3pbg
+        run: |
+          wget -q https://scan.coverity.com/download/cxx/linux64 --post-data "token=$TOKEN&project=$GITHUB_REPOSITORY" -O cov-analysis-linux64.tar.gz
+          mkdir cov-analysis-linux64
+          tar xzf cov-analysis-linux64.tar.gz --strip 1 -C cov-analysis-linux64
 
       - name: Build
-        run: cmake --build build --config Release
+        run: |
+          set -x
+          export PATH="$PWD/cov-analysis-linux64/bin:$PATH"
+          cov-build --dir cov-int cmake --build build
 
-      - name: Run tests
-        run: ctest --test-dir build --output-on-failure
-
-      - name: Checkout shell test framework
-        uses: actions/checkout@v3
-        with:
-          repository: kward/shunit2
-          path: ${{ github.workspace }}/tests/shunit2
-          fetch-depth: 1
-
-      - name: Install
-        run: cmake --install build
-
-      - name: Run additional tests
-        run:  tests/scripts/tests.sh
+      - name: Submit
+        env:
+          TOKEN: AK2euT-neBcvZB1g_m3pbg
+        run: |
+          tar czvf results.tgz cov-int
+          curl \
+            --form project=$GITHUB_REPOSITORY \
+            --form token=$TOKEN \
+            --form email=m.samsonov@computer.org \
+            --form file=@results.tgz \
+            --form version=$GITHUB_REF \
+            --form description=$GITHUB_SHA \
+            https://scan.coverity.com/builds?project=$GITHUB_REPOSITORY

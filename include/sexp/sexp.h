@@ -37,12 +37,16 @@
 #include <climits>
 #include <limits>
 #include <cctype>
+#include <locale>
 #include <cstring>
 #include <memory>
 #include <algorithm>
 #include <iostream>
 #include <string>
 #include <vector>
+#include <cassert>
+
+#include "sexp-error.h"
 
 namespace sexp {
 
@@ -60,34 +64,39 @@ namespace sexp {
 
 class sexp_char_defs_t {
   protected:
-    static bool base64digit[256]; /* true if c is base64 digit */
-    static bool tokenchar[256];   /* true if c can be in a token */
-    static bool alpha[256];       /* true if c is alphabetic A-Z a-z */
-    static bool whitespace[256];  /* true if c is whitespace */
-    static bool decdigit[256];    /* true if c is a dec digit */
-    static bool hexdigit[256];    /* true if c is a hex digit */
+    static const bool          base64digit[256]; /* true if c is base64 digit */
+    static const bool          tokenchar[256];   /* true if c can be in a token */
+    static const unsigned char values[256][3]; /* values of c as { dec. hex, base64 } digit */
+    static std::locale         c_locale;
 
-    static unsigned char upper[256];       /* upper[c] is upper case version of c */
-    static unsigned char decvalue[256];    /* decvalue[c] is value of c as dec digit */
-    static unsigned char hexvalue[256];    /* hexvalue[c] is value of c as a hex digit */
-    static unsigned char base64value[256]; /* base64value[c] is value of c as base64 digit */
-
-    static bool initialized;
-    static void initialize_character_tables(void);
-    static bool is_white_space(int c);
-    static bool is_dec_digit(int c);
-    static bool is_hex_digit(int c);
-    static bool is_base64_digit(int c);
-    static bool is_token_char(int c);
-    static bool is_alpha(int c);
-
-    sexp_char_defs_t(void)
+    static bool is_white_space(int c)
     {
-        if (!initialized) {
-            initialize_character_tables();
-            initialized = true;
-        }
-    }
+        return c >= 0 && c <= 255 && std::isspace((char) c, c_locale);
+    };
+    static bool is_dec_digit(int c)
+    {
+        return c >= 0 && c <= 255 && std::isdigit((char) c, c_locale);
+    };
+    static bool is_hex_digit(int c)
+    {
+        return c >= 0 && c <= 255 && std::isxdigit((char) c, c_locale);
+    };
+    static bool is_base64_digit(int c) { return c >= 0 && c <= 255 && base64digit[c]; };
+    static bool is_token_char(int c) { return c >= 0 && c <= 255 && tokenchar[c]; };
+    static bool is_alpha(int c)
+    {
+        return c >= 0 && c <= 255 && std::isalpha((char) c, c_locale);
+    };
+
+    /* decvalue(c) is value of c as dec digit */
+    static unsigned char decvalue(int c) { return (c >= 0 && c <= 255) ? values[c][0] : 0; };
+    /* hexvalue(c) is value of c as a hex digit */
+    static unsigned char hexvalue(int c) { return (c >= 0 && c <= 255) ? values[c][1] : 0; };
+    /* base64value(c) is value of c as base64 digit */
+    static unsigned char base64value(int c)
+    {
+        return (c >= 0 && c <= 255) ? values[c][2] : 0;
+    };
 };
 
 class sexp_string_t;
@@ -125,7 +134,6 @@ class sexp_simple_string_t : public std::basic_string<octet_t>, private sexp_cha
     sexp_output_stream_t *print_canonical_verbatim(sexp_output_stream_t *os) const;
     sexp_output_stream_t *print_advanced(sexp_output_stream_t *os) const;
     sexp_output_stream_t *print_token(sexp_output_stream_t *os) const;
-    sexp_output_stream_t *print_verbatim(sexp_output_stream_t *os) const;
     sexp_output_stream_t *print_quoted(sexp_output_stream_t *os) const;
     sexp_output_stream_t *print_hexadecimal(sexp_output_stream_t *os) const;
     sexp_output_stream_t *print_base64(sexp_output_stream_t *os) const;
@@ -145,7 +153,8 @@ class sexp_simple_string_t : public std::basic_string<octet_t>, private sexp_cha
 
     unsigned as_unsigned() const noexcept
     {
-        return empty() ? UINT_MAX : (unsigned) atoi(reinterpret_cast<const char *>(c_str()));
+        return empty() ? std::numeric_limits<uint32_t>::max() :
+                         (unsigned) atoi(reinterpret_cast<const char *>(c_str()));
     }
 };
 
@@ -169,7 +178,7 @@ class sexp_object_t {
 
     virtual sexp_output_stream_t *print_canonical(sexp_output_stream_t *os) const = 0;
     virtual sexp_output_stream_t *print_advanced(sexp_output_stream_t *os) const;
-    virtual uint32_t              advanced_length(sexp_output_stream_t *os) const = 0;
+    virtual size_t                advanced_length(sexp_output_stream_t *os) const = 0;
 
     virtual sexp_list_t *  sexp_list_view(void) noexcept { return nullptr; }
     virtual sexp_string_t *sexp_string_view(void) noexcept { return nullptr; }
@@ -193,7 +202,10 @@ class sexp_object_t {
     }
     virtual bool     operator==(const char *right) const noexcept { return false; }
     virtual bool     operator!=(const char *right) const noexcept { return true; }
-    virtual unsigned as_unsigned() const noexcept { return UINT_MAX; }
+    virtual unsigned as_unsigned() const noexcept
+    {
+        return std::numeric_limits<uint32_t>::max();
+    }
 };
 
 /*
@@ -238,7 +250,7 @@ class sexp_string_t : public sexp_object_t {
 
     virtual sexp_output_stream_t *print_canonical(sexp_output_stream_t *os) const;
     virtual sexp_output_stream_t *print_advanced(sexp_output_stream_t *os) const;
-    virtual uint32_t              advanced_length(sexp_output_stream_t *os) const;
+    virtual size_t                advanced_length(sexp_output_stream_t *os) const;
 
     virtual sexp_string_t *sexp_string_view(void) noexcept { return this; }
     virtual bool           is_sexp_string(void) const noexcept { return true; }
@@ -270,7 +282,7 @@ class sexp_list_t : public sexp_object_t, public std::vector<std::unique_ptr<sex
 
     virtual sexp_output_stream_t *print_canonical(sexp_output_stream_t *os) const;
     virtual sexp_output_stream_t *print_advanced(sexp_output_stream_t *os) const;
-    virtual uint32_t              advanced_length(sexp_output_stream_t *os) const;
+    virtual size_t                advanced_length(sexp_output_stream_t *os) const;
 
     virtual sexp_list_t *sexp_list_view(void) noexcept { return this; }
     virtual bool         is_sexp_list(void) const noexcept { return true; }
@@ -296,7 +308,7 @@ class sexp_list_t : public sexp_object_t, public std::vector<std::unique_ptr<sex
  * SEXP input stream
  */
 
-class sexp_input_stream_t : private sexp_char_defs_t {
+class sexp_input_stream_t : public sexp_char_defs_t {
   protected:
     std::istream *input_file;
     uint32_t      byte_size; /* 4 or 6 or 8 == currently scanning mode */
@@ -306,8 +318,12 @@ class sexp_input_stream_t : private sexp_char_defs_t {
     int           count;     /* number of 8-bit characters output by get_char */
     size_t        depth;     /* current depth of nested SEXP lists */
     size_t        max_depth; /* maximum allowed depth of nested SEXP lists, 0 if no limit */
+
+    virtual int read_char(void);
+
   public:
     sexp_input_stream_t(std::istream *i, size_t max_depth = 0);
+    virtual ~sexp_input_stream_t() = default;
     sexp_input_stream_t *set_input(std::istream *i, size_t max_depth = 0);
     sexp_input_stream_t *set_byte_size(uint32_t new_byte_size);
     uint32_t             get_byte_size(void) { return byte_size; }
@@ -371,12 +387,12 @@ class sexp_output_stream_t {
     uint32_t        indent;       /* current indentation level (starts at 0) */
   public:
     sexp_output_stream_t(std::ostream *o);
-    void                  set_output(std::ostream *o) { output_file = o; }
+    sexp_output_stream_t *set_output(std::ostream *o);
     sexp_output_stream_t *put_char(int c);                /* output a character */
     sexp_output_stream_t *new_line(sexp_print_mode mode); /* go to next line (and indent) */
     sexp_output_stream_t *var_put_char(int c);
     sexp_output_stream_t *flush(void);
-    sexp_output_stream_t *print_decimal(uint32_t n);
+    sexp_output_stream_t *print_decimal(uint64_t n);
 
     sexp_output_stream_t *change_output_byte_size(int newByteSize, sexp_print_mode mode);
 
@@ -400,9 +416,17 @@ class sexp_output_stream_t {
 
     uint32_t              get_byte_size(void) const { return byte_size; }
     uint32_t              get_column(void) const { return column; }
-    uint32_t              reset_column(void) { return column = 0; }
+    sexp_output_stream_t *reset_column(void)
+    {
+        column = 0;
+        return this;
+    }
     uint32_t              get_max_column(void) const { return max_column; }
-    uint32_t              set_max_column(uint32_t mc) { return max_column = mc; }
+    sexp_output_stream_t *set_max_column(uint32_t mc)
+    {
+        max_column = mc;
+        return this;
+    }
     sexp_output_stream_t *inc_indent(void)
     {
         ++indent;

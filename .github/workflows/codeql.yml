@@ -18,6 +18,10 @@ on:
     # The branches below must be a subset of the branches above
     branches: [ "main" ]
 
+concurrency:
+  group: '${{ github.workflow }}-${{ github.job }}-${{ github.head_ref || github.ref_name }}'
+  cancel-in-progress: true
+
 jobs:
   analyze:
     name: Analyze

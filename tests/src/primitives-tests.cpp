@@ -171,6 +171,18 @@ TEST_F(PrimitivesTests, Wrap)
     do_test_advanced(reallyLong, broken);
 }
 
+TEST_F(PrimitivesTests, Escapes)
+{
+    do_test_canonical("(\"\\b\\t\\v\\n\\f\\r\\\"\\'\\\\\")", "(9:\b\t\v\n\f\r\"'\\)");
+    do_test_advanced("(\"\\b\\t\\v\\n\\f\\r\\\"\\'\\\\\")", "(|CAkLCgwNIidc|)");
+
+    do_test_canonical("(\"\\040\\041\\042\\043\\044\")", "(5: !\"#$)");
+    do_test_advanced("(\"\\065\\061\\062\\063\\064\")", "(\"51234\")");
+
+    do_test_canonical("(\"\\x40\\x41\\x42\\x43\\x44\")", "(5:@ABCD)");
+    do_test_advanced("(\"\\x65\\x61\\x62\\x63\\x64\")", "(eabcd)");
+}
+
 TEST_F(PrimitivesTests, at4rnp)
 {
     const char *str_in = "(rnp_block (rnp_list1 rnp_list2))";
@@ -273,4 +285,116 @@ TEST_F(PrimitivesTests, u4rnp)
     lst.parse(is.set_input(&iss2)->set_byte_size(8)->get_char());
     EXPECT_EQ(lst.sexp_string_at(1)->as_unsigned(), 54321);
 }
+
+TEST_F(PrimitivesTests, proInheritance)
+{
+    sexp_list_t lst;
+    EXPECT_FALSE(lst.is_sexp_string());
+    EXPECT_TRUE(lst.is_sexp_list());
+    EXPECT_EQ(lst.sexp_string_view(), nullptr);
+    EXPECT_EQ(lst.sexp_list_view(), &lst);
+    EXPECT_EQ(lst.as_unsigned(), std::numeric_limits<uint32_t>::max());
+    EXPECT_EQ(lst.sexp_list_at(0), nullptr);
+    EXPECT_EQ(lst.sexp_string_at(0), nullptr);
+    EXPECT_EQ(lst.sexp_simple_string_at(0), nullptr);
+
+    sexp_string_t str;
+    EXPECT_FALSE(str.is_sexp_list());
+    EXPECT_TRUE(str.is_sexp_string());
+    EXPECT_EQ(str.sexp_string_view(), &str);
+    EXPECT_EQ(str.sexp_list_view(), nullptr);
+    EXPECT_EQ(str.sexp_list_at(0), nullptr);
+    EXPECT_EQ(str.sexp_string_at(0), nullptr);
+    EXPECT_EQ(str.sexp_simple_string_at(0), nullptr);
+}
+
+TEST_F(PrimitivesTests, DisplayHint)
+{
+    do_test_canonical("(URL [URI]www.ribose.com)", "(3:URL[3:URI]14:www.ribose.com)");
+    do_test_advanced("(3:URL[3:URI]14:www.ribose.com)", "(URL [URI]www.ribose.com)");
+}
+
+TEST_F(PrimitivesTests, scanToEof)
+{
+    const char *str_in = "ABCD";
+
+    std::istringstream  iss(str_in);
+    sexp_input_stream_t is(&iss);
+
+    auto object = is.scan_to_eof();
+    EXPECT_TRUE(object->is_sexp_string());
+
+    is.set_byte_size(4);
+    EXPECT_EQ(is.get_byte_size(), 4);
+
+    EXPECT_EQ(is.get_char(), &is);
+    EXPECT_EQ(is.get_byte_size(), 8);
+}
+
+TEST_F(PrimitivesTests, ChangeOutputByteSizeTest)
+{
+    std::ostringstream   oss(std::ios_base::binary);
+    sexp_output_stream_t os(&oss);
+
+    EXPECT_EQ(os.change_output_byte_size(8, sexp_output_stream_t::advanced), &os);
+
+    try {
+        os.change_output_byte_size(7, sexp_output_stream_t::advanced);
+        FAIL() << "sexp::sexp_exception_t expected but has not been thrown";
+    } catch (sexp::sexp_exception_t &e) {
+        EXPECT_STREQ(e.what(), "SEXP ERROR: Illegal output base 7");
+    }
+
+    EXPECT_EQ(os.change_output_byte_size(4, sexp_output_stream_t::advanced), &os);
+
+    try {
+        os.change_output_byte_size(6, sexp_output_stream_t::advanced);
+        FAIL() << "sexp::sexp_exception_t expected but has not been thrown";
+    } catch (sexp::sexp_exception_t &e) {
+        EXPECT_STREQ(e.what(), "SEXP ERROR: Illegal change of output byte size from 4 to 6");
+    }
+}
+
+TEST_F(PrimitivesTests, FlushTest)
+{
+    std::ostringstream   oss1(std::ios_base::binary);
+    std::ostringstream   oss2(std::ios_base::binary);
+    sexp_output_stream_t os(&oss1);
+
+    EXPECT_EQ(
+      os.change_output_byte_size(6, sexp_output_stream_t::advanced)->print_decimal(1)->flush(),
+      &os);
+    EXPECT_EQ(oss1.str(), "MQ==");
+    os.set_output(&oss2)
+      ->change_output_byte_size(6, sexp_output_stream_t::advanced)
+      ->set_max_column(2)
+      ->print_decimal(2)
+      ->flush();
+    EXPECT_EQ(oss2.str(), "Mg\n==");
+}
+
+TEST_F(PrimitivesTests, ListWrapTest)
+{
+    std::istringstream             iss("(abc)");
+    sexp_input_stream_t            is(&iss);
+    std::unique_ptr<sexp_object_t> obj = is.set_byte_size(8)->get_char()->scan_object();
+
+    std::ostringstream   oss(std::ios_base::binary);
+    sexp_output_stream_t os(&oss);
+    os.set_max_column(5)->print_advanced(obj);
+    EXPECT_EQ(oss.str(), "(abc\n )");
+}
+
+TEST_F(PrimitivesTests, EnsureHexTest)
+{
+    std::istringstream             iss("(3:a\011c)");
+    sexp_input_stream_t            is(&iss);
+    std::unique_ptr<sexp_object_t> obj = is.set_byte_size(8)->get_char()->scan_object();
+
+    std::ostringstream   oss(std::ios_base::binary);
+    sexp_output_stream_t os(&oss);
+    os.print_advanced(obj);
+    EXPECT_EQ(oss.str(), "(#610963#)");
+}
+
 } // namespace

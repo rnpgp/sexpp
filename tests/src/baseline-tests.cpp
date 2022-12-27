@@ -45,9 +45,9 @@ class BaselineTests : public testing::Test {
 
     BaselineTests()
     {
-        base_samples[base_sample_advanced] = sexp_samples_folder + "/sexp-sample-a";
-        base_samples[base_sample_base64] = sexp_samples_folder + "/sexp-sample-b";
-        base_samples[base_sample_canonical] = sexp_samples_folder + "/sexp-sample-c";
+        base_samples[base_sample_advanced] = sexp_samples_folder + "/baseline/sexp-sample-a";
+        base_samples[base_sample_base64] = sexp_samples_folder + "/baseline/sexp-sample-b";
+        base_samples[base_sample_canonical] = sexp_samples_folder + "/baseline/sexp-sample-c";
     };
 };
 
@@ -93,8 +93,7 @@ TEST_F(BaselineTests, Scan2Base64)
             std::ostringstream   oss(std::ios_base::binary);
             sexp_output_stream_t os(&oss);
 
-            os.set_max_column(0);
-            os.print_base64(obj);
+            os.set_max_column(0)->print_base64(obj);
             oss << std::endl;
 
             std::istringstream iss(oss.str(), std::ios_base::binary);

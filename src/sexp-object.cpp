@@ -32,7 +32,6 @@
  * 5/5/1997
  */
 
-#include <sexp/sexp-error.h>
 #include <sexp/sexp.h>
 
 namespace sexp {
@@ -87,9 +86,9 @@ sexp_output_stream_t *sexp_string_t::print_advanced(sexp_output_stream_t *os) co
  * sexp_string_t::advanced_length(os)
  * Returns length of printed image of string
  */
-uint32_t sexp_string_t::advanced_length(sexp_output_stream_t *os) const
+size_t sexp_string_t::advanced_length(sexp_output_stream_t *os) const
 {
-    uint32_t len = 0;
+    size_t len = 0;
     if (with_presentation_hint)
         len += 2 + presentation_hint.advanced_length(os);
     len += data_string.advanced_length(os);
@@ -172,9 +171,9 @@ sexp_output_stream_t *sexp_list_t::print_advanced(sexp_output_stream_t *os) cons
  * sexp_list_t::advanced_length(os)
  * Returns length of printed image of list given as iterator
  */
-uint32_t sexp_list_t::advanced_length(sexp_output_stream_t *os) const
+size_t sexp_list_t::advanced_length(sexp_output_stream_t *os) const
 {
-    uint32_t len = 1; /* for left paren */
+    size_t len = 1; /* for left paren */
     std::for_each(begin(), end(), [&](const std::unique_ptr<sexp_object_t> &obj) {
         len += obj->advanced_length(os);
     });

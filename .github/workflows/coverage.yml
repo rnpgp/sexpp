@@ -24,7 +24,7 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-name: build-and-test-msys
+name: coverage
 
 on:
   push:
@@ -36,56 +36,41 @@ concurrency:
   group: '${{ github.workflow }}-${{ github.job }}-${{ github.head_ref || github.ref_name }}'
   cancel-in-progress: true
 
-env:
-  MAKEFLAGS: j4
-
-defaults:
-  run:
-    shell: msys2 {0}
 jobs:
-  build-and-test:
-    runs-on: windows-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        msystem: [ ucrt64, mingw64, clang64 ]
+  coverage:
+    runs-on: ubuntu-latest
+    env:
+      CC: gcc
+      CXX: g++
+      CODECOV_TOKEN: dbb06ac6-97ef-4d04-a0c6-24f7e3d8e1d6
+      MAKEFLAGS: j4
     steps:
       - name: Checkout
         uses: actions/checkout@v3
         with:
           fetch-depth: 1
 
-      - name: Install MSys
-        uses: msys2/setup-msys2@v2
-        with:
-          msystem: ${{ matrix.msystem }}
-          pacboy: >-
-            toolchain:p
-            cmake:p
-          path-type: minimal
-
-      - name: Adjust environment
-        shell: bash
-        run: echo "SEXP_INSTALL_PATH=$(cygpath -u $PWD/install)" >> $GITHUB_ENV
-
       - name: Configure
-        run:  cmake -Bbuild -DCMAKE_INSTALL_PREFIX=${{ env.SEXP_INSTALL_PATH }} -DCMAKE_BUILD_TYPE=Release
+        run: |
+          cmake -Bbuild                                                   \
+                -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/install    \
+                -DWITH_COVERAGE=ON
 
       - name: Build
-        run: cmake --build build --config Release
+        run: cmake --build build
 
       - name: Run tests
         run: ctest --test-dir build --output-on-failure
 
-      - name: Checkout shell test framework
-        uses: actions/checkout@v3
-        with:
-          repository: kward/shunit2
-          path: ${{ github.workspace }}/tests/shunit2
-          fetch-depth: 1
-
-      - name: Install
-        run: cmake --install build
-
-      - name: Run additional tests
-        run:  tests/scripts/tests.sh
+      - name: Upload to codecov.io
+        run: |
+          curl -Os https://uploader.codecov.io/latest/linux/codecov
+          curl https://uploader.codecov.io/verification.gpg | gpg --no-default-keyring --keyring trustedkeys.gpg --import
+          curl -Os https://uploader.codecov.io/latest/linux/codecov
+          curl -Os https://uploader.codecov.io/latest/linux/codecov.SHA256SUM
+          curl -Os https://uploader.codecov.io/latest/linux/codecov.SHA256SUM.sig
+          gpgv codecov.SHA256SUM.sig codecov.SHA256SUM
+          shasum -a 256 -c codecov.SHA256SUM
+          find "build" -type f -name '*.gcno' -exec gcov -p {} +
+          chmod +x codecov
+          ./codecov -t ${{ env.CODECOV_TOKEN }}

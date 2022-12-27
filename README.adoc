@@ -5,6 +5,12 @@ image:https://github.com/rnpgp/sexp/workflows/build-and-test-rh/badge.svg["Build
 image:https://github.com/rnpgp/sexp/workflows/build-and-test-deb/badge.svg["Build status Debian", link="https://github.com/rnpgp/sexp/actions?workflow=build-and-test-deb"]
 image:https://github.com/rnpgp/sexp/workflows/build-and-test-msys/badge.svg["Build status MSys", link="https://github.com/rnpgp/sexp/actions?workflow=build-and-test-msys"]
 
+
+image:https://codecov.io/gh/rnpgp/sexp/branch/feat/g23/graph/badge.svg["Code coverage", link="https://codecov.io/gh/rnpgp/sexp"]
+image:https://github.com/rnpgp/sexp/workflows/CodeQL/badge.svg)["CodeQL analysis", link="https://github.com/rnpgp/sexp/actions?workflow=CodeQL"]
+image:https://scan.coverity.com/projects/27150/badge.svg["Coverity Scan Build Status", link="https://scan.coverity.com/projects/rnpgp-sexp"]
+
+
 == Purpose
 
 This is a C++ library for working with S-expressions. This implementation
@@ -21,6 +27,7 @@ This library differs from the original C implementation in the following ways:
 ** macOS
 ** Windows
 ** msys
+* It implements additional interface to work with S-expressions wrapped by GnuPG 2.3+ extended format as defined at https://github.com/gpg/gnupg/blob/master/agent/keyformat.txt
 
 The original C library is available at:
 
