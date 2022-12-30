@@ -397,4 +397,39 @@ TEST_F(PrimitivesTests, EnsureHexTest)
     EXPECT_EQ(oss.str(), "(#610963#)");
 }
 
+TEST_F(PrimitivesTests, CopyConstructorTest)
+{
+    std::istringstream             iss("(URL [URI]www.ribose.com (message1 message2))");
+    sexp_input_stream_t            is(&iss);
+    std::unique_ptr<sexp_object_t> obj = is.set_byte_size(8)->get_char()->scan_object();
+
+    sexp_list_t* lst = obj->sexp_list_view();
+    EXPECT_NE(lst, nullptr);
+
+    sexp_list_t lst2(*lst);
+    const sexp_string_t* s0 = lst2.sexp_string_at(0);
+    EXPECT_NE(s0, nullptr);
+    EXPECT_STREQ((const char *)s0->get_string().c_str(), "URL");
+    EXPECT_FALSE(s0->has_presentation_hint());
+
+    const sexp_string_t* s1 = lst2.sexp_string_at(1);
+    EXPECT_NE(s1, nullptr);
+    EXPECT_STREQ((const char *)s1->get_string().c_str(), "www.ribose.com");
+    EXPECT_TRUE(s1->has_presentation_hint());
+    EXPECT_STREQ((const char *)s1->get_presentation_hint().c_str(), "URI");
+
+    const sexp_list_t* l2 = lst2.sexp_list_at(2);
+    EXPECT_NE(l2, nullptr);
+
+    const sexp_string_t* l2s0 = l2->sexp_string_at(0);
+    EXPECT_NE(l2s0, nullptr);
+    EXPECT_STREQ((const char *)l2s0->get_string().c_str(), "message1");
+    EXPECT_FALSE(l2s0->has_presentation_hint());
+
+    const sexp_string_t* l2s1 = l2->sexp_string_at(1);
+    EXPECT_NE(l2s1, nullptr);
+    EXPECT_STREQ((const char *)l2s1->get_string().c_str(), "message2");
+    EXPECT_FALSE(l2s1->has_presentation_hint());
+}
+
 } // namespace
