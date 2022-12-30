@@ -114,7 +114,7 @@ typedef uint8_t octet_t;
 class sexp_simple_string_t : public std::basic_string<octet_t>, private sexp_char_defs_t {
   public:
     sexp_simple_string_t(void) = default;
-    sexp_simple_string_t(const sexp_simple_string_t&) = default;
+    sexp_simple_string_t(const sexp_simple_string_t &) = default;
     sexp_simple_string_t(const octet_t *dt) : std::basic_string<octet_t>{dt} {}
     sexp_simple_string_t(const octet_t *bt, size_t ln) : std::basic_string<octet_t>{bt, ln} {}
     sexp_simple_string_t &append(int c)
@@ -221,7 +221,7 @@ class sexp_string_t : public sexp_object_t {
 
   public:
     sexp_string_t(const octet_t *dt) : with_presentation_hint(false), data_string(dt) {}
-    sexp_string_t(const sexp_string_t&) = default;
+    sexp_string_t(const sexp_string_t &) = default;
     sexp_string_t(const octet_t *bt, size_t ln)
         : with_presentation_hint(false), data_string(bt, ln)
     {
@@ -281,7 +281,7 @@ inline bool operator!=(const sexp_string_t *left, const std::string &right) noex
 class sexp_list_t : public sexp_object_t, public std::vector<std::unique_ptr<sexp_object_t>> {
   public:
     sexp_list_t(void) = default;
-    sexp_list_t(const sexp_list_t& to_copy);
+    sexp_list_t(const sexp_list_t &to_copy);
     virtual ~sexp_list_t() {}
 
     virtual sexp_output_stream_t *print_canonical(sexp_output_stream_t *os) const;

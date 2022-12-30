@@ -100,12 +100,14 @@ size_t sexp_string_t::advanced_length(sexp_output_stream_t *os) const
  * Copy constructor
  */
 
-sexp_list_t::sexp_list_t(const sexp_list_t& to_copy):std::vector<std::unique_ptr<sexp_object_t>>() {
-    for_each(to_copy.begin(), to_copy.end(), [this](const std::unique_ptr<sexp_object_t>& el) {
+sexp_list_t::sexp_list_t(const sexp_list_t &to_copy)
+    : std::vector<std::unique_ptr<sexp_object_t>>()
+{
+    for_each(to_copy.begin(), to_copy.end(), [this](const std::unique_ptr<sexp_object_t> &el) {
         push_back(
-            el->is_sexp_list() ? std::unique_ptr<sexp_object_t>(new sexp_list_t(*el->sexp_list_view())) :
-                                 std::unique_ptr<sexp_object_t>(new sexp_string_t(*el->sexp_string_view()))
-        );
+          el->is_sexp_list() ?
+            std::unique_ptr<sexp_object_t>(new sexp_list_t(*el->sexp_list_view())) :
+            std::unique_ptr<sexp_object_t>(new sexp_string_t(*el->sexp_string_view())));
     });
 };
 
