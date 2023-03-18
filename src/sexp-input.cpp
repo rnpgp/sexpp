@@ -194,17 +194,17 @@ void sexp_input_stream_t::scan_token(sexp_simple_string_t &ss)
  * scan one or more characters (until EOF reached)
  * return an object that is just that string
  */
-std::unique_ptr<sexp_object_t> sexp_input_stream_t::scan_to_eof(void)
+sexp_object_t *sexp_input_stream_t::scan_to_eof(void)
 {
     sexp_simple_string_t           ss;
-    std::unique_ptr<sexp_string_t> s(new sexp_string_t());
+    sexp_string_t *s =new sexp_string_t();
     skip_white_space();
     while (next_char != EOF) {
         ss.append(next_char);
         get_char();
     }
     s->set_string(ss);
-    _return_unique_ptr_(s);
+    return s;
 }
 
 /*

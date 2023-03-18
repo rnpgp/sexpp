@@ -346,7 +346,7 @@ class sexp_input_stream_t : public sexp_char_defs_t {
         return this;
     }
 
-    std::unique_ptr<sexp_object_t> scan_to_eof();
+    sexp_object_t                 *scan_to_eof();
     std::unique_ptr<sexp_object_t> scan_object(void);
     std::unique_ptr<sexp_string_t> scan_string(void);
     std::unique_ptr<sexp_list_t>   scan_list(void);
