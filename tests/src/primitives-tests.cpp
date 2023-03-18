@@ -36,9 +36,10 @@ class PrimitivesTests : public testing::Test {
   protected:
     static void do_test_advanced(const char *str_in, const char *str_out = nullptr)
     {
-        std::istringstream             iss(str_in);
-        sexp_input_stream_t            is(&iss);
-        auto obj = std::unique_ptr<sexp_object_t>(is.set_byte_size(8)->get_char()->scan_object());
+        std::istringstream  iss(str_in);
+        sexp_input_stream_t is(&iss);
+        auto                obj =
+          std::unique_ptr<sexp_object_t>(is.set_byte_size(8)->get_char()->scan_object());
 
         std::ostringstream   oss(std::ios_base::binary);
         sexp_output_stream_t os(&oss);
@@ -49,9 +50,10 @@ class PrimitivesTests : public testing::Test {
 
     static void do_test_canonical(const char *str_in, const char *str_out = nullptr)
     {
-        std::istringstream             iss(str_in);
-        sexp_input_stream_t            is(&iss);
-        auto obj = std::unique_ptr<sexp_object_t>(is.set_byte_size(8)->get_char()->scan_object());
+        std::istringstream  iss(str_in);
+        sexp_input_stream_t is(&iss);
+        auto                obj =
+          std::unique_ptr<sexp_object_t>(is.set_byte_size(8)->get_char()->scan_object());
 
         std::ostringstream   oss(std::ios_base::binary);
         sexp_output_stream_t os(&oss);
@@ -375,8 +377,8 @@ TEST_F(PrimitivesTests, FlushTest)
 
 TEST_F(PrimitivesTests, ListWrapTest)
 {
-    std::istringstream             iss("(abc)");
-    sexp_input_stream_t            is(&iss);
+    std::istringstream  iss("(abc)");
+    sexp_input_stream_t is(&iss);
     auto obj = std::unique_ptr<sexp_object_t>(is.set_byte_size(8)->get_char()->scan_object());
 
     std::ostringstream   oss(std::ios_base::binary);
@@ -387,8 +389,8 @@ TEST_F(PrimitivesTests, ListWrapTest)
 
 TEST_F(PrimitivesTests, EnsureHexTest)
 {
-    std::istringstream             iss("(3:a\011c)");
-    sexp_input_stream_t            is(&iss);
+    std::istringstream  iss("(3:a\011c)");
+    sexp_input_stream_t is(&iss);
     auto obj = std::unique_ptr<sexp_object_t>(is.set_byte_size(8)->get_char()->scan_object());
 
     std::ostringstream   oss(std::ios_base::binary);

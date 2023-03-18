@@ -467,7 +467,7 @@ sexp_simple_string_t sexp_input_stream_t::scan_simple_string(void)
  */
 sexp_string_t *sexp_input_stream_t::scan_string(void)
 {
-    sexp_string_t* s = new sexp_string_t();
+    sexp_string_t *s = new sexp_string_t();
     s->parse(this);
     return s;
 }
@@ -476,9 +476,9 @@ sexp_string_t *sexp_input_stream_t::scan_string(void)
  * sexp_input_stream_t::scan_list(void)
  * Read and return a sexp_list_t from the input stream.
  */
-sexp_list_t*  sexp_input_stream_t::scan_list(void)
+sexp_list_t *sexp_input_stream_t::scan_list(void)
 {
-    sexp_list_t* list = new sexp_list_t();
+    sexp_list_t *list = new sexp_list_t();
     list->parse(this);
     return list;
 }
@@ -487,9 +487,9 @@ sexp_list_t*  sexp_input_stream_t::scan_list(void)
  * sexp_input_stream_t::scan_object(void)
  * Reads and returns a sexp_object_t from the given input stream.
  */
-sexp_object_t* sexp_input_stream_t::scan_object(void)
+sexp_object_t *sexp_input_stream_t::scan_object(void)
 {
-    sexp_object_t* object;
+    sexp_object_t *object;
     skip_white_space();
     if (next_char == '{') {
         set_byte_size(6)->skip_char('{');

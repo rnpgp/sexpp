@@ -346,17 +346,17 @@ class sexp_input_stream_t : public sexp_char_defs_t {
         return this;
     }
 
-    sexp_object_t *                scan_to_eof();
-    sexp_object_t *                scan_object(void);
-    sexp_string_t *                scan_string(void);
-    sexp_list_t *                  scan_list(void);
-    sexp_simple_string_t           scan_simple_string(void);
-    void                           scan_token(sexp_simple_string_t &ss);
-    void     scan_verbatim_string(sexp_simple_string_t &ss, uint32_t length);
-    void     scan_quoted_string(sexp_simple_string_t &ss, uint32_t length);
-    void     scan_hexadecimal_string(sexp_simple_string_t &ss, uint32_t length);
-    void     scan_base64_string(sexp_simple_string_t &ss, uint32_t length);
-    uint32_t scan_decimal_string(void);
+    sexp_object_t *      scan_to_eof();
+    sexp_object_t *      scan_object(void);
+    sexp_string_t *      scan_string(void);
+    sexp_list_t *        scan_list(void);
+    sexp_simple_string_t scan_simple_string(void);
+    void                 scan_token(sexp_simple_string_t &ss);
+    void                 scan_verbatim_string(sexp_simple_string_t &ss, uint32_t length);
+    void                 scan_quoted_string(sexp_simple_string_t &ss, uint32_t length);
+    void                 scan_hexadecimal_string(sexp_simple_string_t &ss, uint32_t length);
+    void                 scan_base64_string(sexp_simple_string_t &ss, uint32_t length);
+    uint32_t             scan_decimal_string(void);
 
     int get_next_char(void) const { return next_char; }
     int set_next_char(int c) { return next_char = c; }

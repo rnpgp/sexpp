@@ -42,8 +42,8 @@ TEST_F(G10CompatTests, Canonical)
     EXPECT_FALSE(ifs.fail());
 
     if (!ifs.fail()) {
-        sexp_input_stream_t                  is(&ifs);
-        auto obj =
+        sexp_input_stream_t is(&ifs);
+        auto                obj =
           std::unique_ptr<sexp_object_t>(is.set_byte_size(8)->get_char()->scan_object());
 
         std::ostringstream   oss(std::ios_base::binary);
