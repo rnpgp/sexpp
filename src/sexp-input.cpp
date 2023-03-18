@@ -465,31 +465,31 @@ sexp_simple_string_t sexp_input_stream_t::scan_simple_string(void)
  * sexp_input_stream_t::scan_string(void)
  * Reads and returns a string [presentationhint]string from input stream.
  */
-std::unique_ptr<sexp_string_t> sexp_input_stream_t::scan_string(void)
+sexp_string_t *sexp_input_stream_t::scan_string(void)
 {
-    std::unique_ptr<sexp_string_t> s(new sexp_string_t());
+    sexp_string_t* s = new sexp_string_t();
     s->parse(this);
-    _return_unique_ptr_(s);
+    return s;
 }
 
 /*
  * sexp_input_stream_t::scan_list(void)
  * Read and return a sexp_list_t from the input stream.
  */
-std::unique_ptr<sexp_list_t> sexp_input_stream_t::scan_list(void)
+sexp_list_t*  sexp_input_stream_t::scan_list(void)
 {
-    std::unique_ptr<sexp_list_t> list(new sexp_list_t());
+    sexp_list_t* list = new sexp_list_t();
     list->parse(this);
-    _return_unique_ptr_(list);
+    return list;
 }
 
 /*
  * sexp_input_stream_t::scan_object(void)
  * Reads and returns a sexp_object_t from the given input stream.
  */
-std::unique_ptr<sexp_object_t> sexp_input_stream_t::scan_object(void)
+sexp_object_t* sexp_input_stream_t::scan_object(void)
 {
-    std::unique_ptr<sexp_object_t> object;
+    sexp_object_t* object;
     skip_white_space();
     if (next_char == '{') {
         set_byte_size(6)->skip_char('{');
@@ -501,7 +501,7 @@ std::unique_ptr<sexp_object_t> sexp_input_stream_t::scan_object(void)
         else
             object = scan_string();
     }
-    _return_unique_ptr_(object);
+    return object;
 }
 
 } // namespace sexp

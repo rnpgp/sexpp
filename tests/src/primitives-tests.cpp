@@ -38,7 +38,7 @@ class PrimitivesTests : public testing::Test {
     {
         std::istringstream             iss(str_in);
         sexp_input_stream_t            is(&iss);
-        std::unique_ptr<sexp_object_t> obj = is.set_byte_size(8)->get_char()->scan_object();
+        auto obj = std::unique_ptr<sexp_object_t>(is.set_byte_size(8)->get_char()->scan_object());
 
         std::ostringstream   oss(std::ios_base::binary);
         sexp_output_stream_t os(&oss);
@@ -51,7 +51,7 @@ class PrimitivesTests : public testing::Test {
     {
         std::istringstream             iss(str_in);
         sexp_input_stream_t            is(&iss);
-        std::unique_ptr<sexp_object_t> obj = is.set_byte_size(8)->get_char()->scan_object();
+        auto obj = std::unique_ptr<sexp_object_t>(is.set_byte_size(8)->get_char()->scan_object());
 
         std::ostringstream   oss(std::ios_base::binary);
         sexp_output_stream_t os(&oss);
@@ -377,7 +377,7 @@ TEST_F(PrimitivesTests, ListWrapTest)
 {
     std::istringstream             iss("(abc)");
     sexp_input_stream_t            is(&iss);
-    std::unique_ptr<sexp_object_t> obj = is.set_byte_size(8)->get_char()->scan_object();
+    auto obj = std::unique_ptr<sexp_object_t>(is.set_byte_size(8)->get_char()->scan_object());
 
     std::ostringstream   oss(std::ios_base::binary);
     sexp_output_stream_t os(&oss);
@@ -389,7 +389,7 @@ TEST_F(PrimitivesTests, EnsureHexTest)
 {
     std::istringstream             iss("(3:a\011c)");
     sexp_input_stream_t            is(&iss);
-    std::unique_ptr<sexp_object_t> obj = is.set_byte_size(8)->get_char()->scan_object();
+    auto obj = std::unique_ptr<sexp_object_t>(is.set_byte_size(8)->get_char()->scan_object());
 
     std::ostringstream   oss(std::ios_base::binary);
     sexp_output_stream_t os(&oss);

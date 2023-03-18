@@ -347,9 +347,9 @@ class sexp_input_stream_t : public sexp_char_defs_t {
     }
 
     sexp_object_t *                scan_to_eof();
-    std::unique_ptr<sexp_object_t> scan_object(void);
-    std::unique_ptr<sexp_string_t> scan_string(void);
-    std::unique_ptr<sexp_list_t>   scan_list(void);
+    sexp_object_t *                scan_object(void);
+    sexp_string_t *                scan_string(void);
+    sexp_list_t *                  scan_list(void);
     sexp_simple_string_t           scan_simple_string(void);
     void                           scan_token(sexp_simple_string_t &ss);
     void     scan_verbatim_string(sexp_simple_string_t &ss, uint32_t length);

@@ -106,7 +106,7 @@ void sexp_list_t::parse(sexp_input_stream_t *sis)
     if (sis->get_next_char() == ')') {
         ;
     } else {
-        push_back(sis->scan_object());
+        push_back(std::unique_ptr<sexp_object_t>(sis->scan_object()));
     }
 
     while (true) {
@@ -116,7 +116,7 @@ void sexp_list_t::parse(sexp_input_stream_t *sis)
             return;
 
         } else {
-            push_back(sis->scan_object());
+            push_back(std::unique_ptr<sexp_object_t>(sis->scan_object()));
         }
     }
 }

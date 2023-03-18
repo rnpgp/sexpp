@@ -164,7 +164,7 @@ int main(int argc, char **argv)
                 break;
 
             object =
-              sws ? std::unique_ptr<sexp_object_t>(is->scan_to_eof()) : is->scan_object();
+              std::unique_ptr<sexp_object_t>(sws ? is->scan_to_eof() : is->scan_object());
 
             if (swp)
                 std::cout << std::endl;
