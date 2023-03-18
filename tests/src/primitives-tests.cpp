@@ -321,7 +321,7 @@ TEST_F(PrimitivesTests, scanToEof)
     std::istringstream  iss(str_in);
     sexp_input_stream_t is(&iss);
 
-    auto object = is.scan_to_eof();
+    auto object = std::unique_ptr<sexp_object_t>(is.scan_to_eof());
     EXPECT_TRUE(object->is_sexp_string());
 
     is.set_byte_size(4);
