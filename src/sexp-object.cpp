@@ -128,7 +128,7 @@ void sexp_list_t::parse(sexp_input_stream_t *sis)
 sexp_output_stream_t *sexp_list_t::print_canonical(sexp_output_stream_t *os) const
 {
     os->var_put_char('(');
-    std::for_each(begin(), end(), [os](const std::unique_ptr<sexp_object_t> &obj) {
+    std::for_each(begin(), end(), [os](const std::shared_ptr<sexp_object_t> &obj) {
         obj->print_canonical(os);
     });
     os->var_put_char(')');
@@ -151,7 +151,7 @@ sexp_output_stream_t *sexp_list_t::print_advanced(sexp_output_stream_t *os) cons
     os->put_char('(')->inc_indent();
     vertical = (advanced_length(os) > os->get_max_column() - os->get_column());
 
-    std::for_each(begin(), end(), [&](const std::unique_ptr<sexp_object_t> &obj) {
+    std::for_each(begin(), end(), [&](const std::shared_ptr<sexp_object_t> &obj) {
         if (!firstelement) {
             if (vertical)
                 os->new_line(sexp_output_stream_t::advanced);
@@ -174,7 +174,7 @@ sexp_output_stream_t *sexp_list_t::print_advanced(sexp_output_stream_t *os) cons
 size_t sexp_list_t::advanced_length(sexp_output_stream_t *os) const
 {
     size_t len = 1; /* for left paren */
-    std::for_each(begin(), end(), [&](const std::unique_ptr<sexp_object_t> &obj) {
+    std::for_each(begin(), end(), [&](const std::shared_ptr<sexp_object_t> &obj) {
         len += obj->advanced_length(os);
     });
     return (len + 1); /* for final paren */

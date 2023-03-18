@@ -199,7 +199,7 @@ sexp_output_stream_t *sexp_output_stream_t::print_decimal(uint64_t n)
  */
 
 sexp_output_stream_t *sexp_output_stream_t::print_base64(
-  const std::unique_ptr<sexp_object_t> &object)
+  const std::shared_ptr<sexp_object_t> &object)
 {
     change_output_byte_size(8, base64)->var_put_char('{')->change_output_byte_size(6, base64);
     print_canonical(object);

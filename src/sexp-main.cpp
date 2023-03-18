@@ -82,7 +82,7 @@ int main(int argc, char **argv)
     std::string           ofname;
     std::string           ifname;
     try {
-        std::unique_ptr<sexp_object_t> object;
+        std::shared_ptr<sexp_object_t> object;
 
         is = new sexp_input_stream_t(&std::cin);
         os = new sexp_output_stream_t(&std::cout);

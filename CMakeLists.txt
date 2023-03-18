@@ -102,23 +102,6 @@ if(NOT MSVC)
 
 endif(NOT MSVC)
 
-
-CHECK_CXX_SOURCE_COMPILES(
-    "#include <memory>
-    int main(int argc, char**argv) {
-        return 0;
-    }
-    std::unique_ptr<int> test(void) {
-        std::unique_ptr<int> p(new int);
-        return p;
-    }"
-    CAN_RETURN_UNIQUE_PTR
-)
-
-if(CAN_RETURN_UNIQUE_PTR)
-    add_compile_definitions(RETURN_UNIQUE_PTR)
-endif(CAN_RETURN_UNIQUE_PTR)
-
 add_library(sexp STATIC
     "src/sexp-input.cpp"
     "src/sexp-output.cpp"
