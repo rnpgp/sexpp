@@ -1,6 +1,6 @@
 /**
  *
- * Copyright (c) 2022, [Ribose Inc](https://www.ribose.com).
+ * Copyright (c) 2022-2023, [Ribose Inc](https://www.ribose.com).
  * All rights reserved.
  * This file is a part of RNP sexp library
  *
@@ -168,7 +168,7 @@ TEST_F(ExceptionTests, InvalidByteSizeAndMode)
     try {
         std::istringstream             iss("(3:a\011c)");
         sexp_input_stream_t            is(&iss);
-        std::unique_ptr<sexp_object_t> obj = is.set_byte_size(8)->get_char()->scan_object();
+        std::shared_ptr<sexp_object_t> obj = is.set_byte_size(8)->get_char()->scan_object();
 
         std::ostringstream   oss(std::ios_base::binary);
         sexp_output_stream_t os(&oss);

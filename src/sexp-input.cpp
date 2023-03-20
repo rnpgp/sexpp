@@ -1,6 +1,6 @@
 /**
  *
- * Copyright (c) 2022, [Ribose Inc](https://www.ribose.com).
+ * Copyright (c) 2022-2023, [Ribose Inc](https://www.ribose.com).
  * All rights reserved.
  * This file is a part of RNP sexp library
  *
@@ -194,17 +194,17 @@ void sexp_input_stream_t::scan_token(sexp_simple_string_t &ss)
  * scan one or more characters (until EOF reached)
  * return an object that is just that string
  */
-std::unique_ptr<sexp_object_t> sexp_input_stream_t::scan_to_eof(void)
+std::shared_ptr<sexp_object_t> sexp_input_stream_t::scan_to_eof(void)
 {
     sexp_simple_string_t           ss;
-    std::unique_ptr<sexp_string_t> s(new sexp_string_t());
+    std::shared_ptr<sexp_string_t> s(new sexp_string_t());
     skip_white_space();
     while (next_char != EOF) {
         ss.append(next_char);
         get_char();
     }
     s->set_string(ss);
-    _return_unique_ptr_(s);
+    return s;
 }
 
 /*
@@ -465,31 +465,31 @@ sexp_simple_string_t sexp_input_stream_t::scan_simple_string(void)
  * sexp_input_stream_t::scan_string(void)
  * Reads and returns a string [presentationhint]string from input stream.
  */
-std::unique_ptr<sexp_string_t> sexp_input_stream_t::scan_string(void)
+std::shared_ptr<sexp_string_t> sexp_input_stream_t::scan_string(void)
 {
-    std::unique_ptr<sexp_string_t> s(new sexp_string_t());
+    std::shared_ptr<sexp_string_t> s(new sexp_string_t());
     s->parse(this);
-    _return_unique_ptr_(s);
+    return s;
 }
 
 /*
  * sexp_input_stream_t::scan_list(void)
  * Read and return a sexp_list_t from the input stream.
  */
-std::unique_ptr<sexp_list_t> sexp_input_stream_t::scan_list(void)
+std::shared_ptr<sexp_list_t> sexp_input_stream_t::scan_list(void)
 {
-    std::unique_ptr<sexp_list_t> list(new sexp_list_t());
+    std::shared_ptr<sexp_list_t> list(new sexp_list_t());
     list->parse(this);
-    _return_unique_ptr_(list);
+    return list;
 }
 
 /*
  * sexp_input_stream_t::scan_object(void)
  * Reads and returns a sexp_object_t from the given input stream.
  */
-std::unique_ptr<sexp_object_t> sexp_input_stream_t::scan_object(void)
+std::shared_ptr<sexp_object_t> sexp_input_stream_t::scan_object(void)
 {
-    std::unique_ptr<sexp_object_t> object;
+    std::shared_ptr<sexp_object_t> object;
     skip_white_space();
     if (next_char == '{') {
         set_byte_size(6)->skip_char('{');
@@ -501,7 +501,7 @@ std::unique_ptr<sexp_object_t> sexp_input_stream_t::scan_object(void)
         else
             object = scan_string();
     }
-    _return_unique_ptr_(object);
+    return object;
 }
 
 } // namespace sexp

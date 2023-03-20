@@ -1,6 +1,6 @@
 /**
  *
- * Copyright (c) 2022, [Ribose Inc](https://www.ribose.com).
+ * Copyright (c) 2022-2023, [Ribose Inc](https://www.ribose.com).
  * All rights reserved.
  * This file is a part of RNP sexp library
  *
@@ -49,13 +49,6 @@
 #include "sexp-error.h"
 
 namespace sexp {
-
-#ifdef RETURN_UNIQUE_PTR
-#define _return_unique_ptr_(p) return (p)
-#else
-#define _return_unique_ptr_(p) return (std::move(p))
-#endif
-
 /*
  * SEXP octet_t definitions
  * We maintain some presumable redundancy with ctype
@@ -186,17 +179,17 @@ class sexp_object_t {
     virtual bool           is_sexp_string(void) const noexcept { return false; }
 
     virtual const sexp_list_t *sexp_list_at(
-      std::vector<std::unique_ptr<sexp_object_t>>::size_type pos) const noexcept
+      std::vector<std::shared_ptr<sexp_object_t>>::size_type pos) const noexcept
     {
         return nullptr;
     }
     virtual const sexp_string_t *sexp_string_at(
-      std::vector<std::unique_ptr<sexp_object_t>>::size_type pos) const noexcept
+      std::vector<std::shared_ptr<sexp_object_t>>::size_type pos) const noexcept
     {
         return nullptr;
     }
     virtual const sexp_simple_string_t *sexp_simple_string_at(
-      std::vector<std::unique_ptr<sexp_object_t>>::size_type pos) const noexcept
+      std::vector<std::shared_ptr<sexp_object_t>>::size_type pos) const noexcept
     {
         return nullptr;
     }
@@ -276,7 +269,7 @@ inline bool operator!=(const sexp_string_t *left, const std::string &right) noex
  * SEXP list
  */
 
-class sexp_list_t : public sexp_object_t, public std::vector<std::unique_ptr<sexp_object_t>> {
+class sexp_list_t : public sexp_object_t, public std::vector<std::shared_ptr<sexp_object_t>> {
   public:
     virtual ~sexp_list_t() {}
 
@@ -346,10 +339,10 @@ class sexp_input_stream_t : public sexp_char_defs_t {
         return this;
     }
 
-    std::unique_ptr<sexp_object_t> scan_to_eof();
-    std::unique_ptr<sexp_object_t> scan_object(void);
-    std::unique_ptr<sexp_string_t> scan_string(void);
-    std::unique_ptr<sexp_list_t>   scan_list(void);
+    std::shared_ptr<sexp_object_t> scan_to_eof();
+    std::shared_ptr<sexp_object_t> scan_object(void);
+    std::shared_ptr<sexp_string_t> scan_string(void);
+    std::shared_ptr<sexp_list_t>   scan_list(void);
     sexp_simple_string_t           scan_simple_string(void);
     void                           scan_token(sexp_simple_string_t &ss);
     void     scan_verbatim_string(sexp_simple_string_t &ss, uint32_t length);
@@ -396,15 +389,15 @@ class sexp_output_stream_t {
 
     sexp_output_stream_t *change_output_byte_size(int newByteSize, sexp_print_mode mode);
 
-    sexp_output_stream_t *print_canonical(const std::unique_ptr<sexp_object_t> &obj)
+    sexp_output_stream_t *print_canonical(const std::shared_ptr<sexp_object_t> &obj)
     {
         return obj->print_canonical(this);
     }
-    sexp_output_stream_t *print_advanced(const std::unique_ptr<sexp_object_t> &obj)
+    sexp_output_stream_t *print_advanced(const std::shared_ptr<sexp_object_t> &obj)
     {
         return obj->print_advanced(this);
     };
-    sexp_output_stream_t *print_base64(const std::unique_ptr<sexp_object_t> &obj);
+    sexp_output_stream_t *print_base64(const std::shared_ptr<sexp_object_t> &obj);
     sexp_output_stream_t *print_canonical(const sexp_simple_string_t *ss)
     {
         return ss->print_canonical_verbatim(this);
