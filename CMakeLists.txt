@@ -116,7 +116,10 @@ add_library(sexp STATIC
 )
 
 target_compile_features(sexp PUBLIC cxx_std_11)
-target_include_directories (sexp PUBLIC include)
+target_include_directories(sexp PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
 set_target_properties(sexp PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 if(WITH_SEXP_CLI)
