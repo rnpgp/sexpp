@@ -81,15 +81,19 @@ jobs:
       - name: Run tests
         run: ctest --test-dir build --output-on-failure
 
+      - name: Install
+        run: cmake --install build
+
+      - name: Install xargs
+        if: matrix.image == 'fedora:35'
+        run:  sudo yum -y install findutils
+
       - name: Checkout shell test framework
         uses: actions/checkout@v3
         with:
           repository: kward/shunit2
           path: ${{github.workspace}}/tests/shunit2
           fetch-depth: 1
-
-      - name: Install
-        run: cmake --install build
 
       - name: Run additional tests
         shell: bash
