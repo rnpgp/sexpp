@@ -491,7 +491,7 @@ std::shared_ptr<sexp_object_t> sexp_input_stream_t::scan_object(void)
 {
     std::shared_ptr<sexp_object_t> object;
     skip_white_space();
-    if (next_char == '{') {
+    if (next_char == '{' && byte_size != 6) {
         set_byte_size(6)->skip_char('{');
         object = scan_object();
         skip_char('}');

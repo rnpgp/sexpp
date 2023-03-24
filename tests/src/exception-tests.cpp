@@ -138,6 +138,12 @@ TEST_F(ExceptionTests, DecimalTooLong)
                            "SEXP ERROR: Decimal number is too long at position 11");
 }
 
+TEST_F(ExceptionTests, Base64CurlyBracket)
+{
+    // "ey..." in base64 encoding translates to "{..."
+    do_scan_with_exception("({ey})", "SEXP ERROR: illegal character '{' (0x7b) at position 3");
+}
+
 TEST_F(ExceptionTests, UnusedBits)
 {
     sexp::sexp_exception_t::set_verbosity(sexp::sexp_exception_t::warning);
