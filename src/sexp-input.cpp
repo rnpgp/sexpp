@@ -197,12 +197,12 @@ void sexp_input_stream_t::scan_token(sexp_simple_string_t &ss)
 std::shared_ptr<sexp_object_t> sexp_input_stream_t::scan_to_eof(void)
 {
     sexp_simple_string_t           ss;
-    std::shared_ptr<sexp_string_t> s(new sexp_string_t());
     skip_white_space();
     while (next_char != EOF) {
         ss.append(next_char);
         get_char();
     }
+    auto s = std::make_shared<sexp_string_t>();
     s->set_string(ss);
     return s;
 }
@@ -467,7 +467,7 @@ sexp_simple_string_t sexp_input_stream_t::scan_simple_string(void)
  */
 std::shared_ptr<sexp_string_t> sexp_input_stream_t::scan_string(void)
 {
-    std::shared_ptr<sexp_string_t> s(new sexp_string_t());
+    auto s = std::make_shared<sexp_string_t>();;
     s->parse(this);
     return s;
 }
@@ -478,7 +478,7 @@ std::shared_ptr<sexp_string_t> sexp_input_stream_t::scan_string(void)
  */
 std::shared_ptr<sexp_list_t> sexp_input_stream_t::scan_list(void)
 {
-    std::shared_ptr<sexp_list_t> list(new sexp_list_t());
+    auto list = std::make_shared<sexp_list_t>();
     list->parse(this);
     return list;
 }
