@@ -180,14 +180,8 @@ sexp_output_stream_t *sexp_output_stream_t::new_line(sexp_print_mode mode)
 sexp_output_stream_t *sexp_output_stream_t::print_decimal(uint64_t n)
 {
     char buffer[20]; // 64*ln(2)/ln(10)
-    snprintf(buffer,
-             sizeof(buffer) / sizeof(buffer[0]),
-#ifdef _WIN32
-             "%llu",
-#else
-             "%lu",
-#endif
-             n); // since itoa is not a part of any standard
+    // since itoa is not a part of any standard
+    snprintf(buffer,  sizeof(buffer) / sizeof(buffer[0]), "%" PRIu64, n);
     for (uint32_t i = 0; buffer[i] != 0; i++)
         var_put_char(buffer[i]);
     return this;
