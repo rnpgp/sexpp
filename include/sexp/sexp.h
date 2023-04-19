@@ -34,6 +34,7 @@
 
 #pragma once
 
+#include <inttypes.h>
 #include <climits>
 #include <limits>
 #include <cctype>
