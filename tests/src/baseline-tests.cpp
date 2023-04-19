@@ -40,8 +40,7 @@ class BaselineTests : public testing::Test {
     static const uint32_t base_sample_canonical = 2;
     static const uint32_t n_base_samples = base_sample_canonical + 1;
 
-    static const uint32_t was_set_upbase_sample_advanced = 0;
-    static std::string    base_samples[n_base_samples];
+    static std::string base_samples[n_base_samples];
 
     BaselineTests()
     {
