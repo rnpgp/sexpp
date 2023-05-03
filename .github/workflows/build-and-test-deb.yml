@@ -48,7 +48,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        image: [ 'i386/debian:9', 'i386/debian:11', 'amd64/debian:11' ]
+        image: [ 'i386/debian:10', 'i386/debian:11', 'amd64/debian:11' ]
         env: [ {CC: gcc, CXX: g++}, {CC: clang, CXX: clang++} ]
     container: ${{ matrix.image }}
     env: ${{ matrix.env }}
