@@ -42,14 +42,17 @@ env:
 jobs:
   build-and-test:
     runs-on: ${{ matrix.os }}
+    name: ${{ matrix.os }}-${{ matrix.env.CC }} shared lib ${{ matrix.shared }}
     strategy:
       fail-fast: false
       matrix:
         os: [ ubuntu-20.04, macos-11, windows-2019 ]
         env: [ { } ]
+        shared: [on, off]
         # on macos gcc is an alias to clang by default, so there is no real value in macos clang run
         include:
-          - { os: ubuntu-20.04, env: { CC: clang, CXX: clang++ } }
+          - { os: ubuntu-20.04, env: { CC: clang, CXX: clang++ }, shared: on }
+          - { os: ubuntu-20.04, env: { CC: clang, CXX: clang++ }, shared: off }
     env: ${{ matrix.env }}
     steps:
       - name: Checkout
@@ -58,7 +61,7 @@ jobs:
           fetch-depth: 1
 
       - name: Configure
-        run: cmake -Bbuild -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/install -DCMAKE_BUILD_TYPE=Release
+        run: cmake -Bbuild -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/install -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIB=${{ matrix.shared }}
 
       - name: Adjust environment for Windows build
         if: runner.os == 'Windows'

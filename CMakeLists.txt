@@ -41,10 +41,18 @@ option(WITH_SEXP_CLI "Build sexp console application" ON)
 option(WITH_SANITIZERS "Enable ASAN and other sanitizers" OFF)
 option(WITH_COVERAGE "Enable coverage report" OFF)
 option(DOWNLOAD_GTEST "Download googletest" ON)
+option(BUILD_SHARED_LIB "Build shared library" OFF)
 
 include(GNUInstallDirs)
 include(CheckCXXSourceCompiles)
 
+if (BUILD_SHARED_LIB)
+    set(TYPE "SHARED")
+else (BUILD_SHARED_LIB)
+    set(TYPE "STATIC")
+endif (BUILD_SHARED_LIB)
+
+message(STATUS "Building ${TYPE} library")
 
 if (WITH_SANITIZERS)
     if (NOT CMAKE_CXX_COMPILER_ID MATCHES "Clang")
@@ -53,7 +61,7 @@ if (WITH_SANITIZERS)
     if(NOT CMAKE_BUILD_TYPE MATCHES "Debug")
         message(STATUS "Forcing build type to Debug for sanitizers")
         set(CMAKE_BUILD_TYPE Debug CACHE STRING "Build type. Forced to Debug" FORCE)
-        set(WITH_TESTS ON CACHE STRING "BForced to ON" FORCE)
+        set(WITH_TESTS ON CACHE STRING "Forced to ON" FORCE)
     endif()
 endif()
 
@@ -64,7 +72,7 @@ if (WITH_COVERAGE)
     if(NOT CMAKE_BUILD_TYPE MATCHES "Debug")
         message(STATUS "Forcing build type to Debug for coverage")
         set(CMAKE_BUILD_TYPE Debug CACHE STRING "Build type. Forced to Debug" FORCE)
-        set(WITH_TESTS ON CACHE STRING "BForced to ON" FORCE)
+        set(WITH_TESTS ON CACHE STRING "Forced to ON" FORCE)
     endif()
 endif()
 
@@ -102,7 +110,7 @@ if(NOT MSVC)
 
 endif(NOT MSVC)
 
-add_library(sexp STATIC
+add_library(sexp ${TYPE}
     "src/sexp-input.cpp"
     "src/sexp-output.cpp"
     "src/sexp-object.cpp"
