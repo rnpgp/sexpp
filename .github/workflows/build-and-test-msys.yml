@@ -44,11 +44,13 @@ defaults:
     shell: msys2 {0}
 jobs:
   build-and-test:
+    name: MSys-${{ matrix.msystem }} shared lib ${{ matrix.shared }}
     runs-on: windows-latest
     strategy:
       fail-fast: false
       matrix:
         msystem: [ ucrt64, mingw64, clang64 ]
+        shared: [on, off]
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -69,7 +71,7 @@ jobs:
         run: echo "SEXP_INSTALL_PATH=$(cygpath -u $PWD/install)" >> $GITHUB_ENV
 
       - name: Configure
-        run:  cmake -Bbuild -DCMAKE_INSTALL_PREFIX=${{ env.SEXP_INSTALL_PATH }} -DCMAKE_BUILD_TYPE=Release
+        run:  cmake -Bbuild -DCMAKE_INSTALL_PREFIX=${{ env.SEXP_INSTALL_PATH }} -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIB=${{ matrix.shared }}
 
       - name: Build
         run: cmake --build build --config Release

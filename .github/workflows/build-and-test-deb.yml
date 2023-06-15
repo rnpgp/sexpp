@@ -43,13 +43,15 @@ env:
 
 jobs:
   build-and-test:
-    name: ${{ matrix.image }}-${{ matrix.env.CC }}
+    name: ${{ matrix.image }}-${{ matrix.env.CC }} shared lib ${{ matrix.shared }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         image: [ 'i386/debian:10', 'i386/debian:11', 'amd64/debian:11' ]
         env: [ {CC: gcc, CXX: g++}, {CC: clang, CXX: clang++} ]
+        shared: [on, off]
+
     container: ${{ matrix.image }}
     env: ${{ matrix.env }}
     steps:
@@ -87,7 +89,7 @@ jobs:
         run: echo "SEXP_INSTALL_PATH=$PWD/install" >> $GITHUB_ENV
 
       - name: Configure
-        run: cmake . -Bbuild -DCMAKE_INSTALL_PREFIX=${{ env.SEXP_INSTALL_PATH }} -DCMAKE_BUILD_TYPE=Release
+        run: cmake . -Bbuild -DCMAKE_INSTALL_PREFIX=${{ env.SEXP_INSTALL_PATH }} -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIB=${{ matrix.shared }}
 
       - name: Build
         run: cmake --build build --config Release
