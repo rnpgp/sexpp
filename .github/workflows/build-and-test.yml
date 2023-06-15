@@ -60,13 +60,16 @@ jobs:
         with:
           fetch-depth: 1
 
-      - name: Configure
-        run: cmake -Bbuild -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/install -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIB=${{ matrix.shared }}
-
       - name: Adjust environment for Windows build
         if: runner.os == 'Windows'
         shell: bash
         run: echo "OSTYPE=windows" >> $GITHUB_ENV
+
+      - name: Adjust environment
+        run: echo "SHARED_LIB=${{ matrix.shared }}" >> $GITHUB_ENV
+
+      - name: Configure
+        run: cmake -Bbuild -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/install -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=${{ matrix.shared }}
 
       - name: Build
         run: cmake --build build --config Release

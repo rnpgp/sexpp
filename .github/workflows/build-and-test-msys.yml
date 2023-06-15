@@ -68,10 +68,12 @@ jobs:
 
       - name: Adjust environment
         shell: bash
-        run: echo "SEXP_INSTALL_PATH=$(cygpath -u $PWD/install)" >> $GITHUB_ENV
+        run: |
+          echo "SEXP_INSTALL_PATH=$(cygpath -u $PWD/install)" >> $GITHUB_ENV
+          echo "SHARED_LIB=${{ matrix.shared }}" >> $GITHUB_ENV
 
       - name: Configure
-        run:  cmake -Bbuild -DCMAKE_INSTALL_PREFIX=${{ env.SEXP_INSTALL_PATH }} -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIB=${{ matrix.shared }}
+        run:  cmake -Bbuild -DCMAKE_INSTALL_PREFIX=${{ env.SEXP_INSTALL_PATH }} -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=${{ matrix.shared }}
 
       - name: Build
         run: cmake --build build --config Release

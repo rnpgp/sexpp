@@ -43,12 +43,43 @@ assert_installed_var() {
 test_install_script() {
    echo "==> Install script test"
 
-   if [[ "$OSTYPE" == "windows" ]]; then
-      assert_installed "$DIR_INS_B/sexp.exe"
-      assert_installed "$DIR_INS_L/sexp.lib"
+   if [[ "${SHARED_LIB:-}" == "on" ]]; then
+      case "$OSTYPE" in
+         darwin*)
+            assert_installed "$DIR_INS_B/sexp"
+            assert_installed "$DIR_INS_L/libsexp.dylib"
+         ;;
+         windows )
+            assert_installed "$DIR_INS_B/sexp.exe"
+            assert_installed "$DIR_INS_B/sexp.dll"
+            assert_installed "$DIR_INS_L/sexp.lib"
+         ;;
+         msys)
+
+            assert_installed "$DIR_INS_B/sexp.exe"
+            assert_installed "$DIR_INS_B/libsexp.dll"
+            assert_installed "$DIR_INS_L/libsexp.dll.a"
+         ;;
+         *)
+            assert_installed "$DIR_INS_B/sexp"
+            assert_installed_var "$DIR_INS_L" "$DIR_INS_L64" "libsexp.so"
+         ;;   
+      esac
    else
-      assert_installed "$DIR_INS_B/sexp"
-      assert_installed_var "$DIR_INS_L" "$DIR_INS_L64" "libsexp.a"
+      case "$OSTYPE" in
+         windows)
+            assert_installed "$DIR_INS_B/sexp.exe"
+            assert_installed "$DIR_INS_L/sexp.lib" 
+         ;;
+         msys)
+            assert_installed "$DIR_INS_B/sexp.exe"
+            assert_installed "$DIR_INS_L/libsexp.a"
+         ;;
+         *)
+            assert_installed "$DIR_INS_B/sexp"
+            assert_installed_var "$DIR_INS_L" "$DIR_INS_L64" "libsexp.a"
+         ;;   
+      esac
    fi
 
    assert_installed_var "$DIR_INS_P" "$DIR_INS_P64" "sexp.pc"
@@ -75,6 +106,7 @@ Input:
 
 Writing base64 (of canonical) output to certificate.dat
 EOM
+   export LD_LIBRARY_PATH="$DIR_INS_L":"$DIR_INS_L64"
    echo "(aa bb (cc dd))" > input1.dat
    output=$("$app" -o certificate.dat -p -b < input1.dat)
 #  $expected possibly includes extra EOL at the end -- it depends on OS

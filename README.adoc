@@ -89,6 +89,9 @@ cmake --install .
 
 == CMake script options
 
+`BUILD_SHARED_LIBS:BOOL`::
+build shared library (default: `OFF`)
+
 `WITH_SEXP_TESTS:BOOL`::
 build tests (default: `ON`)
 
