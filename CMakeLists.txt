@@ -41,16 +41,19 @@ option(WITH_SEXP_CLI "Build sexp console application" ON)
 option(WITH_SANITIZERS "Enable ASAN and other sanitizers" OFF)
 option(WITH_COVERAGE "Enable coverage report" OFF)
 option(DOWNLOAD_GTEST "Download googletest" ON)
-option(BUILD_SHARED_LIB "Build shared library" OFF)
+option(BUILD_SHARED_LIBS "Build shared library" OFF)
 
 include(GNUInstallDirs)
 include(CheckCXXSourceCompiles)
 
-if (BUILD_SHARED_LIB)
+if (BUILD_SHARED_LIBS)
     set(TYPE "SHARED")
-else (BUILD_SHARED_LIB)
+    if (WIN32)
+        set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS, TRUE)
+    endif(WIN32)
+else (BUILD_SHARED_LIBS)
     set(TYPE "STATIC")
-endif (BUILD_SHARED_LIB)
+endif (BUILD_SHARED_LIBS)
 
 message(STATUS "Building ${TYPE} library")
 
@@ -129,6 +132,7 @@ target_include_directories(sexp PUBLIC
     $<INSTALL_INTERFACE:include>
 )
 set_target_properties(sexp PROPERTIES POSITION_INDEPENDENT_CODE ON)
+set_target_properties(sexp PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 if(WITH_SEXP_CLI)
     add_executable (sexp-cli
@@ -140,6 +144,7 @@ if(WITH_SEXP_CLI)
     target_link_libraries(sexp-cli PRIVATE sexp)
     target_compile_features(sexp-cli PUBLIC cxx_std_11)
     set_target_properties(sexp-cli PROPERTIES RUNTIME_OUTPUT_NAME sexp)
+    set_target_properties(sexp-cli PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 endif(WITH_SEXP_CLI)
 
 
@@ -230,6 +235,7 @@ if(WITH_SEXP_TESTS)
     )
 
     target_compile_features(sexp-tests PUBLIC cxx_std_11)
+    set_target_properties(sexp-tests PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
     gtest_discover_tests(sexp-tests)
 endif(WITH_SEXP_TESTS)
@@ -241,7 +247,13 @@ configure_file(
     @ONLY
 )
 
-install(TARGETS sexp DESTINATION "${CMAKE_INSTALL_LIBDIR}")
+if (WIN32 AND BUILD_SHARED_LIBS)
+    install(TARGETS sexp RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}")
+    install(TARGETS sexp ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}")
+else(WIN32 AND BUILD_SHARED_LIBS)
+    install(TARGETS sexp DESTINATION "${CMAKE_INSTALL_LIBDIR}")
+endif(WIN32 AND BUILD_SHARED_LIBS)
+
 install(DIRECTORY include/ DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
 install(FILES "${CONFIGURED_PC}" DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
 if(WITH_SEXP_CLI)
