@@ -48,12 +48,14 @@ include(CheckCXXSourceCompiles)
 
 if (BUILD_SHARED_LIBS)
     set(TYPE "SHARED")
-    if (WIN32)
-        set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS, TRUE)
-    endif(WIN32)
 else (BUILD_SHARED_LIBS)
     set(TYPE "STATIC")
 endif (BUILD_SHARED_LIBS)
+
+if (BUILD_SHARED_LIBS AND MSVC)
+    message(FATAL_ERROR "Building sexp shared library with MSVC is not supported")
+endif(BUILD_SHARED_LIBS AND MSVC)
+
 
 message(STATUS "Building ${TYPE} library")
 
