@@ -118,6 +118,7 @@ add_library(sexp ${TYPE}
     "src/sexp-simple-string.cpp"
     "src/sexp-char-defs.cpp"
     "src/sexp-error.cpp"
+    "src/sexp-depth-manager.cpp"
     "src/ext-key-format.cpp"
     "include/sexp/sexp.h"
     "include/sexp/sexp-error.h"

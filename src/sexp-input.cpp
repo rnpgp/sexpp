@@ -31,17 +31,9 @@
 namespace sexp {
 
 /*
- * newSexpInputStream()
- * Creates and initializes a new sexp_input_stream_t object.
- * (Prefixes stream with one blank, and initializes stream
- *  so that it reads from standard input.)
+ * sexp_input_stream_t::sexp_input_stream_t
+ * Creates and initializes new sexp_input_stream_t object.
  */
-std::istream *input_file;
-uint32_t      byte_size; /* 4 or 6 or 8 == currently scanning mode */
-int           next_char; /* character currently being scanned */
-uint32_t      bits;      /* Bits waiting to be used */
-uint32_t      n_bits;    /* number of such bits waiting to be used */
-int           count;     /* number of 8-bit characters output by get_char */
 
 sexp_input_stream_t::sexp_input_stream_t(std::istream *i, size_t m_depth)
 {
@@ -49,7 +41,7 @@ sexp_input_stream_t::sexp_input_stream_t(std::istream *i, size_t m_depth)
 }
 
 /*
- * sexp_input_stream_t::set_input(std::istream *i)
+ * sexp_input_stream_t::set_input(std::istream *i, size_t m_depth)
  */
 
 sexp_input_stream_t *sexp_input_stream_t::set_input(std::istream *i, size_t m_depth)
@@ -60,8 +52,7 @@ sexp_input_stream_t *sexp_input_stream_t::set_input(std::istream *i, size_t m_de
     bits = 0;
     n_bits = 0;
     count = -1;
-    depth = 0;
-    max_depth = m_depth;
+    reset_depth(m_depth);
     return this;
 }
 

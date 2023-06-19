@@ -207,7 +207,7 @@ static void do_parse_list_from_string_with_limit(const char *str, size_t m_depth
     lst.parse(is.set_byte_size(8)->get_char());
 }
 
-TEST_F(ExceptionTests, MaxDepth)
+TEST_F(ExceptionTests, MaxDepthParse)
 {
     const char *depth_1 = "(sexp_list_1)";
     const char *depth_4 = "(sexp_list_1 (sexp_list_2 (sexp_list_3 (sexp_list_4))))";
@@ -244,4 +244,88 @@ TEST_F(ExceptionTests, MaxDepth)
           "SEXP ERROR: Maximum allowed SEXP list depth (4) is exceeded at position 53");
     }
 }
+
+static void do_print_list_from_string(const char *str, bool advanced, size_t m_depth = 0)
+{
+    std::istringstream  iss(str);
+    sexp_input_stream_t is(&iss);
+    sexp_list_t         lst;
+    lst.parse(is.set_byte_size(8)->get_char());
+
+    std::ostringstream   oss(str);
+    sexp_output_stream_t os(&oss, m_depth);
+    if (advanced)
+        lst.print_advanced(&os);
+    else
+        lst.print_canonical(&os);
+}
+
+TEST_F(ExceptionTests, MaxDepthPrintAdvanced)
+{
+    const char *depth_1 = "(sexp_list_1)";
+    const char *depth_4 = "(sexp_list_1 (sexp_list_2 (sexp_list_3 (sexp_list_4))))";
+    const char *depth_4e = "(sexp_list_1 (sexp_list_2 (sexp_list_3 ())))";
+    const char *depth_5 =
+      "(sexp_list_1 (sexp_list_2 (sexp_list_3 (sexp_list_4 (sexp_list_5)))))";
+    const char *depth_5e = "(sexp_list_1 (sexp_list_2 (sexp_list_3 (sexp_list_4 ()))))";
+
+    do_print_list_from_string(depth_1, true);
+    do_print_list_from_string(depth_4, true);
+    do_print_list_from_string(depth_4e, true);
+    do_print_list_from_string(depth_5, true);
+    do_print_list_from_string(depth_5e, true);
+
+    do_print_list_from_string(depth_1, true, 4);
+    do_print_list_from_string(depth_4, true, 4);
+    do_print_list_from_string(depth_4e, true, 4);
+
+    try {
+        do_print_list_from_string(depth_5, true, 4);
+        FAIL() << "sexp::sexp_exception_t expected but has not been thrown";
+    } catch (sexp::sexp_exception_t &e) {
+        EXPECT_STREQ(e.what(), "SEXP ERROR: Maximum allowed SEXP list depth (4) is exceeded");
+    }
+
+    try {
+        do_print_list_from_string(depth_5e, true, 4);
+        FAIL() << "sexp::sexp_exception_t expected but has not been thrown";
+    } catch (sexp::sexp_exception_t &e) {
+        EXPECT_STREQ(e.what(), "SEXP ERROR: Maximum allowed SEXP list depth (4) is exceeded");
+    }
+}
+
+TEST_F(ExceptionTests, MaxDepthPrintCanonical)
+{
+    const char *depth_1 = "(sexp_list_1)";
+    const char *depth_4 = "(sexp_list_1 (sexp_list_2 (sexp_list_3 (sexp_list_4))))";
+    const char *depth_4e = "(sexp_list_1 (sexp_list_2 (sexp_list_3 ())))";
+    const char *depth_5 =
+      "(sexp_list_1 (sexp_list_2 (sexp_list_3 (sexp_list_4 (sexp_list_5)))))";
+    const char *depth_5e = "(sexp_list_1 (sexp_list_2 (sexp_list_3 (sexp_list_4 ()))))";
+
+    do_print_list_from_string(depth_1, false);
+    do_print_list_from_string(depth_4, false);
+    do_print_list_from_string(depth_4e, false);
+    do_print_list_from_string(depth_5, false);
+    do_print_list_from_string(depth_5e, false);
+
+    do_print_list_from_string(depth_1, false, 4);
+    do_print_list_from_string(depth_4, false, 4);
+    do_print_list_from_string(depth_4e, false, 4);
+
+    try {
+        do_print_list_from_string(depth_5, false, 4);
+        FAIL() << "sexp::sexp_exception_t expected but has not been thrown";
+    } catch (sexp::sexp_exception_t &e) {
+        EXPECT_STREQ(e.what(), "SEXP ERROR: Maximum allowed SEXP list depth (4) is exceeded");
+    }
+
+    try {
+        do_print_list_from_string(depth_5e, false, 4);
+        FAIL() << "sexp::sexp_exception_t expected but has not been thrown";
+    } catch (sexp::sexp_exception_t &e) {
+        EXPECT_STREQ(e.what(), "SEXP ERROR: Maximum allowed SEXP list depth (4) is exceeded");
+    }
+}
+
 } // namespace

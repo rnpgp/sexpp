@@ -44,6 +44,7 @@
 #include "sexp-error.h"
 
 namespace sexp {
+
 /*
  * SEXP octet_t definitions
  * We maintain some presumable redundancy with ctype
@@ -293,10 +294,30 @@ class sexp_list_t : public sexp_object_t, public std::vector<std::shared_ptr<sex
 };
 
 /*
+    sexp_depth_manager controls maximum allowed nesting of sexp lists
+    for sexp_input_stream, sexp_output_stream processing
+    One still can create an object with deeper nesting manually
+*/
+
+class sexp_depth_manager {
+  public:
+    static const size_t DEFAULT_MAX_DEPTH = 1024;
+
+  private:
+    size_t depth;     /* current depth of nested SEXP lists */
+    size_t max_depth; /* maximum allowed depth of nested SEXP lists, 0 if no limit */
+  protected:
+    sexp_depth_manager(size_t m_depth = DEFAULT_MAX_DEPTH);
+    void reset_depth(size_t m_depth);
+    void increase_depth(int count = -1);
+    void decrease_depth(void);
+};
+
+/*
  * SEXP input stream
  */
 
-class sexp_input_stream_t : public sexp_char_defs_t {
+class sexp_input_stream_t : public sexp_char_defs_t, sexp_depth_manager {
   protected:
     std::istream *input_file;
     uint32_t      byte_size; /* 4 or 6 or 8 == currently scanning mode */
@@ -304,36 +325,20 @@ class sexp_input_stream_t : public sexp_char_defs_t {
     uint32_t      bits;      /* Bits waiting to be used */
     uint32_t      n_bits;    /* number of such bits waiting to be used */
     int           count;     /* number of 8-bit characters output by get_char */
-    size_t        depth;     /* current depth of nested SEXP lists */
-    size_t        max_depth; /* maximum allowed depth of nested SEXP lists, 0 if no limit */
 
     virtual int read_char(void);
 
   public:
-    sexp_input_stream_t(std::istream *i, size_t max_depth = 0);
+    sexp_input_stream_t(std::istream *i,
+                        size_t        max_depth = sexp_depth_manager::DEFAULT_MAX_DEPTH);
     virtual ~sexp_input_stream_t() = default;
-    sexp_input_stream_t *set_input(std::istream *i, size_t max_depth = 0);
-    sexp_input_stream_t *set_byte_size(uint32_t new_byte_size);
-    uint32_t             get_byte_size(void) { return byte_size; }
-    sexp_input_stream_t *get_char(void);
-    sexp_input_stream_t *skip_white_space(void);
-    sexp_input_stream_t *skip_char(int c);
-    sexp_input_stream_t *increase_depth(void)
-    {
-        if (max_depth != 0 && ++depth > max_depth)
-            sexp_error(sexp_exception_t::error,
-                       "Maximum allowed SEXP list depth (%u) is exceeded",
-                       max_depth,
-                       0,
-                       count);
-        return this;
-    }
-    sexp_input_stream_t *decrease_depth(void)
-    {
-        depth--;
-        return this;
-    }
-
+    sexp_input_stream_t *          set_input(std::istream *i,
+                                             size_t max_depth = sexp_depth_manager::DEFAULT_MAX_DEPTH);
+    sexp_input_stream_t *          set_byte_size(uint32_t new_byte_size);
+    uint32_t                       get_byte_size(void) { return byte_size; }
+    sexp_input_stream_t *          get_char(void);
+    sexp_input_stream_t *          skip_white_space(void);
+    sexp_input_stream_t *          skip_char(int c);
     std::shared_ptr<sexp_object_t> scan_to_eof();
     std::shared_ptr<sexp_object_t> scan_object(void);
     std::shared_ptr<sexp_string_t> scan_string(void);
@@ -348,13 +353,24 @@ class sexp_input_stream_t : public sexp_char_defs_t {
 
     int get_next_char(void) const { return next_char; }
     int set_next_char(int c) { return next_char = c; }
+
+    sexp_input_stream_t *open_list(void)
+    {
+        skip_char('(')->increase_depth(count);
+        return this;
+    }
+    sexp_input_stream_t *close_list(void)
+    {
+        skip_char(')')->decrease_depth();
+        return this;
+    }
 };
 
 /*
  * SEXP output stream
  */
 
-class sexp_output_stream_t {
+class sexp_output_stream_t : sexp_depth_manager {
   public:
     const uint32_t default_line_length = 75;
     enum sexp_print_mode {                /* PRINTING MODES */
@@ -374,8 +390,10 @@ class sexp_output_stream_t {
     uint32_t        max_column;   /* max usable column, or 0 if no maximum */
     uint32_t        indent;       /* current indentation level (starts at 0) */
   public:
-    sexp_output_stream_t(std::ostream *o);
-    sexp_output_stream_t *set_output(std::ostream *o);
+    sexp_output_stream_t(std::ostream *o,
+                         size_t        max_depth = sexp_depth_manager::DEFAULT_MAX_DEPTH);
+    sexp_output_stream_t *set_output(std::ostream *o,
+                                     size_t max_depth = sexp_depth_manager::DEFAULT_MAX_DEPTH);
     sexp_output_stream_t *put_char(int c);                /* output a character */
     sexp_output_stream_t *new_line(sexp_print_mode mode); /* go to next line (and indent) */
     sexp_output_stream_t *var_put_char(int c);
@@ -423,6 +441,29 @@ class sexp_output_stream_t {
     sexp_output_stream_t *dec_indent(void)
     {
         --indent;
+        return this;
+    }
+
+    sexp_output_stream_t *open_list(void)
+    {
+        put_char('(');
+        increase_depth();
+
+        return this;
+    }
+    sexp_output_stream_t *close_list(void)
+    {
+        put_char(')')->decrease_depth();
+        return this;
+    }
+    sexp_output_stream_t *var_open_list(void)
+    {
+        var_put_char('(')->increase_depth();
+        return this;
+    }
+    sexp_output_stream_t *var_close_list(void)
+    {
+        var_put_char(')')->decrease_depth();
         return this;
     }
 };
