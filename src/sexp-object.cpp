@@ -96,7 +96,7 @@ size_t sexp_string_t::advanced_length(sexp_output_stream_t *os) const
 
 void sexp_list_t::parse(sexp_input_stream_t *sis)
 {
-    sis->skip_char('(')->increase_depth()->skip_white_space();
+    sis->open_list()->skip_white_space();
     if (sis->get_next_char() == ')') {
         ;
     } else {
@@ -106,7 +106,7 @@ void sexp_list_t::parse(sexp_input_stream_t *sis)
     while (true) {
         sis->skip_white_space();
         if (sis->get_next_char() == ')') { /* we just grabbed last element of list */
-            sis->skip_char(')')->decrease_depth();
+            sis->close_list();
             return;
 
         } else {
@@ -121,11 +121,11 @@ void sexp_list_t::parse(sexp_input_stream_t *sis)
  */
 sexp_output_stream_t *sexp_list_t::print_canonical(sexp_output_stream_t *os) const
 {
-    os->var_put_char('(');
+    os->var_open_list();
     std::for_each(begin(), end(), [os](const std::shared_ptr<sexp_object_t> &obj) {
         obj->print_canonical(os);
     });
-    os->var_put_char(')');
+    os->var_close_list();
     return os;
 }
 
@@ -142,7 +142,7 @@ sexp_output_stream_t *sexp_list_t::print_advanced(sexp_output_stream_t *os) cons
     sexp_object_t::print_advanced(os);
     int vertical = false;
     int firstelement = true;
-    os->put_char('(')->inc_indent();
+    os->open_list()->inc_indent();
     vertical = (advanced_length(os) > os->get_max_column() - os->get_column());
 
     std::for_each(begin(), end(), [&](const std::shared_ptr<sexp_object_t> &obj) {

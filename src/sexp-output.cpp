@@ -38,16 +38,16 @@ static const char *base64Digits =
  * sexp_output_stream_t::sexp_output_stream_t
  * Creates and initializes new sexp_output_stream_t object.
  */
-sexp_output_stream_t::sexp_output_stream_t(std::ostream *o)
+sexp_output_stream_t::sexp_output_stream_t(std::ostream *o, size_t m_depth)
 {
-    set_output(o);
+    set_output(o, m_depth);
 }
 
 /*
  * sexp_output_stream_t::set_output
  * Re-initializes new sexp_output_stream_t object.
  */
-sexp_output_stream_t *sexp_output_stream_t::set_output(std::ostream *o)
+sexp_output_stream_t *sexp_output_stream_t::set_output(std::ostream *o, size_t m_depth)
 {
     output_file = o;
     byte_size = 8;
@@ -58,6 +58,7 @@ sexp_output_stream_t *sexp_output_stream_t::set_output(std::ostream *o)
     max_column = default_line_length;
     indent = 0;
     base64_count = 0;
+    reset_depth(m_depth);
     return this;
 }
 

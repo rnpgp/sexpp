@@ -4,3 +4,4 @@
 /tests/include/sexp-samples-folder.h
 /.vscode
 /result
+/tests/shunit2
