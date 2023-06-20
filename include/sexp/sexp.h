@@ -354,16 +354,8 @@ class sexp_input_stream_t : public sexp_char_defs_t, sexp_depth_manager {
     int get_next_char(void) const { return next_char; }
     int set_next_char(int c) { return next_char = c; }
 
-    sexp_input_stream_t *open_list(void)
-    {
-        skip_char('(')->increase_depth(count);
-        return this;
-    }
-    sexp_input_stream_t *close_list(void)
-    {
-        skip_char(')')->decrease_depth();
-        return this;
-    }
+    sexp_input_stream_t *open_list(void);
+    sexp_input_stream_t *close_list(void);
 };
 
 /*
