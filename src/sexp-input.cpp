@@ -490,4 +490,25 @@ std::shared_ptr<sexp_object_t> sexp_input_stream_t::scan_object(void)
     return object;
 }
 
+/*
+ * sexp_input_stream_t::open_list(void)
+ */
+sexp_input_stream_t *sexp_input_stream_t::open_list(void)
+{
+    skip_char('(');
+    // gcc 4.8.5 generates wrong code in case of chaining like
+    //           skip_char('(')->increase_depth(count)
+    increase_depth(count);
+    return this;
+}
+/*
+ * sexp_input_stream_t::close_list(void)
+ */
+sexp_input_stream_t *sexp_input_stream_t::close_list(void)
+{
+    skip_char(')');
+    decrease_depth();
+    return this;
+}
+
 } // namespace sexp
