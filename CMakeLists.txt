@@ -130,8 +130,10 @@ target_include_directories(sexp PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>
 )
-set_target_properties(sexp PROPERTIES POSITION_INDEPENDENT_CODE ON)
-set_target_properties(sexp PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+set_target_properties(sexp PROPERTIES
+  POSITION_INDEPENDENT_CODE ON
+  RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
+)
 
 set_target_properties(sexp
   PROPERTIES
