@@ -130,9 +130,18 @@ target_include_directories(sexp PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>
 )
+
+string(REGEX MATCH "^([0-9]+)\\.[0-9]+\\.[0-9]+$" vmatches "${SEXP_VERSION}")
+if (NOT vmatches)
+  message(FATAL_ERROR "Failed to extract major version from SEXP_VERSION (${SEXP_VERSION}).")
+endif()
+set(SEXP_MAJOR_VERSION "${CMAKE_MATCH_1}")
+
 set_target_properties(sexp PROPERTIES
   POSITION_INDEPENDENT_CODE ON
   RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
+  VERSION "${SEXP_VERSION}"
+  SOVERSION "${SEXP_MAJOR_VERSION}"
 )
 
 if(WITH_SEXP_CLI)
