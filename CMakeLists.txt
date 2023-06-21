@@ -133,6 +133,13 @@ target_include_directories(sexp PUBLIC
 set_target_properties(sexp PROPERTIES POSITION_INDEPENDENT_CODE ON)
 set_target_properties(sexp PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
+set_target_properties(sexp
+  PROPERTIES
+    VERSION "${CMAKE_PROJECT_VERSION}"
+    SOVERSION "${CMAKE_PROJECT_VERSION_MAJOR}"
+    OUTPUT_NAME "sexp"
+)
+
 if(WITH_SEXP_CLI)
     add_executable (sexp-cli
                     src/sexp-main.cpp
