@@ -39,10 +39,14 @@ test_install_script() {
    echo "==> Install script test"
 
    if [[ "${SHARED_LIB:-}" == "on" ]]; then
+      version=$(cat "$DIR_ROOT"/version.txt)
+      version_major="${version:0:1}"
       case "$OSTYPE" in
          darwin*)
             assert_installed "$DIR_INS_B/sexp"
             assert_installed "$DIR_INS_L/libsexp.dylib"
+            assert_installed "$DIR_INS_L/libsexp.$version_major.dylib"
+            assert_installed "$DIR_INS_L/libsexp.$version.dylib"
          ;;
          windows )
             assert_installed "$DIR_INS_B/sexp.exe"
@@ -58,13 +62,15 @@ test_install_script() {
          *)
             assert_installed "$DIR_INS_B/sexp"
             assert_installed_var "$DIR_INS_L" "$DIR_INS_L64" "libsexp.so"
-         ;;   
+            assert_installed_var "$DIR_INS_L" "$DIR_INS_L64" "libsexp.so.$version_major"
+            assert_installed_var "$DIR_INS_L" "$DIR_INS_L64" "libsexp.so.$version"
+         ;;
       esac
    else
       case "$OSTYPE" in
          windows)
             assert_installed "$DIR_INS_B/sexp.exe"
-            assert_installed "$DIR_INS_L/sexp.lib" 
+            assert_installed "$DIR_INS_L/sexp.lib"
          ;;
          msys)
             assert_installed "$DIR_INS_B/sexp.exe"
@@ -73,7 +79,7 @@ test_install_script() {
          *)
             assert_installed "$DIR_INS_B/sexp"
             assert_installed_var "$DIR_INS_L" "$DIR_INS_L64" "libsexp.a"
-         ;;   
+         ;;
       esac
    fi
 
@@ -153,9 +159,10 @@ EOM
 # ......................................................................
 # main
 
-DIR0="$( cd "$( dirname "$0" )" && pwd )"
-DIR1="${DIR_ROOT:="$DIR0/../.."}"
-DIR_ROOT="$( cd "$DIR1" && pwd )"
+DIR00=$( dirname "$0" )
+DIR0=$( cd "$DIR00" && pwd )
+DIR1="${DIR_ROOT:=$DIR0/../..}"
+DIR_ROOT=$( cd "$DIR1" && pwd )
 
 if [[ -z "${DIR_INSTALL:-}" ]]; then
    DIR_INSTALL="$DIR_ROOT/install"
@@ -168,7 +175,7 @@ DIR_INS_P="$DIR_INS_L/pkgconfig"
 DIR_INS_P64="$DIR_INS_L64/pkgconfig"
 DIR_INS_I="$DIR_INSTALL/include/sexp"
 
-DIR_TESTS="$( cd "$DIR0/.." && pwd)"
+DIR_TESTS=$( cd "$DIR0/.." && pwd)
 
 echo "Running sexp additional tests"
 # shellcheck source=/dev/null
