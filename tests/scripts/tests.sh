@@ -33,6 +33,10 @@ assert_installed_var() {
    assertTrue "{$1,$2}/$3 was not installed" "[ -f $1/$3 ] || [ -f $2/$3 ]"
 }
 
+assert_installed_var2() {
+   assertTrue "$1/{$2,$3} was not installed" "[ -f $1/$2 ] || [ -f $1/$3 ]"
+}
+
 # ......................................................................
 # Check that sexp is installed as expected
 test_install_script() {
@@ -84,6 +88,8 @@ test_install_script() {
    fi
 
    assert_installed_var "$DIR_INS_P" "$DIR_INS_P64" "sexp.pc"
+   assert_installed_var_2 "$DIR_INS_M/man1" "sexp.1" "sexp.1.gz"
+
    assert_installed "$DIR_INS_I/sexp.h"
    assert_installed "$DIR_INS_I/sexp-error.h"
 }
@@ -108,6 +114,7 @@ Input:
 Writing base64 (of canonical) output to certificate.dat
 EOM
    export LD_LIBRARY_PATH="$DIR_INS_L":"$DIR_INS_L64"
+   rm -f input1.dat
    echo "(aa bb (cc dd))" > input1.dat
    output=$("$app" -o certificate.dat -p -b < input1.dat)
 #  $expected possibly includes extra EOL at the end -- it depends on OS
@@ -146,6 +153,7 @@ Advanced transport output:
 
 Input:
 EOM
+   rm -f input2.dat
    echo "(abc def (ghi jkl))" > input2.dat
    output=$("$app" < input2.dat)
    assertContains "$expected" "$output"
@@ -171,6 +179,7 @@ fi
 DIR_INS_B="$DIR_INSTALL/bin"
 DIR_INS_L="$DIR_INSTALL/lib"
 DIR_INS_L64="$DIR_INSTALL/lib64"
+DIR_INS_M="$DIR_INSTALL/share/man"
 DIR_INS_P="$DIR_INS_L/pkgconfig"
 DIR_INS_P64="$DIR_INS_L64/pkgconfig"
 DIR_INS_I="$DIR_INSTALL/include/sexp"
