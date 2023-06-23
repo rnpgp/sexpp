@@ -1,4 +1,4 @@
-= S-expressions parser and generator library in C\++ (SEXP in C++)
+= S-Expressions parser and generator library in C\++ (SEXP in C++)
 
 image:https://github.com/rnpgp/sexp/workflows/build-and-test/badge.svg["Build status Ubuntu/macOS/Windows", link="https://github.com/rnpgp/sexp/actions?workflow=build-and-test"]
 image:https://github.com/rnpgp/sexp/workflows/build-and-test-rh/badge.svg["Build status CentOS/Fedora", link="https://github.com/rnpgp/sexp/actions?workflow=build-and-test-rh"]
@@ -13,7 +13,7 @@ image:https://scan.coverity.com/projects/27150/badge.svg["Coverity Scan Build St
 
 == Purpose
 
-This is a C++ library for working with S-expressions.
+This is a C++ library for working with S-Expressions.
 
 This implementation is derived from the reference SEXP C library developed by
 Prof. Ronald Rivest and Prof. Butler Lampson of MIT LCS (now CSAIL).
@@ -22,13 +22,13 @@ This library differs from the original C implementation in the following ways:
 
 * It aims to be reuseable in C++ implementations and is importable via CMake.
 * It includes a test suite for correctness testing and tests against malformed
-  S-expressions.
+  S-Expressions.
 * It supports, and is tested against, all major platforms, including:
 ** Ubuntu, Debian, Fedora, CentOS
 ** macOS
 ** Windows
 ** msys
-* It implements additional interface to work with S-expressions wrapped by GnuPG
+* It implements additional interface to work with S-Expressions wrapped by GnuPG
   2.3+ extended format
   (https://github.com/gpg/gnupg/blob/master/agent/keyformat.txt[specification]).
 
@@ -40,10 +40,10 @@ The original C library was available at (but no longer accessible):
 
 == Background
 
-S-expressions are a data structure for representing complex data as a variation
-on https://en.wikipedia.org/wiki/Lisp_(programming_language)[LISP] S-expressions.
+S-Expressions are a data structure for representing complex data as a variation
+on https://en.wikipedia.org/wiki/Lisp_(programming_language)[LISP] S-Expressions.
 
-S-expressions were originally adopted for use in
+S-Expressions were originally adopted for use in
 http://theory.lcs.mit.edu/~cis/sdsi.html[SDSI] and
 http://world.std.com/~cme/html/spki.html[SPKI].
 
@@ -123,7 +123,7 @@ build with address and other sanitizers (requires clang compiler)
 == SEXP command-line utility
 
 The `sexp` command-line utility is reference parser and generator of
-S-expressions. It can read, parse and print out SEXP in all defined formats.
+S-Expressions. It can read, parse and print out SEXP in all defined formats.
 
 === Switches
 
@@ -135,7 +135,7 @@ S-expressions. It can read, parse and print out SEXP in all defined formats.
 3+| Input
 | `-i <filename>` | input file name                                | read input from console (stdin)
 | `-p`            | prompt input if reading from console           | disabled
-| `-s`            | treat input as a single SEXP string            | disabled, input is treated as S-expression
+| `-s`            | treat input as a single SEXP string            | disabled, input is treated as an S-Expression
 
 3+| Output
 | `-o <filename>` | output file name:                              | write output to console (stdout)
@@ -146,7 +146,7 @@ S-expressions. It can read, parse and print out SEXP in all defined formats.
 | `-w <width>`    | set output line width (0 implies no constraint)| 75
 
 3+| Miscellaneous
-| `-x`            | execute repeatedly until EOF                   | process single S-expression then exit
+| `-x`            | execute repeatedly until EOF                   | process single S-Expression then exit
 | `-h`            | print help message and exit                    |
 
 |===
@@ -155,7 +155,7 @@ Running without switches implies: `-p -a -b -c -x`.
 
 === Usage examples
 
-Prompt for S-expressions input from console, parse and output it to
+Prompt for S-Expressions input from console, parse and output it to
 `certificate.dat` in base64 transport format.
 
 [source]
@@ -168,7 +168,7 @@ $ sexp -o certificate.dat -p -b
 > Writing base64 (of canonical) output to 'certificate.dat'
 ----
 
-Parse all S-expressions from `certificate.dat`, output them to console in
+Parse all S-Expressions from `certificate.dat`, output them to console in
 advanced transport format with no prompts:
 
 [source,sh]
@@ -178,7 +178,7 @@ $ sexp -i certificate.dat -x
 > (2:aa2:bb(2:cc2:dd))
 ----
 
-Parse S-expressions from `certificate.dat`, output it to console in canonical,
+Parse S-Expressions from `certificate.dat`, output it to console in canonical,
 base64 and advanced format with prompts and no width limitation:
 
 [source,sh]
@@ -195,7 +195,7 @@ $ sexp -i certificate.dat -a -b -c -p -w 0
 > (aa bb (cc dd))
 ----
 
-Repeatedly prompt for S-expressions input from console, parse and output it
+Repeatedly prompt for S-Expressions input from console, parse and output it
 console in advanced, base64 and canonical formats:
 
 [source,sh]
