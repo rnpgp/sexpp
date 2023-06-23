@@ -13,9 +13,10 @@ image:https://scan.coverity.com/projects/27150/badge.svg["Coverity Scan Build St
 
 == Purpose
 
-This is a C++ library for working with S-expressions. This implementation
-is derived from the reference SEXP C library developed by Professors Ronald Rivest
-and Butler Lampson of MIT LCS (now CSAIL).
+This is a C++ library for working with S-expressions.
+
+This implementation is derived from the reference SEXP C library developed by
+Prof. Ronald Rivest and Prof. Butler Lampson of MIT LCS (now CSAIL).
 
 This library differs from the original C implementation in the following ways:
 
@@ -27,9 +28,12 @@ This library differs from the original C implementation in the following ways:
 ** macOS
 ** Windows
 ** msys
-* It implements additional interface to work with S-expressions wrapped by GnuPG 2.3+ extended format as defined at https://github.com/gpg/gnupg/blob/master/agent/keyformat.txt
+* It implements additional interface to work with S-expressions wrapped by GnuPG
+  2.3+ extended format
+  (https://github.com/gpg/gnupg/blob/master/agent/keyformat.txt[specification]).
 
-The original C library is available at:
+
+The original C library was available at (but no longer accessible):
 
 * http://people.csail.mit.edu/rivest/sexp.html
 
@@ -78,68 +82,81 @@ it also supports the advanced format, both for input and for output.
 
 [source,sh]
 ----
-mkdir build
-cd build
-cmake ..
-cmake --build .
-ctest
-cmake --install .
+$ mkdir build
+$ cd build
+$ cmake ..
+$ cmake --build .
+$ ctest
+$ cmake --install .
 ----
 
 
 == CMake script options
 
 `BUILD_SHARED_LIBS:BOOL`::
-build shared library (default: `OFF`)
+(default: `OFF`)
+build shared library
 
 `WITH_SEXP_TESTS:BOOL`::
-build tests (default: `ON`)
+(default: `ON`)
+build tests
 
 `DOWNLOAD_GTEST`::
-if tests are build download googletest from github (default: `ON`)
-when this option is set to `OFF` googletest binary package is a prerequisite for SEXP tests
+(default: `ON`)
+if tests are built, automatically download googletest from GitHub;
+when set to `OFF`, the googletest binary package needs to be available for SEXP
+tests.
 
 `WITH_SEXP_CLI:BOOL`::
-build the `sexp` client application (default: `ON`)
+(default: `ON`) build the `sexp` command-line utility
 
 `WITH_SANITIZERS:BOOL`::
-build with address and other sanitizers (default: `OFF`)
-(requires clang compiler)
+(default: `OFF`)
+build with address and other sanitizers (requires clang compiler)
 
 
 
 == SEXP command-line utility
 
-The `sexp` command-line utility is reference parser and generator of S-expressions.
-It can read, parse and print out SEXP in all defined formats.
+The `sexp` command-line utility is reference parser and generator of
+S-expressions. It can read, parse and print out SEXP in all defined formats.
 
-=== sexp switches:
+=== Switches
+
+.`sexp` switches
 [options="header"]
-|=======================================================================================================
-| Switch              | Description                                    | Default
+|===
+| Switch          | Description                                    | Default
+
 3+| Input
-| -i <filename>       | input file name                                | read input from console (stdin)
-| -p                  | prompt input if reading from console           | disabled
-| -s                  | treat input as a single SEXP string            | disabled, input is treated as S-expression
+| `-i <filename>` | input file name                                | read input from console (stdin)
+| `-p`            | prompt input if reading from console           | disabled
+| `-s`            | treat input as a single SEXP string            | disabled, input is treated as S-expression
+
 3+| Output
-| -o <filename>       | output file name:                              | write output to console (stdout)
-| -a                  | generate advanced transport format             | enabled if no format is specified
-| -b                  | generate base-64 transport format              | disabled
-| -c                  | generate canonical format                      | disabled
-| -l                  | suppress linefeeds after output                | disabled
-| -w <width>          | set output line width (0 implies no constraint)| 75
+| `-o <filename>` | output file name:                              | write output to console (stdout)
+| `-a`            | generate advanced transport format             | enabled if no format is specified
+| `-b`            | generate base-64 transport format              | disabled
+| `-c`            | generate canonical format                      | disabled
+| `-l`            | suppress linefeeds after output                | disabled
+| `-w <width>`    | set output line width (0 implies no constraint)| 75
+
 3+| Miscellaneous
-| -x                  | execute repeatedly until EOF                   | process single S-expression then exit
-| -h                  | print help message and exit                    |
-|=======================================================================================================
+| `-x`            | execute repeatedly until EOF                   | process single S-expression then exit
+| `-h`            | print help message and exit                    |
 
-Running without switches implies: -p -a -b -c -x
+|===
 
-=== Usage examples:
-Prompt for S-expressions input from console, parse and output it to `certificate.dat` in base64 transport format
+Running without switches implies: `-p -a -b -c -x`.
+
+=== Usage examples
+
+Prompt for S-expressions input from console, parse and output it to
+`certificate.dat` in base64 transport format.
+
 [source]
 ----
-sexp -o certificate.dat -p -b
+$ sexp -o certificate.dat -p -b
 
 > Input:
 > (aa bb (cc dd))
@@ -147,18 +164,22 @@ sexp -o certificate.dat -p -b
 > Writing base64 (of canonical) output to 'certificate.dat'
 ----
 
-Parse all S-expressions from `certificate.dat`, output them to console in advanced transport format with no prompts
-[source]
+Parse all S-expressions from `certificate.dat`, output them to console in
+advanced transport format with no prompts:
+
+[source,sh]
 ----
-sexp -i certificate.dat -x
+$ sexp -i certificate.dat -x
 
 > (2:aa2:bb(2:cc2:dd))
 ----
 
-Parse S-expressions from `certificate.dat`, output it to console in canonical, base64 and advanced format with prompts and no width limitation
-[source]
+Parse S-expressions from `certificate.dat`, output it to console in canonical,
+base64 and advanced format with prompts and no width limitation:
+
+[source,sh]
 ----
-sexp -i certificate.dat -a -b -c -p -w 0
+$ sexp -i certificate.dat -a -b -c -p -w 0
 
 > Reading input from certificate.dat
 >
@@ -170,14 +191,19 @@ sexp -i certificate.dat -a -b -c -p -w 0
 > (aa bb (cc dd))
 ----
 
-Repeatedly prompt for S-expressions input from console, parse and output it console in advanced, base64 and canonical formats
-[source]
+Repeatedly prompt for S-expressions input from console, parse and output it
+console in advanced, base64 and canonical formats:
+
+[source,sh]
 ----
-sexp -p -a -b -c -x
+$ sexp -p -a -b -c -x
 ----
+
 or just
+
+[source,sh]
 ----
-sexp
+$ sexp
 
 > Input:
 > (abc def (ghi jkl))
@@ -194,5 +220,7 @@ sexp
 ----
 
 == License
+
+Copyright Ribose.
 
 The code is made available as open-source software under the MIT License.
