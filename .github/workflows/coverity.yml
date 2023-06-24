@@ -37,8 +37,8 @@ jobs:
     env:
       CC: gcc
       CXX: g++
-      COVERITY_TOKEN: qjcM1CWLcq9PJB3yL0ZXIw
       MAKEFLAGS: j4
+      TOKEN: qjcM1CWLcq9PJB3yL0ZXIw
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -56,8 +56,6 @@ jobs:
         run: cmake -Bbuild -DDOWNLOAD_GTEST=OFF
 
       - name: Download Coverity
-        env:
-          TOKEN: AK2euT-neBcvZB1g_m3pbg
         run: |
           wget -q https://scan.coverity.com/download/cxx/linux64 --post-data "token=$TOKEN&project=$GITHUB_REPOSITORY" -O cov-analysis-linux64.tar.gz
           mkdir cov-analysis-linux64
@@ -70,8 +68,6 @@ jobs:
           cov-build --dir cov-int cmake --build build
 
       - name: Submit
-        env:
-          TOKEN: AK2euT-neBcvZB1g_m3pbg
         run: |
           tar czvf results.tgz cov-int
           curl \

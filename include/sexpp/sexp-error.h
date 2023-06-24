@@ -48,7 +48,7 @@ class sexp_exception_t : public std::exception {
                      int         error_position,
                      const char *prefix = "SEXP")
         : position{error_position}, level{error_level},
-          message{format(prefix, error_message, error_level, error_position)} {};
+          message{format(prefix, std::move(error_message), error_level, error_position)} {};
 
     static std::string format(std::string prf,
                               std::string message,
@@ -65,7 +65,7 @@ class sexp_exception_t : public std::exception {
     static void set_interactive(bool new_interactive) { interactive = new_interactive; };
 };
 
-void   sexp_error(
+void sexp_error(
   sexp_exception_t::severity level, const char *msg, size_t c1, size_t c2, int pos);
 
 } // namespace sexp
