@@ -23,11 +23,10 @@
 cmake_minimum_required(VERSION 3.14)
 
 include(cmake/version.cmake)
-determine_version("${CMAKE_CURRENT_SOURCE_DIR}" SEXP)
-
+determine_version("${CMAKE_CURRENT_SOURCE_DIR}" SEXPP)
 # project name, etc
-project(sexp
-  VERSION "${SEXP_VERSION}"
+project(sexpp
+  VERSION "${SEXPP_VERSION}"
   LANGUAGES C CXX
   DESCRIPTION "S-expressions parser and generator C++ library, fully compliant to [https://people.csail.mit.edu/rivest/Sexp.txt]"
 )
@@ -111,7 +110,7 @@ if(NOT MSVC)
 
 endif(NOT MSVC)
 
-add_library(sexp ${TYPE}
+add_library(sexpp ${TYPE}
     "src/sexp-input.cpp"
     "src/sexp-output.cpp"
     "src/sexp-object.cpp"
@@ -120,43 +119,39 @@ add_library(sexp ${TYPE}
     "src/sexp-error.cpp"
     "src/sexp-depth-manager.cpp"
     "src/ext-key-format.cpp"
-    "include/sexp/sexp.h"
-    "include/sexp/sexp-error.h"
-    "include/sexp/ext-key-format.h"
+    "include/sexpp/sexp.h"
+    "include/sexpp/sexp-error.h"
+    "include/sexpp/ext-key-format.h"
 )
 
-target_compile_features(sexp PUBLIC cxx_std_11)
-target_include_directories(sexp PUBLIC
+target_compile_features(sexpp PUBLIC cxx_std_11)
+target_include_directories(sexpp PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>
 )
 
-string(REGEX MATCH "^([0-9]+)\\.[0-9]+\\.[0-9]+$" vmatches "${SEXP_VERSION}")
-if (NOT vmatches)
-  message(FATAL_ERROR "Failed to extract major version from SEXP_VERSION (${SEXP_VERSION}).")
-endif()
-set(SEXP_MAJOR_VERSION "${CMAKE_MATCH_1}")
-
-set_target_properties(sexp PROPERTIES
+set_target_properties(sexpp PROPERTIES
   POSITION_INDEPENDENT_CODE ON
   RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
-  VERSION "${SEXP_VERSION}"
-  SOVERSION "${SEXP_MAJOR_VERSION}"
-  OUTPUT_NAME "sexp"
+  VERSION "${SEXPP_VERSION}"
+  SOVERSION "${SEXPP_MAJOR_VERSION}"
+  OUTPUT_NAME "sexpp"
 )
 
-if(WITH_SEXP_CLI)
-    add_executable (sexp-cli
+if (WITH_SEXP_CLI)
+    add_executable (sexpp-cli
                     src/sexp-main.cpp
-                    include/sexp/sexp.h
-                    include/sexp/sexp-error.h
+                    include/sexpp/sexp.h
+                    include/sexpp/sexp-error.h
     )
-    target_include_directories (sexp-cli PUBLIC include)
-    target_link_libraries(sexp-cli PRIVATE sexp)
-    target_compile_features(sexp-cli PUBLIC cxx_std_11)
-    set_target_properties(sexp-cli PROPERTIES RUNTIME_OUTPUT_NAME sexp)
-    set_target_properties(sexp-cli PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-endif(WITH_SEXP_CLI)
+    target_include_directories (sexpp-cli PUBLIC include)
+    target_link_libraries(sexpp-cli PRIVATE sexpp)
+    target_compile_features(sexpp-cli PUBLIC cxx_std_11)
+    set_target_properties(sexpp-cli PROPERTIES
+        RUNTIME_OUTPUT_NAME sexpp
+        RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
+    )
+endif (WITH_SEXP_CLI)
 
 
 if(WITH_SEXP_TESTS)
@@ -194,7 +189,7 @@ if(WITH_SEXP_TESTS)
         @ONLY
     )
 
-    add_executable(sexp-tests
+    add_executable(sexpp-tests
         "tests/src/baseline-tests.cpp"
         "tests/src/exception-tests.cpp"
         "tests/src/primitives-tests.cpp"
@@ -229,45 +224,45 @@ if(WITH_SEXP_TESTS)
         set(GTest GTest::GTest)
 
         if(NOT MSVC)
-            target_link_libraries(sexp-tests PRIVATE pthread)
+            target_link_libraries(sexpp-tests PRIVATE pthread)
         endif(NOT MSVC)
     endif(DOWNLOAD_GTEST)
 
-    target_link_libraries(sexp-tests PRIVATE
-        sexp
+    target_link_libraries(sexpp-tests PRIVATE
+        sexpp
          ${GTestMain}
          ${GTest}
     )
 
-    target_include_directories(sexp-tests PRIVATE
+    target_include_directories(sexpp-tests PRIVATE
         tests/include
         include
         "${GTEST_INCLUDE_DIRS}"
     )
 
-    target_compile_features(sexp-tests PUBLIC cxx_std_11)
-    set_target_properties(sexp-tests PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+    target_compile_features(sexpp-tests PUBLIC cxx_std_11)
+    set_target_properties(sexpp-tests PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-    gtest_discover_tests(sexp-tests)
+    gtest_discover_tests(sexpp-tests)
 endif(WITH_SEXP_TESTS)
 
-set(CONFIGURED_PC "${CMAKE_CURRENT_BINARY_DIR}/sexp.pc")
+set(CONFIGURED_PC "${CMAKE_CURRENT_BINARY_DIR}/sexpp.pc")
 configure_file(
-    "${CMAKE_CURRENT_SOURCE_DIR}/cmake/sexp.pc.in"
+    "${CMAKE_CURRENT_SOURCE_DIR}/cmake/sexpp.pc.in"
     "${CONFIGURED_PC}"
     @ONLY
 )
 
 if (WIN32 AND BUILD_SHARED_LIBS)
-    install(TARGETS sexp RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}")
-    install(TARGETS sexp ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}")
+    install(TARGETS sexpp RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}")
+    install(TARGETS sexpp ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}")
 else(WIN32 AND BUILD_SHARED_LIBS)
-    install(TARGETS sexp DESTINATION "${CMAKE_INSTALL_LIBDIR}")
+    install(TARGETS sexpp DESTINATION "${CMAKE_INSTALL_LIBDIR}")
 endif(WIN32 AND BUILD_SHARED_LIBS)
 
 install(DIRECTORY include/ DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
 install(FILES "${CONFIGURED_PC}" DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
 if(WITH_SEXP_CLI)
-    install(TARGETS sexp-cli DESTINATION "${CMAKE_INSTALL_BINDIR}")
-    install(FILES man/sexp.1 DESTINATION "${CMAKE_INSTALL_MANDIR}/man1")
+    install(TARGETS sexpp-cli DESTINATION "${CMAKE_INSTALL_BINDIR}")
+    install(FILES man/sexpp.1 DESTINATION "${CMAKE_INSTALL_MANDIR}/man1")
 endif(WITH_SEXP_CLI)

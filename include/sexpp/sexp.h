@@ -51,7 +51,7 @@ namespace sexp {
  * However, we do enforce 'C' locale this way
  */
 
-class sexp_char_defs_t {
+class  sexp_char_defs_t {
   protected:
     static const bool          base64digit[256]; /* true if c is base64 digit */
     static const bool          tokenchar[256];   /* true if c can be in a token */
@@ -100,7 +100,7 @@ class sexp_input_stream_t;
 
 typedef uint8_t octet_t;
 
-class sexp_simple_string_t : public std::basic_string<octet_t>, private sexp_char_defs_t {
+class  sexp_simple_string_t : public std::basic_string<octet_t>, private sexp_char_defs_t {
   public:
     sexp_simple_string_t(void) = default;
     sexp_simple_string_t(const octet_t *dt) : std::basic_string<octet_t>{dt} {}
@@ -161,7 +161,7 @@ inline bool operator!=(const sexp_simple_string_t *left, const std::string &righ
  * SEXP object
  */
 
-class sexp_object_t {
+class  sexp_object_t {
   public:
     virtual ~sexp_object_t(){};
 
@@ -201,7 +201,7 @@ class sexp_object_t {
  * SEXP string
  */
 
-class sexp_string_t : public sexp_object_t {
+class  sexp_string_t : public sexp_object_t {
   protected:
     bool                 with_presentation_hint;
     sexp_simple_string_t presentation_hint;

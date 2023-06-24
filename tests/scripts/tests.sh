@@ -47,48 +47,48 @@ test_install_script() {
       version_major="${version:0:1}"
       case "$OSTYPE" in
          darwin*)
-            assert_installed "$DIR_INS_B/sexp"
-            assert_installed "$DIR_INS_L/libsexp.dylib"
-            assert_installed "$DIR_INS_L/libsexp.$version_major.dylib"
-            assert_installed "$DIR_INS_L/libsexp.$version.dylib"
+            assert_installed "$DIR_INS_B/sexpp"
+            assert_installed "$DIR_INS_L/libsexpp.dylib"
+            assert_installed "$DIR_INS_L/libsexpp.$version_major.dylib"
+            assert_installed "$DIR_INS_L/libsexpp.$version.dylib"
          ;;
          windows )
-            assert_installed "$DIR_INS_B/sexp.exe"
-            assert_installed "$DIR_INS_B/sexp.dll"
-            assert_installed "$DIR_INS_L/sexp.lib"
+            assert_installed "$DIR_INS_B/sexpp.exe"
+            assert_installed "$DIR_INS_B/sexpp.dll"
+            assert_installed "$DIR_INS_L/sexpp.lib"
          ;;
          msys)
 
-            assert_installed "$DIR_INS_B/sexp.exe"
-            assert_installed "$DIR_INS_B/libsexp.dll"
-            assert_installed "$DIR_INS_L/libsexp.dll.a"
+            assert_installed "$DIR_INS_B/sexpp.exe"
+            assert_installed "$DIR_INS_B/libsexpp.dll"
+            assert_installed "$DIR_INS_L/libsexpp.dll.a"
          ;;
          *)
-            assert_installed "$DIR_INS_B/sexp"
-            assert_installed_var "$DIR_INS_L" "$DIR_INS_L64" "libsexp.so"
-            assert_installed_var "$DIR_INS_L" "$DIR_INS_L64" "libsexp.so.$version_major"
-            assert_installed_var "$DIR_INS_L" "$DIR_INS_L64" "libsexp.so.$version"
+            assert_installed "$DIR_INS_B/sexpp"
+            assert_installed_var "$DIR_INS_L" "$DIR_INS_L64" "libsexpp.so"
+            assert_installed_var "$DIR_INS_L" "$DIR_INS_L64" "libsexpp.so.$version_major"
+            assert_installed_var "$DIR_INS_L" "$DIR_INS_L64" "libsexpp.so.$version"
          ;;
       esac
    else
       case "$OSTYPE" in
          windows)
-            assert_installed "$DIR_INS_B/sexp.exe"
-            assert_installed "$DIR_INS_L/sexp.lib"
+            assert_installed "$DIR_INS_B/sexpp.exe"
+            assert_installed "$DIR_INS_L/sexpp.lib"
          ;;
          msys)
-            assert_installed "$DIR_INS_B/sexp.exe"
-            assert_installed "$DIR_INS_L/libsexp.a"
+            assert_installed "$DIR_INS_B/sexpp.exe"
+            assert_installed "$DIR_INS_L/libsexpp.a"
          ;;
          *)
-            assert_installed "$DIR_INS_B/sexp"
-            assert_installed_var "$DIR_INS_L" "$DIR_INS_L64" "libsexp.a"
+            assert_installed "$DIR_INS_B/sexpp"
+            assert_installed_var "$DIR_INS_L" "$DIR_INS_L64" "libsexpp.a"
          ;;
       esac
    fi
 
-   assert_installed_var "$DIR_INS_P" "$DIR_INS_P64" "sexp.pc"
-   assert_installed_var_2 "$DIR_INS_M/man1" "sexp.1" "sexp.1.gz"
+   assert_installed_var "$DIR_INS_P" "$DIR_INS_P64" "sexpp.pc"
+   assert_installed_var2 "$DIR_INS_M/man1" "sexpp.1" "sexpp.1.gz"
 
    assert_installed "$DIR_INS_I/sexp.h"
    assert_installed "$DIR_INS_I/sexp-error.h"
@@ -106,7 +106,7 @@ test_sexp_cli() {
       startSkipping
    fi
 
-   app="$DIR_INS_B/sexp"
+   app="$DIR_INS_B/sexpp"
 # shellcheck disable=SC2251
 ! IFS= read -r -d '' expected << EOM
 Input:
@@ -182,7 +182,7 @@ DIR_INS_L64="$DIR_INSTALL/lib64"
 DIR_INS_M="$DIR_INSTALL/share/man"
 DIR_INS_P="$DIR_INS_L/pkgconfig"
 DIR_INS_P64="$DIR_INS_L64/pkgconfig"
-DIR_INS_I="$DIR_INSTALL/include/sexp"
+DIR_INS_I="$DIR_INSTALL/include/sexpp"
 
 DIR_TESTS=$( cd "$DIR0/.." && pwd)
 

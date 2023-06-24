@@ -21,8 +21,8 @@
  *
  */
 
-#include <sexp-tests.h>
-#include <sexp/ext-key-format.h>
+#include "sexp-tests.h"
+#include "sexpp/ext-key-format.h"
 
 using namespace sexp;
 using namespace ext_key_format;

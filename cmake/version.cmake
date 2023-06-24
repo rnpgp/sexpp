@@ -38,29 +38,30 @@ function(extract_version_info version var_prefix)
   # extract the main components
   #   v1.9.0-3-g5b92266+1546836556
   #   v1.9.0-3-g5b92266-dirty+1546836556
-  string(REGEX MATCH "^v?([0-9]+\\.[0-9]+\\.[0-9]+)(-([0-9]+)-g([0-9a-f]+)(-dirty)?)?(\\+([0-9]+))?$" matches "${version}")
+  string(REGEX MATCH "^v?(([0-9]+)\\.[0-9]+\\.[0-9]+)(-([0-9]+)-g([0-9a-f]+)(-dirty)?)?(\\+([0-9]+))?$" matches "${version}")
   if (NOT matches)
     message(FATAL_ERROR "Failed to extract version components from ${version}.")
   endif()
   set(${var_prefix}_VERSION "${CMAKE_MATCH_1}" PARENT_SCOPE) # 1.9.0
-  if (NOT CMAKE_MATCH_3)
-    set(CMAKE_MATCH_3 "0")
-  endif()
-  set(${var_prefix}_VERSION_NCOMMITS "${CMAKE_MATCH_3}" PARENT_SCOPE) # 3
+  set(${var_prefix}_MAJOR_VERSION "${CMAKE_MATCH_2}" PARENT_SCOPE) # 1
   if (NOT CMAKE_MATCH_4)
     set(CMAKE_MATCH_4 "0")
   endif()
-  set(${var_prefix}_VERSION_GIT_REV "${CMAKE_MATCH_4}" PARENT_SCOPE) # 5b92266
-  if (CMAKE_MATCH_5 STREQUAL "-dirty")
+  set(${var_prefix}_VERSION_NCOMMITS "${CMAKE_MATCH_4}" PARENT_SCOPE) # 3
+  if (NOT CMAKE_MATCH_5)
+    set(CMAKE_MATCH_5 "0")
+  endif()
+  set(${var_prefix}_VERSION_GIT_REV "${CMAKE_MATCH_5}" PARENT_SCOPE) # 5b92266
+  if (CMAKE_MATCH_6 STREQUAL "-dirty")
     set(${var_prefix}_VERSION_IS_DIRTY TRUE PARENT_SCOPE)
   else()
     set(${var_prefix}_VERSION_IS_DIRTY FALSE PARENT_SCOPE)
   endif()
   # timestamp is optional, default to 0
-  if (NOT CMAKE_MATCH_7)
-    set(CMAKE_MATCH_7 "0")
+  if (NOT CMAKE_MATCH_8)
+    set(CMAKE_MATCH_8 "0")
   endif()
-  set(${var_prefix}_VERSION_COMMIT_TIMESTAMP "${CMAKE_MATCH_7}" PARENT_SCOPE) # 1546836556
+  set(${var_prefix}_VERSION_COMMIT_TIMESTAMP "${CMAKE_MATCH_8}" PARENT_SCOPE) # 1546836556
 endfunction()
 
 function(determine_version source_dir var_prefix)
@@ -153,7 +154,9 @@ function(determine_version source_dir var_prefix)
   # set the results
   set(${var_prefix}_VERSION_SUFFIX "${version_suffix}" PARENT_SCOPE)
   set(${var_prefix}_VERSION_FULL "${version_full}" PARENT_SCOPE)
+  set(${var_prefix}_MAJOR_VERSION "${${local_prefix}_MAJOR_VERSION}" PARENT_SCOPE) # 1
   # for informational purposes
+  message(STATUS "${var_prefix}_MAJOR_VERSION: ${${local_prefix}_MAJOR_VERSION}")
   message(STATUS "${var_prefix}_VERSION_SUFFIX: ${version_suffix}")
   message(STATUS "${var_prefix}_VERSION_FULL: ${version_full}")
 endfunction()
