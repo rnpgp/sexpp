@@ -37,7 +37,7 @@ jobs:
     env:
       CC: gcc
       CXX: g++
-      COVERITY_TOKEN: AK2euT-neBcvZB1g_m3pbg
+      COVERITY_TOKEN: qjcM1CWLcq9PJB3yL0ZXIw
       MAKEFLAGS: j4
     steps:
       - name: Checkout

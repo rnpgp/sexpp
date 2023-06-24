@@ -2,8 +2,8 @@ libdir=@CMAKE_INSTALL_FULL_LIBDIR@
 includedir=@CMAKE_INSTALL_FULL_INCLUDEDIR@
 
 Name: sexp
-Description: S-expressions library
+Description: C++ library for working with S-Expressions
 Version: @PROJECT_VERSION@
 URL: https://github.com/rnpgp/sexp
-Libs: -L${libdir} -lsexp
+Libs: -L${libdir} -lsexpp
 Cflags: -I${includedir}

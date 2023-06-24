@@ -21,7 +21,7 @@
  *
  */
 
-#include <sexp/sexp-error.h>
+#include <sexpp/sexp-error.h>
 
 namespace sexp {
 

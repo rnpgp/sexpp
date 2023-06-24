@@ -65,7 +65,7 @@ class sexp_exception_t : public std::exception {
     static void set_interactive(bool new_interactive) { interactive = new_interactive; };
 };
 
-void sexp_error(
+void   sexp_error(
   sexp_exception_t::severity level, const char *msg, size_t c1, size_t c2, int pos);
 
 } // namespace sexp

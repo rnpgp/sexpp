@@ -6,9 +6,9 @@ image:https://github.com/rnpgp/sexp/workflows/build-and-test-deb/badge.svg["Buil
 image:https://github.com/rnpgp/sexp/workflows/build-and-test-msys/badge.svg["Build status MSys", link="https://github.com/rnpgp/sexp/actions?workflow=build-and-test-msys"]
 
 
-image:https://codecov.io/gh/rnpgp/sexp/branch/feat/g23/graph/badge.svg["Code coverage", link="https://codecov.io/gh/rnpgp/sexp"]
+image:https://codecov.io/gh/rnpgp/sexp/branch/feat/g23/graph/badge.svg["Code coverage", link="https://codecov.io/gh/rnpgp/sexpp"]
 image:https://github.com/rnpgp/sexp/workflows/CodeQL/badge.svg["CodeQL analysis", link="https://github.com/rnpgp/sexp/actions?workflow=CodeQL"]
-image:https://scan.coverity.com/projects/27150/badge.svg["Coverity Scan Build Status", link="https://scan.coverity.com/projects/rnpgp-sexp"]
+image:https://scan.coverity.com/projects/28717/badge.svg["Coverity Scan Build Status", link="https://scan.coverity.com/projects/rnpgp-sexpp"]
 
 
 == Purpose
@@ -120,14 +120,14 @@ build with address and other sanitizers (requires clang compiler)
 
 
 
-== SEXP command-line utility
+== SEXPP command-line utility
 
-The `sexp` command-line utility is reference parser and generator of
+The `sexpp` command-line utility is reference parser and generator of
 S-Expressions. It can read, parse and print out SEXP in all defined formats.
 
 === Switches
 
-.`sexp` switches
+.`sexpp` switches
 [options="header"]
 |===
 | Switch          | Description                                    | Default
@@ -160,7 +160,7 @@ Prompt for S-Expressions input from console, parse and output it to
 
 [source]
 ----
-$ sexp -o certificate.dat -p -b
+$ sexpp -o certificate.dat -p -b
 
 > Input:
 > (aa bb (cc dd))
@@ -173,7 +173,7 @@ advanced transport format with no prompts:
 
 [source,sh]
 ----
-$ sexp -i certificate.dat -x
+$ sexpp -i certificate.dat -x
 
 > (2:aa2:bb(2:cc2:dd))
 ----
@@ -183,7 +183,7 @@ base64 and advanced format with prompts and no width limitation:
 
 [source,sh]
 ----
-$ sexp -i certificate.dat -a -b -c -p -w 0
+$ sexpp -i certificate.dat -a -b -c -p -w 0
 
 > Reading input from certificate.dat
 >
@@ -200,14 +200,14 @@ console in advanced, base64 and canonical formats:
 
 [source,sh]
 ----
-$ sexp -p -a -b -c -x
+$ sexpp -p -a -b -c -x
 ----
 
 or just
 
 [source,sh]
 ----
-$ sexp
+$ sexpp
 
 > Input:
 > (abc def (ghi jkl))

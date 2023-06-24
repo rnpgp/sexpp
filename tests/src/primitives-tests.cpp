@@ -21,7 +21,7 @@
  *
  */
 
-#include <sexp-tests.h>
+#include "sexp-tests.h"
 
 using namespace sexp;
 
