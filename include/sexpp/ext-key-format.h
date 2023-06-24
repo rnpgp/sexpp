@@ -29,7 +29,7 @@
 
 namespace ext_key_format {
 
-void   ext_key_error(
+void ext_key_error(
   sexp::sexp_exception_t::severity level, const char *msg, size_t c1, size_t c2, int pos);
 
 class ext_key_input_stream_t;

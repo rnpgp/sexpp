@@ -6,8 +6,8 @@ image:https://github.com/rnpgp/sexp/workflows/build-and-test-deb/badge.svg["Buil
 image:https://github.com/rnpgp/sexp/workflows/build-and-test-msys/badge.svg["Build status MSys", link="https://github.com/rnpgp/sexp/actions?workflow=build-and-test-msys"]
 
 
-image:https://codecov.io/gh/rnpgp/sexp/branch/feat/g23/graph/badge.svg["Code coverage", link="https://codecov.io/gh/rnpgp/sexpp"]
-image:https://github.com/rnpgp/sexp/workflows/CodeQL/badge.svg["CodeQL analysis", link="https://github.com/rnpgp/sexp/actions?workflow=CodeQL"]
+image:https://codecov.io/gh/rnpgp/sexpp/branch/main/graph/badge.svg["Code coverage", link="https://codecov.io/gh/rnpgp/sexpp"]
+image:https://github.com/rnpgp/sexpp/workflows/CodeQL/badge.svg["CodeQL analysis", link="https://github.com/rnpgp/sexpp/actions?workflow=CodeQL"]
 image:https://scan.coverity.com/projects/28717/badge.svg["Coverity Scan Build Status", link="https://scan.coverity.com/projects/rnpgp-sexpp"]
 
 

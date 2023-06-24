@@ -41,14 +41,14 @@ jobs:
           source: '.'
           extensions: 'h,cpp,c'
           clangFormatVersion: 11
-          inplace: True
-      - uses: EndBug/add-and-commit@v9
-        with:
-          author_name: A robot on behalf of Maxim Samsonov
-          author_email: m.samsonov@computer.org
-          message: 'Committing clang-format changes'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#          inplace: True
+#      - uses: EndBug/add-and-commit@v9
+#        with:
+#          author_name: A robot on behalf of Maxim Samsonov
+#          author_email: m.samsonov@computer.org
+#          message: 'Committing clang-format changes'
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   shellcheck:
     runs-on: ubuntu-latest
     steps:
