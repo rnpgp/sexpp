@@ -41,6 +41,7 @@
 #include <vector>
 #include <cassert>
 
+#include "sexp-public.h"
 #include "sexp-error.h"
 
 namespace sexp {
@@ -51,7 +52,7 @@ namespace sexp {
  * However, we do enforce 'C' locale this way
  */
 
-class sexp_char_defs_t {
+class SEXP_PUBLIC_SYMBOL sexp_char_defs_t {
   protected:
     static const bool          base64digit[256]; /* true if c is base64 digit */
     static const bool          tokenchar[256];   /* true if c can be in a token */
@@ -100,7 +101,8 @@ class sexp_input_stream_t;
 
 typedef uint8_t octet_t;
 
-class sexp_simple_string_t : public std::basic_string<octet_t>, private sexp_char_defs_t {
+class SEXP_PUBLIC_SYMBOL sexp_simple_string_t : public std::basic_string<octet_t>,
+                                                private sexp_char_defs_t {
   public:
     sexp_simple_string_t(void) = default;
     sexp_simple_string_t(const octet_t *dt) : std::basic_string<octet_t>{dt} {}
@@ -161,7 +163,7 @@ inline bool operator!=(const sexp_simple_string_t *left, const std::string &righ
  * SEXP object
  */
 
-class sexp_object_t {
+class SEXP_PUBLIC_SYMBOL sexp_object_t {
   public:
     virtual ~sexp_object_t(){};
 
@@ -201,7 +203,7 @@ class sexp_object_t {
  * SEXP string
  */
 
-class sexp_string_t : public sexp_object_t {
+class SEXP_PUBLIC_SYMBOL sexp_string_t : public sexp_object_t {
   protected:
     bool                 with_presentation_hint;
     sexp_simple_string_t presentation_hint;
@@ -265,7 +267,8 @@ inline bool operator!=(const sexp_string_t *left, const std::string &right) noex
  * SEXP list
  */
 
-class sexp_list_t : public sexp_object_t, public std::vector<std::shared_ptr<sexp_object_t>> {
+class SEXP_PUBLIC_SYMBOL sexp_list_t : public sexp_object_t,
+                                       public std::vector<std::shared_ptr<sexp_object_t>> {
   public:
     virtual ~sexp_list_t() {}
 
@@ -299,7 +302,7 @@ class sexp_list_t : public sexp_object_t, public std::vector<std::shared_ptr<sex
     One still can create an object with deeper nesting manually
 */
 
-class sexp_depth_manager {
+class SEXP_PUBLIC_SYMBOL sexp_depth_manager {
   public:
     static const size_t DEFAULT_MAX_DEPTH = 1024;
 
@@ -317,7 +320,7 @@ class sexp_depth_manager {
  * SEXP input stream
  */
 
-class sexp_input_stream_t : public sexp_char_defs_t, sexp_depth_manager {
+class SEXP_PUBLIC_SYMBOL sexp_input_stream_t : public sexp_char_defs_t, sexp_depth_manager {
   protected:
     std::istream *input_file;
     uint32_t      byte_size; /* 4 or 6 or 8 == currently scanning mode */
@@ -362,7 +365,7 @@ class sexp_input_stream_t : public sexp_char_defs_t, sexp_depth_manager {
  * SEXP output stream
  */
 
-class sexp_output_stream_t : sexp_depth_manager {
+class SEXP_PUBLIC_SYMBOL sexp_output_stream_t : sexp_depth_manager {
   public:
     const uint32_t default_line_length = 75;
     enum sexp_print_mode {                /* PRINTING MODES */

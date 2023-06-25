@@ -25,16 +25,17 @@
 
 #include <map>
 
+#include "sexp-public.h"
 #include "sexp.h"
 
 namespace ext_key_format {
 
-void ext_key_error(
+void SEXP_PUBLIC_SYMBOL ext_key_error(
   sexp::sexp_exception_t::severity level, const char *msg, size_t c1, size_t c2, int pos);
 
 class ext_key_input_stream_t;
 
-class extended_private_key_t {
+class SEXP_PUBLIC_SYMBOL extended_private_key_t {
   public:
     // Comparison of names is done case insensitively !!!
     struct ci_less {
@@ -68,7 +69,7 @@ class extended_private_key_t {
     void parse(ext_key_input_stream_t &is);
 };
 
-class ext_key_input_stream_t : public sexp::sexp_input_stream_t {
+class SEXP_PUBLIC_SYMBOL ext_key_input_stream_t : public sexp::sexp_input_stream_t {
   private:
     static const bool namechar[256]; /* true if allowed in the name field */
 

@@ -28,9 +28,11 @@
 #include <iostream>
 #include <string>
 
+#include "sexp-public.h"
+
 namespace sexp {
 
-class sexp_exception_t : public std::exception {
+class SEXP_PUBLIC_SYMBOL sexp_exception_t : public std::exception {
   public:
     enum severity { error = 0, warning = 1 };
 
@@ -65,7 +67,7 @@ class sexp_exception_t : public std::exception {
     static void set_interactive(bool new_interactive) { interactive = new_interactive; };
 };
 
-void sexp_error(
-  sexp_exception_t::severity level, const char *msg, size_t c1, size_t c2, int pos);
+void SEXP_PUBLIC_SYMBOL
+sexp_error(sexp_exception_t::severity level, const char *msg, size_t c1, size_t c2, int pos);
 
 } // namespace sexp

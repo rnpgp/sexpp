@@ -1,6 +1,6 @@
 /**
  *
- * Copyright 2023 Ribose Inc.
+ * Copyright 2023 Ribose Inc. (https://www.ribose.com)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -19,32 +19,12 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
- **/
+ */
 
-#include "sexpp/sexp.h"
+#pragma once
 
-namespace sexp {
-
-sexp_depth_manager::sexp_depth_manager(size_t m_depth)
-{
-    reset_depth(m_depth);
-}
-void sexp_depth_manager::reset_depth(size_t m_depth)
-{
-    depth = 0;
-    max_depth = m_depth;
-}
-void sexp_depth_manager::increase_depth(int count)
-{
-    if (max_depth != 0 && ++depth > max_depth)
-        sexp_error(sexp_exception_t::error,
-                   "Maximum allowed SEXP list depth (%u) is exceeded",
-                   max_depth,
-                   0,
-                   count);
-}
-void sexp_depth_manager::decrease_depth(void)
-{
-    depth--;
-}
-} // namespace sexp
+#ifdef BUILD_SHARED_LIBS
+#define SEXP_PUBLIC_SYMBOL __attribute__((visibility("default")))
+#else
+#define SEXP_PUBLIC_SYMBOL
+#endif
