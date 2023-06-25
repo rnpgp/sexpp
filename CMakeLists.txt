@@ -130,6 +130,11 @@ target_include_directories(sexpp PUBLIC
     $<INSTALL_INTERFACE:include>
 )
 
+if (BUILD_SHARED_LIBS)
+    target_compile_definitions(sexpp PUBLIC BUILD_SHARED_LIBS)
+    set_target_properties(sexpp PROPERTIES CXX_VISIBILITY_PRESET "hidden")
+endif (BUILD_SHARED_LIBS)
+
 set_target_properties(sexpp PROPERTIES
   POSITION_INDEPENDENT_CODE ON
   RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"

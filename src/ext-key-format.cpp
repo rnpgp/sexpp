@@ -21,7 +21,7 @@
  *
  */
 
-#include <sexpp/ext-key-format.h>
+#include "sexpp/ext-key-format.h"
 
 using namespace sexp;
 

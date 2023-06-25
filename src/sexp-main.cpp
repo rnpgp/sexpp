@@ -28,7 +28,7 @@
 
 #include <fstream>
 
-#include <sexpp/sexp.h>
+#include "sexpp/sexp.h"
 
 using namespace sexp;
 

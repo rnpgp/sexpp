@@ -26,7 +26,7 @@
  * 7/21/1997
  */
 
-#include <sexpp/sexp.h>
+#include "sexpp/sexp.h"
 
 namespace sexp {
 
