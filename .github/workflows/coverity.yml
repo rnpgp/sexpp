@@ -38,7 +38,7 @@ jobs:
       CC: gcc
       CXX: g++
       MAKEFLAGS: j4
-      TOKEN: qjcM1CWLcq9PJB3yL0ZXIw
+      COVERITY_TOKEN: qjcM1CWLcq9PJB3yL0ZXIw
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -55,26 +55,9 @@ jobs:
       - name: Configure
         run: cmake -Bbuild -DDOWNLOAD_GTEST=OFF
 
-      - name: Download Coverity
-        run: |
-          wget -q https://scan.coverity.com/download/cxx/linux64 --post-data "token=$TOKEN&project=$GITHUB_REPOSITORY" -O cov-analysis-linux64.tar.gz
-          mkdir cov-analysis-linux64
-          tar xzf cov-analysis-linux64.tar.gz --strip 1 -C cov-analysis-linux64
-
-      - name: Build
-        run: |
-          set -x
-          export PATH="$PWD/cov-analysis-linux64/bin:$PATH"
-          cov-build --dir cov-int cmake --build build
-
-      - name: Submit
-        run: |
-          tar czvf results.tgz cov-int
-          curl \
-            --form project=$GITHUB_REPOSITORY \
-            --form token=$TOKEN \
-            --form email=m.samsonov@computer.org \
-            --form file=@results.tgz \
-            --form version=$GITHUB_REF \
-            --form description=$GITHUB_SHA \
-            https://scan.coverity.com/builds?project=$GITHUB_REPOSITORY
+      - name: Coverity Scan
+        uses: vapier/coverity-scan-action@v1
+        with:
+          email: maxirmx@sw.consulting
+          token: ${{ env.COVERITY_TOKEN }}
+          command: cmake --build build      
