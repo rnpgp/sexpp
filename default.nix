@@ -39,6 +39,4 @@ stdenv.mkDerivation {
 
   nativeBuildInputs = with pkgs; [ cmake gtest pkg-config ];
 
-  outputs = [ "out" "lib" "dev" ];
-
 }
