@@ -24,7 +24,7 @@ This library differs from the original C implementation in the following ways:
 * It includes a test suite for correctness testing and tests against malformed
   S-Expressions.
 * It supports, and is tested against, all major platforms, including:
-** Ubuntu, Debian, Fedora, CentOS
+** Ubuntu, Debian, Fedora, CentOS, NixOS
 ** macOS
 ** Windows
 ** msys

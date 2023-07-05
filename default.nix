@@ -24,8 +24,8 @@
 , stdenv ? pkgs.stdenv
 }:
 
-stdenv.mkDerivation rec {
-  pname = "sexp";
+stdenv.mkDerivation {
+  pname = "sexpp";
   version = "unstable";
 
   src = ./.;
@@ -39,11 +39,6 @@ stdenv.mkDerivation rec {
 
   nativeBuildInputs = with pkgs; [ cmake gtest pkg-config ];
 
-  meta = with lib; {
-    homepage = "https://github.com/rnpgp/sexp";
-    description = "S-expressions parser and generator C++ library, fully compliant to [https://people.csail.mit.edu/rivest/Sexp.txt]";
-    license = licenses.bsd2;
-    platforms = platforms.all;
-    maintainers = with maintainers; [ ribose-jeffreylau ];
-  };
+  outputs = [ "out" "lib" "dev" ];
+
 }
