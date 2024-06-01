@@ -51,7 +51,6 @@ if (BUILD_SHARED_LIBS AND MSVC)
     message(FATAL_ERROR "Building sexp shared library with MSVC is not supported")
 endif(BUILD_SHARED_LIBS AND MSVC)
 
-
 message(STATUS "Building ${TYPE} library")
 
 if (WITH_SANITIZERS)
@@ -107,7 +106,6 @@ if(NOT MSVC)
     -Wno-unused-parameter
     -Wno-missing-field-initializers
   )
-
 endif(NOT MSVC)
 
 add_library(sexpp ${TYPE}
@@ -132,7 +130,10 @@ target_include_directories(sexpp PUBLIC
 
 if (BUILD_SHARED_LIBS)
     target_compile_definitions(sexpp PUBLIC BUILD_SHARED_LIBS)
-    set_target_properties(sexpp PROPERTIES CXX_VISIBILITY_PRESET "hidden")
+    set_target_properties(sexpp PROPERTIES
+        CXX_VISIBILITY_PRESET "hidden"
+        VISIBILITY_INLINES_HIDDEN true
+    )
 endif (BUILD_SHARED_LIBS)
 
 set_target_properties(sexpp PROPERTIES
