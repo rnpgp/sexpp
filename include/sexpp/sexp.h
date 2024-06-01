@@ -143,6 +143,13 @@ class SEXP_PUBLIC_SYMBOL sexp_simple_string_t : public std::vector<octet_t>,
     }
 
     uint32_t as_unsigned() const noexcept;
+
+    std::string as_string(void) const
+    {
+        return std::string(reinterpret_cast<const char *>(data()), size());
+    }
+
+    std::string c_str(void) const { return as_string(); }
 };
 
 inline bool operator==(const sexp_simple_string_t *left, const std::string &right) noexcept
