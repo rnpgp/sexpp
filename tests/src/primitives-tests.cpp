@@ -201,7 +201,8 @@ TEST_F(PrimitivesTests, at4rnp)
     }
 
     const sexp_string_t *sstr = lst.sexp_string_at(0);
-    EXPECT_STREQ(reinterpret_cast<const char *>(sstr->get_string().c_str()), "rnp_block");
+    int result = memcmp(sstr->get_string().data(), "rnp_block", sstr->get_string().size());
+    EXPECT_EQ(result, 0);
 }
 
 TEST_F(PrimitivesTests, eq4rnp)
@@ -278,6 +279,15 @@ TEST_F(PrimitivesTests, u4rnp)
     lst.clear();
     lst.parse(is.set_input(&iss2)->set_byte_size(8)->get_char());
     EXPECT_EQ(lst.sexp_string_at(1)->as_unsigned(), 54321);
+}
+
+TEST_F(PrimitivesTests, asUnsigned)
+{
+    sexp_simple_string_t sss1(reinterpret_cast<const octet_t *>(""));
+    EXPECT_EQ(sss1.as_unsigned(), std::numeric_limits<uint32_t>::max());
+
+    sexp_simple_string_t sss2(reinterpret_cast<const octet_t *>("123A456"));
+    EXPECT_EQ(sss2.as_unsigned(), 0);
 }
 
 TEST_F(PrimitivesTests, proInheritance)
@@ -389,6 +399,17 @@ TEST_F(PrimitivesTests, EnsureHexTest)
     sexp_output_stream_t os(&oss);
     os.print_advanced(obj);
     EXPECT_EQ(oss.str(), "(#610963#)");
+}
+
+TEST_F(PrimitivesTests, SimpleStringConstructors)
+{
+    const char *tss = "test simple string";
+
+    sexp_simple_string_t sss1(reinterpret_cast<const octet_t *>(tss));
+    EXPECT_TRUE(sss1 == tss);
+
+    sexp_simple_string_t sss2(reinterpret_cast<const octet_t *>(tss), 4);
+    EXPECT_TRUE(sss2 == "test");
 }
 
 } // namespace

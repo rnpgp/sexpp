@@ -234,9 +234,9 @@ void sexp_input_stream_t::scan_verbatim_string(sexp_simple_string_t &ss, uint32_
 void sexp_input_stream_t::scan_quoted_string(sexp_simple_string_t &ss, uint32_t length)
 {
     skip_char('"');
-    while (ss.length() <= length) {
+    while (ss.size() <= length) {
         if (next_char == '\"') {
-            if (length == std::numeric_limits<uint32_t>::max() || (ss.length() == length)) {
+            if (length == std::numeric_limits<uint32_t>::max() || (ss.size() == length)) {
                 skip_char('\"');
                 return;
             } else
@@ -367,10 +367,10 @@ void sexp_input_stream_t::scan_hexadecimal_string(sexp_simple_string_t &ss, uint
         get_char();
     }
     skip_char('#');
-    if (ss.length() != length && length != std::numeric_limits<uint32_t>::max())
+    if (ss.size() != length && length != std::numeric_limits<uint32_t>::max())
         sexp_error(sexp_exception_t::warning,
                    "Hex string has length %d different than declared length %d",
-                   ss.length(),
+                   ss.size(),
                    length,
                    count);
 }
@@ -389,10 +389,10 @@ void sexp_input_stream_t::scan_base64_string(sexp_simple_string_t &ss, uint32_t 
         get_char();
     }
     skip_char('|');
-    if (ss.length() != length && length != std::numeric_limits<uint32_t>::max())
+    if (ss.size() != length && length != std::numeric_limits<uint32_t>::max())
         sexp_error(sexp_exception_t::warning,
                    "Base64 string has length %d different than declared length %d",
-                   ss.length(),
+                   ss.size(),
                    length,
                    count);
 }
@@ -441,7 +441,7 @@ sexp_simple_string_t sexp_input_stream_t::scan_simple_string(void)
         }
     }
 
-    if (ss.length() == 0)
+    if (ss.size() == 0)
         sexp_error(sexp_exception_t::warning, "Simple string has zero length", 0, 0, count);
     return ss;
 }
