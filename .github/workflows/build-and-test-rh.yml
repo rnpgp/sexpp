@@ -1,5 +1,5 @@
 #
-# Copyright 2021-2023 Ribose Inc. (https://www.ribose.com)
+# Copyright 2021-2024 Ribose Inc. (https://www.ribose.com)
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of
 # this software and associated documentation files (the "Software"), to deal in
@@ -41,7 +41,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        image: [ 'centos:7', 'tgagor/centos:stream8', 'quay.io/centos/centos:stream9', 'fedora:35', 'fedora:36' ]
+        image: [ 'centos:7', 'tgagor/centos:stream8', 'quay.io/centos/centos:stream9', 'fedora:35', 'fedora:36', 'fedora:38' ]
         env: [ {CC: gcc, CXX: g++}, {CC: clang, CXX: clang++} ]
         shared: [ on, off ]
     container: ${{ matrix.image }}
@@ -61,6 +61,14 @@ jobs:
         run: yum -y install sudo git gcc gcc-c++ make cmake clang
 
       - name: Checkout
+        if: matrix.image != 'centos:7'
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+# CentOS 7 doesn't support node.js:20. To be removed once it is EOLed at June, 2024.
+      - name: Checkout centos:7
+        if: matrix.image == 'centos:7'
         uses: actions/checkout@v3
         with:
           fetch-depth: 1
