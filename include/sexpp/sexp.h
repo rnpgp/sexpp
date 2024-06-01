@@ -112,6 +112,11 @@ class SEXP_PUBLIC_SYMBOL sexp_simple_string_t : public std::vector<octet_t>,
         push_back((octet_t)(c & 0xFF));
         return *this;
     }
+    const sexp_simple_string_t &append(const octet_t *d, size_t ln)
+    {
+        insert(end(), d, d + ln);
+        return *this;
+    }
     // Returns length for printing simple string as a token
     size_t advanced_length_token(void) const { return size(); }
     // Returns length for printing simple string as a base64 string
@@ -143,6 +148,11 @@ class SEXP_PUBLIC_SYMBOL sexp_simple_string_t : public std::vector<octet_t>,
     }
 
     uint32_t as_unsigned() const noexcept;
+
+    std::string as_string(void) const
+    {
+        return std::string(reinterpret_cast<const char *>(data()), size());
+    }
 };
 
 inline bool operator==(const sexp_simple_string_t *left, const std::string &right) noexcept
