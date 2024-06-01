@@ -105,8 +105,8 @@ class SEXP_PUBLIC_SYMBOL sexp_simple_string_t : public std::vector<octet_t>,
                                                 private sexp_char_defs_t {
   public:
     sexp_simple_string_t(void) = default;
-    sexp_simple_string_t(const octet_t *dt) : std::vector<octet_t>() { for (; *dt; ++dt) push_back(*dt); }
-    sexp_simple_string_t(const octet_t *bt, size_t ln) : std::vector<octet_t>(ln) { for (size_t s = 0; s < ln; ++bt, ++s ) push_back(*bt); }
+    sexp_simple_string_t(const octet_t *dt);
+    sexp_simple_string_t(const octet_t *bt, size_t ln);
     sexp_simple_string_t &append(int c)
     {
         push_back((octet_t)(c & 0xFF));

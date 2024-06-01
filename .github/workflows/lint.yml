@@ -1,5 +1,5 @@
 #
-# Copyright 2021-2023 Ribose Inc. (https://www.ribose.com)
+# Copyright 2021-2024 Ribose Inc. (https://www.ribose.com)
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of
 # this software and associated documentation files (the "Software"), to deal in
@@ -35,7 +35,7 @@ jobs:
   clang-format:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: DoozyX/clang-format-lint-action@v0.11
         with:
           source: '.'
@@ -52,5 +52,5 @@ jobs:
   shellcheck:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: ludeeus/action-shellcheck@master
