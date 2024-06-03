@@ -101,25 +101,25 @@ class sexp_input_stream_t;
 
 typedef uint8_t octet_t;
 
-class SEXP_PUBLIC_SYMBOL sexp_simple_string_t : public std::vector<octet_t>,
+class SEXP_PUBLIC_SYMBOL sexp_simple_string_t : public std::basic_string<octet_t>,
                                                 private sexp_char_defs_t {
   public:
     sexp_simple_string_t(void) = default;
-    sexp_simple_string_t(const octet_t *dt);
-    sexp_simple_string_t(const octet_t *bt, size_t ln);
+    sexp_simple_string_t(const octet_t *dt) : std::basic_string<octet_t>{dt} {}
+    sexp_simple_string_t(const octet_t *bt, size_t ln) : std::basic_string<octet_t>{bt, ln} {}
     sexp_simple_string_t &append(int c)
     {
-        push_back((octet_t)(c & 0xFF));
+        (*this) += (octet_t)(c & 0xFF);
         return *this;
     }
     // Returns length for printing simple string as a token
-    size_t advanced_length_token(void) const { return size(); }
+    size_t advanced_length_token(void) const { return length(); }
     // Returns length for printing simple string as a base64 string
-    size_t advanced_length_base64(void) const { return (2 + 4 * ((size() + 2) / 3)); }
+    size_t advanced_length_base64(void) const { return (2 + 4 * ((length() + 2) / 3)); }
     // Returns length for printing simple string ss in quoted-string mode
-    size_t advanced_length_quoted(void) const { return (1 + size() + 1); }
+    size_t advanced_length_quoted(void) const { return (1 + length() + 1); }
     // Returns length for printing simple string ss in hexadecimal mode
-    size_t advanced_length_hexadecimal(void) const { return (1 + 2 * size() + 1); }
+    size_t advanced_length_hexadecimal(void) const { return (1 + 2 * length() + 1); }
     size_t advanced_length(sexp_output_stream_t *os) const;
 
     sexp_output_stream_t *print_canonical_verbatim(sexp_output_stream_t *os) const;
@@ -134,15 +134,19 @@ class SEXP_PUBLIC_SYMBOL sexp_simple_string_t : public std::vector<octet_t>,
 
     bool operator==(const char *right) const noexcept
     {
-        return size() == std::strlen(right) && std::memcmp(data(), right, size()) == 0;
+        return length() == std::strlen(right) && std::memcmp(data(), right, length()) == 0;
     }
 
     bool operator!=(const char *right) const noexcept
     {
-        return size() != std::strlen(right) || std::memcmp(data(), right, size()) != 0;
+        return length() != std::strlen(right) || std::memcmp(data(), right, length()) != 0;
     }
 
-    uint32_t as_unsigned() const noexcept;
+    unsigned as_unsigned() const noexcept
+    {
+        return empty() ? std::numeric_limits<uint32_t>::max() :
+                         (unsigned) atoi(reinterpret_cast<const char *>(c_str()));
+    }
 };
 
 inline bool operator==(const sexp_simple_string_t *left, const std::string &right) noexcept
@@ -189,7 +193,7 @@ class SEXP_PUBLIC_SYMBOL sexp_object_t {
     }
     virtual bool     operator==(const char *right) const noexcept { return false; }
     virtual bool     operator!=(const char *right) const noexcept { return true; }
-    virtual uint32_t as_unsigned() const noexcept
+    virtual unsigned as_unsigned() const noexcept
     {
         return std::numeric_limits<uint32_t>::max();
     }
@@ -246,19 +250,17 @@ class SEXP_PUBLIC_SYMBOL sexp_string_t : public sexp_object_t {
     virtual bool operator!=(const char *right) const noexcept { return data_string != right; }
 
     void             parse(sexp_input_stream_t *sis);
-    virtual uint32_t as_unsigned() const noexcept { return data_string.as_unsigned(); }
+    virtual unsigned as_unsigned() const noexcept { return data_string.as_unsigned(); }
 };
 
 inline bool operator==(const sexp_string_t *left, const std::string &right) noexcept
 {
-    return left->get_string().size() == right.length() &&
-           memcmp(left->get_string().data(), right.c_str(), left->get_string().size()) == 0;
+    return *left == right.c_str();
 }
 
 inline bool operator!=(const sexp_string_t *left, const std::string &right) noexcept
 {
-    return left->get_string().size() != right.length() ||
-           memcmp(left->get_string().data(), right.c_str(), left->get_string().size()) != 0;
+    return *left != right.c_str();
 }
 
 /*

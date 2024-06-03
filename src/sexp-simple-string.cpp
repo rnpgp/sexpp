@@ -29,27 +29,6 @@
 #include "sexpp/sexp.h"
 
 namespace sexp {
-
-/*
- * sexp_simple_string_t::sexp_simple_string_t(const octet_t *dt)
- */
-sexp_simple_string_t::sexp_simple_string_t(const octet_t *dt) : std::vector<octet_t>()
-{
-    for (; *dt; ++dt)
-        push_back(*dt);
-}
-
-/*
- * sexp_simple_string_t::sexp_simple_string_t(const octet_t *bt, size_t ln)
- */
-sexp_simple_string_t::sexp_simple_string_t(const octet_t *bt, size_t ln)
-    : std::vector<octet_t>()
-{
-    reserve(ln);
-    for (size_t s = 0; s < ln; ++bt, ++s)
-        push_back(*bt);
-}
-
 /*
  * sexp_simple_string_t::print_canonical_verbatim(os)
  * Print out simple string on output stream os as verbatim string.
@@ -57,11 +36,11 @@ sexp_simple_string_t::sexp_simple_string_t(const octet_t *bt, size_t ln)
 sexp_output_stream_t *sexp_simple_string_t::print_canonical_verbatim(
   sexp_output_stream_t *os) const
 {
-    const octet_t *c = data();
+    const octet_t *c = c_str();
     /* print out len: */
-    os->print_decimal(size())->var_put_char(':');
+    os->print_decimal(length())->var_put_char(':');
     /* print characters in fragment */
-    for (uint32_t i = 0; i < size(); i++)
+    for (uint32_t i = 0; i < length(); i++)
         os->var_put_char((int) *c++);
     return os;
 }
@@ -76,32 +55,12 @@ size_t sexp_simple_string_t::advanced_length(sexp_output_stream_t *os) const
         return advanced_length_token();
     else if (can_print_as_quoted_string())
         return advanced_length_quoted();
-    else if (size() <= 4 && os->get_byte_size() == 8)
+    else if (length() <= 4 && os->get_byte_size() == 8)
         return advanced_length_hexadecimal();
     else if (os->get_byte_size() == 8)
         return advanced_length_base64();
     else
         return 0; /* an error condition */
-}
-
-/*
- * sexp_simple_string_t::as_unsigned
- * Converts simple string to unsigned integer.
- * Returns std::numeric_limits<uint32_t>::max() if simple string is empty
- * Returns 0 if simple string contains non-digit characters
- */
-uint32_t sexp_simple_string_t::as_unsigned() const noexcept
-{
-    if (empty())
-        return std::numeric_limits<uint32_t>::max();
-
-    uint32_t result = 0;
-    for (octet_t c : *this) {
-        if (!is_dec_digit(c))
-            return 0;
-        result = result * 10 + (c - '0');
-    }
-    return result;
 }
 
 /*
@@ -111,10 +70,10 @@ uint32_t sexp_simple_string_t::as_unsigned() const noexcept
  */
 sexp_output_stream_t *sexp_simple_string_t::print_token(sexp_output_stream_t *os) const
 {
-    const octet_t *c = data();
-    if (os->get_max_column() > 0 && os->get_column() > (os->get_max_column() - size()))
+    const octet_t *c = c_str();
+    if (os->get_max_column() > 0 && os->get_column() > (os->get_max_column() - length()))
         os->new_line(sexp_output_stream_t::advanced);
-    for (uint32_t i = 0; i < size(); i++)
+    for (uint32_t i = 0; i < length(); i++)
         os->put_char((int) (*c++));
     return os;
 }
@@ -125,9 +84,9 @@ sexp_output_stream_t *sexp_simple_string_t::print_token(sexp_output_stream_t *os
  */
 sexp_output_stream_t *sexp_simple_string_t::print_base64(sexp_output_stream_t *os) const
 {
-    const octet_t *c = data();
+    const octet_t *c = c_str();
     os->var_put_char('|')->change_output_byte_size(6, sexp_output_stream_t::advanced);
-    for (uint32_t i = 0; i < size(); i++)
+    for (uint32_t i = 0; i < length(); i++)
         os->var_put_char((int) (*c++));
     return os->flush()
       ->change_output_byte_size(8, sexp_output_stream_t::advanced)
@@ -140,9 +99,9 @@ sexp_output_stream_t *sexp_simple_string_t::print_base64(sexp_output_stream_t *o
  */
 sexp_output_stream_t *sexp_simple_string_t::print_hexadecimal(sexp_output_stream_t *os) const
 {
-    const octet_t *c = data();
+    const octet_t *c = c_str();
     os->put_char('#')->change_output_byte_size(4, sexp_output_stream_t::advanced);
-    for (uint32_t i = 0; i < size(); i++)
+    for (uint32_t i = 0; i < length(); i++)
         os->var_put_char((int) (*c++));
     return os->flush()
       ->change_output_byte_size(8, sexp_output_stream_t::advanced)
@@ -158,9 +117,9 @@ sexp_output_stream_t *sexp_simple_string_t::print_hexadecimal(sexp_output_stream
  */
 sexp_output_stream_t *sexp_simple_string_t::print_quoted(sexp_output_stream_t *os) const
 {
-    const octet_t *c = data();
+    const octet_t *c = c_str();
     os->put_char('\"');
-    for (uint32_t i = 0; i < size(); i++) {
+    for (uint32_t i = 0; i < length(); i++) {
         if (os->get_max_column() > 0 && os->get_column() >= os->get_max_column() - 2) {
             os->put_char('\\')->put_char('\n');
             os->reset_column();
@@ -180,7 +139,7 @@ sexp_output_stream_t *sexp_simple_string_t::print_advanced(sexp_output_stream_t 
         print_token(os);
     else if (can_print_as_quoted_string())
         print_quoted(os);
-    else if (size() <= 4 && os->get_byte_size() == 8)
+    else if (length() <= 4 && os->get_byte_size() == 8)
         print_hexadecimal(os);
     else if (os->get_byte_size() == 8)
         print_base64(os);
@@ -200,8 +159,8 @@ sexp_output_stream_t *sexp_simple_string_t::print_advanced(sexp_output_stream_t 
  */
 bool sexp_simple_string_t::can_print_as_quoted_string(void) const
 {
-    const octet_t *c = data();
-    for (uint32_t i = 0; i < size(); i++, c++) {
+    const octet_t *c = c_str();
+    for (uint32_t i = 0; i < length(); i++, c++) {
         if (!is_token_char((int) (*c)) && *c != ' ')
             return false;
     }
@@ -215,14 +174,14 @@ bool sexp_simple_string_t::can_print_as_quoted_string(void) const
  */
 bool sexp_simple_string_t::can_print_as_token(const sexp_output_stream_t *os) const
 {
-    const octet_t *c = data();
-    if (size() <= 0)
+    const octet_t *c = c_str();
+    if (length() <= 0)
         return false;
     if (is_dec_digit((int) *c))
         return false;
-    if (os->get_max_column() > 0 && os->get_column() + size() >= os->get_max_column())
+    if (os->get_max_column() > 0 && os->get_column() + length() >= os->get_max_column())
         return false;
-    for (uint32_t i = 0; i < size(); i++) {
+    for (uint32_t i = 0; i < length(); i++) {
         if (!is_token_char((int) (*c++)))
             return false;
     }
