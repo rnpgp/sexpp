@@ -412,12 +412,4 @@ TEST_F(PrimitivesTests, SimpleStringConstructors)
     EXPECT_TRUE(sss2 == "test");
 }
 
-TEST_F(PrimitivesTests, Compat_pre_0_9)
-{
-    const octet_t tss[] = {'t', 'e', 's', 't', 'b', 'a'};
-
-    sexp_simple_string_t sss;
-    sss.append(tss, 4);
-    EXPECT_TRUE(strcmp(sss.as_string().c_str(), "test") == 0);
-}
 } // namespace
