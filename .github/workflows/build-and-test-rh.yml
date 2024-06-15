@@ -41,7 +41,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        image: [ 'centos:7', 'quay.io/centos/centos:stream9', 'fedora:35', 'fedora:36', 'fedora:38']
+        image: [ 'centos:7', 'quay.io/centos/centos:stream9', 'fedora:39', 'fedora:40']
         env: [ {CC: gcc, CXX: g++}, {CC: clang, CXX: clang++} ]
         shared: [ on, off ]
     container: ${{ matrix.image }}
