@@ -156,6 +156,12 @@ if (WITH_SEXP_CLI)
         RUNTIME_OUTPUT_NAME sexpp
         RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
     )
+    if (APPLE AND BUILD_SHARED_LIBS)
+        # Since cmd line tools version 2397 dyld doesn't look in ../lib
+        # See https://github.com/rnpgp/rnp/issues/2153 and
+        # https://developer.apple.com/forums/thread/737920 for the details.
+        set_target_properties(sexpp-cli PROPERTIES INSTALL_RPATH "@executable_path/../lib")
+    endif(APPLE AND BUILD_SHARED_LIBS)
 endif (WITH_SEXP_CLI)
 
 

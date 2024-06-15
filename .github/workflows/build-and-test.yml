@@ -55,6 +55,7 @@ jobs:
         # Build of sexp dll with MSVC is not supported
         exclude:
           - { os: windows-2019, env: { }, shared: on }
+          - { os: windows-2022, env: { }, shared: on }
 
     env: ${{ matrix.env }}
     steps:
