@@ -43,7 +43,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        image: [ 'i386/debian:10', 'i386/debian:11', 'amd64/debian:11' ]
+        image: [ 'i386/debian:12', 'amd64/debian:12', 'i386/debian:11', 'amd64/debian:11' ]
         env: [ {CC: gcc, CXX: g++}, {CC: clang, CXX: clang++} ]
         shared: [on, off]
 
