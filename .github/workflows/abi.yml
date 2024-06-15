@@ -1,0 +1,68 @@
+#
+# Copyright 2024 Ribose Inc. (https://www.ribose.com)
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy of
+# this software and associated documentation files (the "Software"), to deal in
+# the Software without restriction, including without limitation the rights to
+# use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+# the Software, and to permit persons to whom the Software is furnished to do so,
+# subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+# FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+# COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+# IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+# CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+#
+
+name: abi
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: '${{ github.workflow }}-${{ github.job }}-${{ github.head_ref || github.ref_name }}'
+  cancel-in-progress: true
+
+jobs:
+  abi-test:
+    runs-on: ubuntu-latest
+    env:
+      CC: gcc
+      CXX: g++
+      MAKEFLAGS: j4
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Install abi tools
+        run: |
+          sudo apt-get install abi-compliance-checker abi-dumper
+
+      - name: Configure
+        run: |
+          cmake -Bbuild -DWITH_ABI_TEST=ON
+
+      - name: Build
+        run: cmake --build build
+
+      - name: Generate abi dump
+        run: abi-dumper build/libsexpp.so -o build/libsexpp.abi -lver 0
+
+      - name: Test abi compatibility
+        run: abi-compliance-checker -l libsexpp -new build/libsexpp.abi -old tests/abi/libsexpp.0.abi -report-path build/abi-report.html
+
+      - name: Upload abi report
+        uses: actions/upload-artifact@v4
+        with:
+          name: abi-report
+          path: build/abi-report.html
