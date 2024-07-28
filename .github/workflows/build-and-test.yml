@@ -41,7 +41,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ ubuntu-20.04, ubuntu-22.04, ubuntu-24.04, macos-11, macos-14, windows-2019, windows-2022 ]
+        os: [ ubuntu-20.04, ubuntu-22.04, ubuntu-24.04, macos-12, macos-latest, windows-2019, windows-2022 ]
         env: [ { } ]
         shared: [on, off]
         # on macos gcc is an alias to clang by default, so there is no real value in macos clang run
