@@ -126,6 +126,18 @@ TEST_F(ExceptionTests, StringBadLength)
                            "SEXP ERROR: illegal character 'A' (0x41) at position 2");
 }
 
+TEST_F(ExceptionTests, StringTooLongTruncated)
+{
+    do_scan_with_exception("(982582599:",
+                           "SEXP ERROR: Too long verbatim string: 982582599 at position 11");
+}
+
+TEST_F(ExceptionTests, StringTruncated)
+{
+    do_scan_with_exception("(1024:",
+                           "SEXP ERROR: EOF while reading verbatim string at position 6");
+}
+
 TEST_F(ExceptionTests, DecimalTooLong)
 {
     do_scan_with_exception("(1234567890:AAABFCAD)",
