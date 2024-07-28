@@ -41,35 +41,17 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        image: [ 'centos:7', 'quay.io/centos/centos:stream9', 'fedora:39', 'fedora:40']
+        image: [ 'quay.io/centos/centos:stream9', 'fedora:39', 'fedora:40']
         env: [ {CC: gcc, CXX: g++}, {CC: clang, CXX: clang++} ]
         shared: [ on, off ]
     container: ${{ matrix.image }}
     env: ${{ matrix.env }}
     steps:
-      - name: Install packages CentOS 7
-        if: matrix.image == 'centos:7'
-        run: |
-          yum -y install http://opensource.wandisco.com/centos/7/git/x86_64/wandisco-git-release-7-2.noarch.rpm
-          yum -y install sudo git make wget gcc gcc-c++ clang
-          wget -nv https://github.com/Kitware/CMake/releases/download/v3.24.3/cmake-3.24.3-linux-x86_64.sh
-          chmod a+x cmake-3.24.3-linux-x86_64.sh
-          ./cmake-3.24.3-linux-x86_64.sh --skip-license --exclude-subdir --prefix=/usr/local
-
-      - name: Install packages not CentOS 7
-        if: matrix.image != 'centos:7'
+      - name: Install packages
         run: yum -y install sudo git gcc gcc-c++ make cmake clang
 
       - name: Checkout
-        if: matrix.image != 'centos:7'
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 1
-
-# CentOS 7 doesn't support node.js:20. To be removed once it is EOLed at June, 2024.
-      - name: Checkout centos:7
-        if: matrix.image == 'centos:7'
-        uses: actions/checkout@v3
         with:
           fetch-depth: 1
 
@@ -90,21 +72,8 @@ jobs:
       - name: Install
         run: cmake --install build
 
-      - name: Install xargs
-        if: matrix.image == 'fedora:35'
-        run:  sudo yum -y install findutils
-
       - name: Checkout shell test framework
-        if: matrix.image != 'centos:7'
         uses: actions/checkout@v4
-        with:
-          repository: kward/shunit2
-          path: ${{github.workspace}}/tests/shunit2
-          fetch-depth: 1
-
-      - name: Checkout shell test framework centos7
-        if: matrix.image == 'centos:7'
-        uses: actions/checkout@v3
         with:
           repository: kward/shunit2
           path: ${{github.workspace}}/tests/shunit2
