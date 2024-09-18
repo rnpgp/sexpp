@@ -60,7 +60,7 @@ TEST_F(ExceptionTests, IllegalCharacter)
                            "SEXP ERROR: illegal character '?' (0x3f) at position 16");
 }
 
-TEST_F(ExceptionTests, UnexpectedEofAfterQoute)
+TEST_F(ExceptionTests, UnexpectedEofAfterQuote)
 {
     do_scan_with_exception("(\")\n", "SEXP ERROR: unexpected end of file at position 4");
 }

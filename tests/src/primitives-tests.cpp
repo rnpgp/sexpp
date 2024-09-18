@@ -110,7 +110,7 @@ TEST_F(PrimitivesTests, Base64Ofoctet_t)
     do_test_advanced("|YWJj|", "abc");
 }
 
-TEST_F(PrimitivesTests, Base64OfVerbatium)
+TEST_F(PrimitivesTests, Base64OfVerbatim)
 {
     do_test_canonical("{MzphYmM=}", "3:abc");
     do_test_advanced("{MzphYmM=}", "abc");
