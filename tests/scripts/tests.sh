@@ -96,7 +96,7 @@ test_install_script() {
 
 # ......................................................................
 # Check sexp client application
-# THese are the examples from README.adoc
+# These are the examples from README.adoc
 test_sexp_cli() {
    echo "==> SEXP client application test"
 
