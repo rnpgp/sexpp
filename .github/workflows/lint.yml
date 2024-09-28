@@ -62,4 +62,3 @@ jobs:
           fetch-depth: 1
           submodules: true
       - uses: crate-ci/typos@master
-    
