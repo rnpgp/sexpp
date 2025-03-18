@@ -52,13 +52,12 @@ test_install_script() {
             assert_installed "$DIR_INS_L/libsexpp.$version_major.dylib"
             assert_installed "$DIR_INS_L/libsexpp.$version.dylib"
          ;;
-         windows )
+         windows)
             assert_installed "$DIR_INS_B/sexpp.exe"
             assert_installed "$DIR_INS_B/sexpp.dll"
             assert_installed "$DIR_INS_L/sexpp.lib"
          ;;
-         msys)
-
+         msys|cygwin)
             assert_installed "$DIR_INS_B/sexpp.exe"
             assert_installed "$DIR_INS_B/libsexpp.dll"
             assert_installed "$DIR_INS_L/libsexpp.dll.a"
@@ -76,7 +75,7 @@ test_install_script() {
             assert_installed "$DIR_INS_B/sexpp.exe"
             assert_installed "$DIR_INS_L/sexpp.lib"
          ;;
-         msys)
+         msys|cygwin)
             assert_installed "$DIR_INS_B/sexpp.exe"
             assert_installed "$DIR_INS_L/libsexpp.a"
          ;;
@@ -102,7 +101,7 @@ test_sexp_cli() {
 
 # On Windows there will be CRLF vs LS mismatch
 # We would rather skip these tests
-   if [[ "$OSTYPE" == "windows" || "$OSTYPE" == "msys" ]]; then
+   if [[ "$OSTYPE" == "windows" || "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" ]]; then
       startSkipping
    fi
 
@@ -158,7 +157,7 @@ EOM
    output=$("$app" < input2.dat)
    assertContains "$expected" "$output"
 
-   if [[ "$OSTYPE" == "windows" || "$OSTYPE" == "msys" ]]; then
+   if [[ "$OSTYPE" == "windows" || "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" ]]; then
       endSkipping
    fi
 
