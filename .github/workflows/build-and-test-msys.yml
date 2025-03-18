@@ -87,4 +87,6 @@ jobs:
         run: cmake --install build
 
       - name: Run additional tests
-        run:  tests/scripts/tests.sh
+        run: |
+          set -eux
+          ./tests/scripts/tests.sh
