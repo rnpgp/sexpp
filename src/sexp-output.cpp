@@ -106,14 +106,14 @@ sexp_output_stream_t *sexp_output_stream_t::var_put_char(int c)
  * Change os->byte_size to newByteSize
  * record mode in output stream for automatic line breaks
  */
-sexp_output_stream_t *sexp_output_stream_t::change_output_byte_size(int newByteSize,
+sexp_output_stream_t *sexp_output_stream_t::change_output_byte_size(size_t newByteSize,
                                                                     sexp_print_mode newMode)
 {
     if (newByteSize != 4 && newByteSize != 6 && newByteSize != 8)
-        sexp_error(sexp_exception_t::error, "Illegal output base %d", newByteSize, 0, EOF);
+        sexp_error(sexp_exception_t::error, "Illegal output base %zu", newByteSize, 0, EOF);
     if (newByteSize != 8 && byte_size != 8)
         sexp_error(sexp_exception_t::error,
-                   "Illegal change of output byte size from %d to %d",
+                   "Illegal change of output byte size from %zu to %zu",
                    byte_size,
                    newByteSize,
                    EOF);
