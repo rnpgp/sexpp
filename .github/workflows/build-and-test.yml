@@ -1,5 +1,5 @@
 #
-# Copyright 2021-2024 Ribose Inc. (https://www.ribose.com)
+# Copyright 2021-2025 Ribose Inc. (https://www.ribose.com)
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of
 # this software and associated documentation files (the "Software"), to deal in
@@ -41,21 +41,19 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ ubuntu-20.04, ubuntu-22.04, ubuntu-24.04, macos-12, macos-latest, windows-2019, windows-2022 ]
+        os: [ ubuntu-22.04, ubuntu-24.04, macos-13, macos-14, macos-15 ]
         env: [ { } ]
         shared: [on, off]
         # on macos gcc is an alias to clang by default, so there is no real value in macos clang run
         include:
-          - { os: ubuntu-20.04, env: { CC: clang, CXX: clang++ }, shared: on }
-          - { os: ubuntu-20.04, env: { CC: clang, CXX: clang++ }, shared: off }
           - { os: ubuntu-22.04, env: { CC: clang, CXX: clang++ }, shared: on }
           - { os: ubuntu-22.04, env: { CC: clang, CXX: clang++ }, shared: off }
           - { os: ubuntu-24.04, env: { CC: clang, CXX: clang++ }, shared: on }
           - { os: ubuntu-24.04, env: { CC: clang, CXX: clang++ }, shared: off }
         # Build of sexp dll with MSVC is not supported
-        exclude:
-          - { os: windows-2019, env: { }, shared: on }
-          - { os: windows-2022, env: { }, shared: on }
+          - { os: windows-2019, env: { }, shared: off }
+          - { os: windows-2022, env: { }, shared: off }
+          - { os: windows-2025, env: { }, shared: off }
 
     env: ${{ matrix.env }}
     steps:
