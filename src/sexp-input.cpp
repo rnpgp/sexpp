@@ -120,7 +120,7 @@ sexp_input_stream_t *sexp_input_stream_t::get_char(void)
                 bits = bits | hexvalue(c);
             else {
                 sexp_error(sexp_exception_t::error,
-                           "character '%c' found in %u-bit coding region",
+                           "character '%c' found in %zu-bit coding region",
                            next_char,
                            byte_size,
                            count);
@@ -249,8 +249,8 @@ void sexp_input_stream_t::scan_quoted_string(sexp_simple_string_t &ss, uint32_t 
                 return;
             } else
                 sexp_error(sexp_exception_t::error,
-                           "Declared length was %d, but quoted string ended too early",
-                           (int) length,
+                           "Declared length was %zu, but quoted string ended too early",
+                           length,
                            0,
                            count);
         } else if (next_char == '\\') /* handle escape sequence */

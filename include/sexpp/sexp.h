@@ -484,7 +484,7 @@ class SEXP_PUBLIC_SYMBOL sexp_output_stream_t : sexp_depth_manager {
     sexp_output_stream_t *flush(void);
     sexp_output_stream_t *print_decimal(uint64_t n);
 
-    sexp_output_stream_t *change_output_byte_size(int newByteSize, sexp_print_mode mode);
+    sexp_output_stream_t *change_output_byte_size(size_t newByteSize, sexp_print_mode mode);
 
     sexp_output_stream_t *print_canonical(const std::shared_ptr<sexp_object_t> &obj)
     {

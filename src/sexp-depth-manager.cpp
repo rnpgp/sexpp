@@ -38,7 +38,7 @@ void sexp_depth_manager::increase_depth(int count)
 {
     if (max_depth != 0 && ++depth > max_depth)
         sexp_error(sexp_exception_t::error,
-                   "Maximum allowed SEXP list depth (%u) is exceeded",
+                   "Maximum allowed SEXP list depth (%zu) is exceeded",
                    max_depth,
                    0,
                    count);
