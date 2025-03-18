@@ -413,7 +413,7 @@ void sexp_input_stream_t::scan_base64_string(sexp_simple_string_t &ss, uint32_t 
  */
 sexp_simple_string_t sexp_input_stream_t::scan_simple_string(void)
 {
-    int                  length;
+    uint32_t             length;
     sexp_simple_string_t ss;
     skip_white_space();
     /* Note that it is important in the following code to test for token-ness
