@@ -1,6 +1,6 @@
 /**
  *
- * Copyright 2021-2023 Ribose Inc. (https://www.ribose.com)
+ * Copyright 2021-2025 Ribose Inc. (https://www.ribose.com)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -68,7 +68,21 @@ class SEXP_PUBLIC_SYMBOL sexp_exception_t : public std::exception {
     static void set_interactive(bool new_interactive) { interactive = new_interactive; };
 };
 
-void SEXP_PUBLIC_SYMBOL
-sexp_error(sexp_exception_t::severity level, const char *msg, size_t c1, size_t c2, int pos);
+void sexp_error(sexp_exception_t::severity level, const char *msg, int pos);
+
+// The next two functions that are used to format error messages are used with c1, c2 values
+// that are either real sizes [%zu format] or known to be characters [%c, %x, %o formats].
+
+void sexp_error(sexp_exception_t::severity level,
+                                   const char *msg,
+                                   size_t c1,
+                                   int pos);
+
+// Keep the only function public to keep ABI unchanged
+void SEXP_PUBLIC_SYMBOL sexp_error(sexp_exception_t::severity level,
+                                   const char *msg,
+                                   size_t c1,
+                                   size_t c2,
+                                   int pos);
 
 } // namespace sexp

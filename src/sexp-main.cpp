@@ -103,7 +103,8 @@ int main(int argc, char **argv)
                     i++;
                 ifs = new std::ifstream(argv[i], std::ifstream::binary);
                 if (ifs->fail())
-                    sexp_error(sexp_exception_t::error, "Can't open input file.", 0, 0, EOF);
+                    throw sexp_exception_t(
+                        std::string("Can't open input file") + argv[i], sexp_exception_t::error, EOF);
                 is->set_input(ifs);
                 ifname = argv[i];
             } else if (*c == 'l')
@@ -113,8 +114,9 @@ int main(int argc, char **argv)
                     i++;
                 ofs = new std::ofstream(argv[i], std::ifstream::binary);
                 if (ofs->fail())
-                    sexp_error(sexp_exception_t::error, "Can't open output file.", 0, 0, EOF);
-                os->set_output(ofs);
+                    throw sexp_exception_t(
+                        std::string("Can't open output file") + argv[i], sexp_exception_t::error, EOF);
+            os->set_output(ofs);
                 ofname = argv[i];
             } else if (*c == 'p')
                 swp = true; /* prompt for input */

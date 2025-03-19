@@ -1,6 +1,6 @@
 /**
  *
- * Copyright 2021-2023 Ribose Inc. (https://www.ribose.com)
+ * Copyright 2021-2025 Ribose Inc. (https://www.ribose.com)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -39,18 +39,31 @@ std::string sexp_exception_t::format(std::string prf,
     return r;
 };
 
-void sexp_error(
-  sexp_exception_t::severity level, const char *msg, size_t c1, size_t c2, int pos)
+void sexp_error(sexp_exception_t::severity level, const char *msg, int pos)
 {
-    char                       tmp[256];
     sexp_exception_t::severity l = (sexp_exception_t::severity) level;
-    snprintf(tmp, sizeof(tmp) / sizeof(tmp[0]), msg, c1, c2);
     if (sexp_exception_t::shall_throw(l))
-        throw sexp_exception_t(tmp, l, pos);
+        throw sexp_exception_t(msg, l, pos);
     if (sexp_exception_t::is_interactive()) {
         std::cout.flush() << std::endl
-                          << "*** " << sexp_exception_t::format("SEXP", tmp, l, pos) << " ***"
+                          << "*** " << sexp_exception_t::format("SEXP", msg, l, pos) << " ***"
                           << std::endl;
     }
 }
+
+void sexp_error(sexp_exception_t::severity level, const char *msg, size_t c1, int pos)
+{
+    char tmp[256];
+    snprintf(tmp, sizeof(tmp) / sizeof(tmp[0]), msg, c1);
+    sexp_error(level, tmp, pos);
+}
+
+void sexp_error(
+  sexp_exception_t::severity level, const char *msg, size_t c1, size_t c2, int pos)
+{
+    char tmp[256];
+    snprintf(tmp, sizeof(tmp) / sizeof(tmp[0]), msg, c1, c2);
+    sexp_error(level, tmp, pos);
+}
+
 } // namespace sexp
