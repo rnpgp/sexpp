@@ -26,17 +26,10 @@ This library differs from the original C implementation in the following ways:
 * It supports, and is tested against, all major platforms, including:
 ** Ubuntu, Debian, Fedora, CentOS, NixOS
 ** macOS
-** Windows
-** msys
+** Windows native
+** Windows MSys
 * It implements additional interface to work with S-Expressions wrapped by GnuPG
   2.3+ extended format
-  (https://github.com/gpg/gnupg/blob/master/agent/keyformat.txt[specification]).
-
-
-The original C library was available at (but no longer accessible):
-
-* http://people.csail.mit.edu/rivest/sexp.html
-
 
 == Background
 
@@ -44,37 +37,28 @@ S-Expressions are a data structure for representing complex data as a variation
 on https://en.wikipedia.org/wiki/Lisp_(programming_language)[LISP] S-Expressions.
 
 S-Expressions were originally adopted for use in
-http://theory.lcs.mit.edu/~cis/sdsi.html[SDSI] and
-http://world.std.com/~cme/html/spki.html[SPKI].
+https://wikipedia.org/wiki/Simple_public-key_infrastructure[SPKI and SDSI].
 
 SDSI has been developed by Prof.
 https://people.csail.mit.edu/rivest/index.html[Ronald L. Rivest] and
 Prof. Butler Lampson of
 http://www.lcs.mit.edu/[MIT's Laboratory for Computer Science],
-members of
-http://theory.lcs.mit.edu/~cis[LCS's Cryptography and Information Security]
+members of LCS's Cryptography and Information Security
 research group.
 
 NOTE: SDSI research has been supported by DARPA contract DABT63-96-C-0018,
 "Security for Distributed Computer Systems".
 
-NOTE: SPKI has been developed by
-http://www.clark.net/pub/cme/home.html[Carl Ellison] and others in the IETF SPKI
+NOTE: SPKI has been developed by Carl Ellison and others in the IETF SPKI
 working group.
-
 
 == S-Expressions specification
 
 * https://datatracker.ietf.org/doc/draft-rivest-sexp/
 
-NOTE: The "SEXP 1.0 guide" used to be at
-https://people.csail.mit.edu/rivest/Sexp.txt.
-
-
 == Code
 
-The library is a deep rework to C++ of the original
-https://people.csail.mit.edu/rivest/sexp.html[SEXP library] that maintains full
+The library is a deep rework to C++ of the original SEXP library that maintains full
 support of original specification.
 
 While most applications will not need anything but the simple canonical and
