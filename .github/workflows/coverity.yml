@@ -1,5 +1,5 @@
 #
-# Copyright 2021-2024 Ribose Inc. (https://www.ribose.com)
+# Copyright 2021-2025 Ribose Inc. (https://www.ribose.com)
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of
 # this software and associated documentation files (the "Software"), to deal in
@@ -22,9 +22,9 @@
 name: coverity
 
 on:
-  push:
-    branches: [ main ]
-  pull_request:
+  schedule:
+    # every day at 9:00 UTC
+    - cron: '0 9 * * *'
   workflow_dispatch:
 
 concurrency:
@@ -58,6 +58,6 @@ jobs:
       - name: Coverity Scan
         uses: vapier/coverity-scan-action@v1
         with:
-          email: maxirmx@sw.consulting
+          email: packaging@ribose.com
           token: ${{ env.COVERITY_TOKEN }}
           command: cmake --build build
