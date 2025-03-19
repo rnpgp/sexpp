@@ -1,6 +1,6 @@
 /**
  *
- * Copyright 2021-2024 Ribose Inc. (https://www.ribose.com)
+ * Copyright 2021-2025 Ribose Inc. (https://www.ribose.com)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -99,7 +99,7 @@ sexp_input_stream_t *sexp_input_stream_t::get_char(void)
             // unused bits
             if (n_bits > 0 && (((1 << n_bits) - 1) & bits) != 0) {
                 sexp_error(sexp_exception_t::warning,
-                           "%d-bit region ended with %d unused bits left-over",
+                           "%zu-bit region ended with %zu unused bits left-over",
                            byte_size,
                            n_bits,
                            count);
@@ -204,7 +204,7 @@ uint32_t sexp_input_stream_t::scan_decimal_string(void)
         value = value * 10 + decvalue(next_char);
         get_char();
         if (i++ > 8)
-            sexp_error(sexp_exception_t::error, "Decimal number is too long", 0, 0, count);
+            sexp_error(sexp_exception_t::error, "Decimal number is too long", count);
     }
     return value;
 }
@@ -221,12 +221,12 @@ void sexp_input_stream_t::scan_verbatim_string(sexp_simple_string_t &ss, uint32_
     assert(length != std::numeric_limits<uint32_t>::max());
     // We should not handle too large strings
     if (length > 1024 * 1024) {
-        sexp_error(sexp_exception_t::error, "Too long verbatim string: %zu", length, 0, count);
+        sexp_error(sexp_exception_t::error, "Verbatim string is too long: %zu", length, count);
     }
     for (uint32_t i = 0; i < length; i++) {
         if (next_char == EOF) {
             sexp_error(
-              sexp_exception_t::error, "EOF while reading verbatim string", 0, 0, count);
+              sexp_exception_t::error, "EOF while reading verbatim string", count);
         }
         ss.append(next_char);
         get_char();
@@ -251,7 +251,6 @@ void sexp_input_stream_t::scan_quoted_string(sexp_simple_string_t &ss, uint32_t 
                 sexp_error(sexp_exception_t::error,
                            "Declared length was %zu, but quoted string ended too early",
                            length,
-                           0,
                            count);
         } else if (next_char == '\\') /* handle escape sequence */
         {
@@ -286,8 +285,8 @@ void sexp_input_stream_t::scan_quoted_string(sexp_simple_string_t &ss, uint32_t 
                 break;
             case 'x': /* hexadecimal number */
             {
-                int j, val;
-                val = 0;
+                int j;
+                uint8_t val = 0; // Handle 2 hex digits, no overflow is possible
                 get_char();
                 for (j = 0; j < 2; j++) {
                     if (is_hex_digit(next_char)) {
@@ -299,7 +298,6 @@ void sexp_input_stream_t::scan_quoted_string(sexp_simple_string_t &ss, uint32_t 
                         sexp_error(sexp_exception_t::error,
                                    "Hex character \x5cx%x... too short",
                                    val,
-                                   0,
                                    count);
                 }
                 ss.append(val);
@@ -322,8 +320,8 @@ void sexp_input_stream_t::scan_quoted_string(sexp_simple_string_t &ss, uint32_t 
             case '5':
             case '6':
             case '7': { /* octal number */
-                int j, val;
-                val = 0;
+                int j;
+                uint32_t val = 0; // Handle 3 octal digits with possible overflow
                 for (j = 0; j < 3; j++) {
                     if (next_char >= '0' && next_char <= '7') {
                         val = ((val << 3) | (next_char - '0'));
@@ -333,27 +331,19 @@ void sexp_input_stream_t::scan_quoted_string(sexp_simple_string_t &ss, uint32_t 
                         sexp_error(sexp_exception_t::error,
                                    "Octal character \\%o... too short",
                                    val,
-                                   0,
                                    count);
                 }
                 if (val > 255)
-                    sexp_error(sexp_exception_t::error,
-                               "Octal character \\%o... too big",
-                               val,
-                               0,
-                               count);
+                    sexp_error(sexp_exception_t::error, "Octal character \\%o... too big", val, count);
                 ss.append(val);
             } break;
             default:
                 sexp_error(sexp_exception_t::error,
-                           "Unknown escape sequence \\%c",
-                           next_char,
-                           0,
-                           count);
+                           "Unknown escape sequence \\%c", next_char, count);
             }
         } /* end of handling escape sequence */
         else if (next_char == EOF) {
-            sexp_error(sexp_exception_t::error, "unexpected end of file", 0, 0, count);
+            sexp_error(sexp_exception_t::error, "unexpected end of file", count);
         } else {
             ss.append(next_char);
         }
@@ -377,7 +367,7 @@ void sexp_input_stream_t::scan_hexadecimal_string(sexp_simple_string_t &ss, uint
     skip_char('#');
     if (ss.length() != length && length != std::numeric_limits<uint32_t>::max())
         sexp_error(sexp_exception_t::warning,
-                   "Hex string has length %d different than declared length %d",
+                   "Hex string has length %zu different than declared length %zu",
                    ss.length(),
                    length,
                    count);
@@ -399,7 +389,7 @@ void sexp_input_stream_t::scan_base64_string(sexp_simple_string_t &ss, uint32_t 
     skip_char('|');
     if (ss.length() != length && length != std::numeric_limits<uint32_t>::max())
         sexp_error(sexp_exception_t::warning,
-                   "Base64 string has length %d different than declared length %d",
+                   "Base64 string has length %zu different than declared length %zu",
                    ss.length(),
                    length,
                    count);
@@ -450,7 +440,7 @@ sexp_simple_string_t sexp_input_stream_t::scan_simple_string(void)
     }
 
     if (ss.length() == 0)
-        sexp_error(sexp_exception_t::warning, "Simple string has zero length", 0, 0, count);
+        sexp_error(sexp_exception_t::warning, "Simple string has zero length", count);
     return ss;
 }
 

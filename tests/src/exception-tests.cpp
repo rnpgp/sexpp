@@ -1,6 +1,6 @@
 /**
  *
- * Copyright 2021-2023 Ribose Inc. (https://www.ribose.com)
+ * Copyright 2021-2025 Ribose Inc. (https://www.ribose.com)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -128,9 +128,8 @@ TEST_F(ExceptionTests, StringBadLength)
 
 TEST_F(ExceptionTests, StringTooLongTruncated)
 {
-    do_scan_with_exception("(982582599:",
-                           "SEXP ERROR: Too long verbatim string: 982582599 at position 11");
-}
+    do_scan_with_exception(
+      "(982582599:", "SEXP ERROR: Verbatim string is too long: 982582599 at position 11");}
 
 TEST_F(ExceptionTests, StringTruncated)
 {

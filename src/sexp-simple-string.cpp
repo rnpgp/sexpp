@@ -146,8 +146,6 @@ sexp_output_stream_t *sexp_simple_string_t::print_advanced(sexp_output_stream_t 
     else
         sexp_error(sexp_exception_t::error,
                    "Can't print in advanced mode with restricted output character set",
-                   0,
-                   0,
                    EOF);
     return os;
 }
