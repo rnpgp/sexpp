@@ -106,7 +106,7 @@ sexp_output_stream_t *sexp_output_stream_t::var_put_char(int c)
  * Change os->byte_size to newByteSize
  * record mode in output stream for automatic line breaks
  */
-sexp_output_stream_t *sexp_output_stream_t::change_output_byte_size(size_t newByteSize,
+sexp_output_stream_t *sexp_output_stream_t::change_output_byte_size(int newByteSize,
                                                                     sexp_print_mode newMode)
 {
     if (newByteSize != 4 && newByteSize != 6 && newByteSize != 8)
