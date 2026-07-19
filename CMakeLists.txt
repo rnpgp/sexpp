@@ -40,6 +40,7 @@ option(DOWNLOAD_GTEST "Download googletest" ON)
 option(BUILD_SHARED_LIBS "Build shared library" OFF)
 
 include(GNUInstallDirs)
+include(CMakePackageConfigHelpers)
 include(CheckCXXSourceCompiles)
 
 if (WITH_SANITIZERS)
@@ -292,11 +293,32 @@ configure_file(
 )
 
 if (WIN32 AND BUILD_SHARED_LIBS)
-    install(TARGETS sexpp RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}")
-    install(TARGETS sexpp ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}")
+    install(TARGETS sexpp EXPORT sexpp-targets RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}")
+    install(TARGETS sexpp EXPORT sexpp-targets ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}")
 else(WIN32 AND BUILD_SHARED_LIBS)
-    install(TARGETS sexpp DESTINATION "${CMAKE_INSTALL_LIBDIR}")
+    install(TARGETS sexpp EXPORT sexpp-targets DESTINATION "${CMAKE_INSTALL_LIBDIR}")
 endif(WIN32 AND BUILD_SHARED_LIBS)
+
+install(EXPORT sexpp-targets
+    FILE sexpp-targets.cmake
+    NAMESPACE sexpp::
+    DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/sexpp"
+)
+
+configure_package_config_file(
+    "${CMAKE_CURRENT_SOURCE_DIR}/cmake/sexpp-config.cmake.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/sexpp-config.cmake"
+    INSTALL_DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/sexpp"
+)
+write_basic_package_version_file(
+    "${CMAKE_CURRENT_BINARY_DIR}/sexpp-config-version.cmake"
+    COMPATIBILITY SameMajorVersion
+)
+install(FILES
+    "${CMAKE_CURRENT_BINARY_DIR}/sexpp-config.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/sexpp-config-version.cmake"
+    DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/sexpp"
+)
 
 install(DIRECTORY include/ DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
 install(FILES "${CONFIGURED_PC}" DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
