@@ -148,6 +148,10 @@ class SEXP_PUBLIC_SYMBOL sexp_char_defs_t {
     static const unsigned char values[256][3]; /* values of c as { dec. hex, base64 } digit */
     static std::locale         c_locale;
 
+    static bool is_printable(int c)
+    {
+        return c >= 0 && c <= 255 && std::isprint((char) c, c_locale);
+    };
     static bool is_white_space(int c)
     {
         return c >= 0 && c <= 255 && std::isspace((char) c, c_locale);

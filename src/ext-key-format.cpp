@@ -193,7 +193,7 @@ std::string ext_key_input_stream_t::scan_name(int c)
     std::string name;
     if (!is_alpha(c)) {
         ext_key_error(sexp_exception_t::error,
-                      isprint(next_char) ?
+                      is_printable(c) ?
                         "unexpected character '%c' (0x%x) found starting a name field" :
                         "unexpected character '0x%x' found starting a name field",
                       c,
@@ -211,7 +211,7 @@ std::string ext_key_input_stream_t::scan_name(int c)
             }
             if (!is_namechar(c)) {
                 ext_key_error(sexp_exception_t::error,
-                              isprint(next_char) ?
+                              is_printable(c) ?
                                 "unexpected character '%c' (0x%x) found in a name field" :
                                 "unexpected character '0x%x' found in a name field",
                               c,
