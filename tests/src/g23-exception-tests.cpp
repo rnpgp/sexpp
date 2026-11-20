@@ -32,6 +32,19 @@ using ::testing::UnitTest;
 namespace {
 class G23ExceptionTests : public testing::Test {
   protected:
+    static void do_scan_text(const char *text, const char *msg)
+    {
+        std::istringstream iss(text);
+        try {
+            ext_key_input_stream_t is(&iss);
+            extended_private_key_t key;
+            is.scan(key);
+            FAIL() << "sexp::sexp_exception_t expected but has not been thrown";
+        } catch (sexp::sexp_exception_t &e) {
+            EXPECT_STREQ(e.what(), msg);
+        }
+    }
+
     static void do_scan_ex(const char *fn, const char *msg)
     {
         std::ifstream ifs(sexp_samples_folder + "/compat/g23/" + fn, std::ifstream::binary);
@@ -79,6 +92,20 @@ TEST_F(G23ExceptionTests, G23MalformedInvalidNameFirstChar)
       "malformed_invalid_name_first_char.key",
       "EXTENDED KEY FORMAT ERROR: unexpected character '1' (0x31) found starting a name field "
       "at position 21");
+}
+
+TEST_F(G23ExceptionTests, G23MalformedNonPrintableNameFirstChar)
+{
+    do_scan_text("\x01: value",
+                 "EXTENDED KEY FORMAT ERROR: unexpected character '0x1' found starting a "
+                 "name field at position 0");
+}
+
+TEST_F(G23ExceptionTests, G23MalformedNonPrintableNameChar)
+{
+    do_scan_text("Name\x01: value",
+                 "EXTENDED KEY FORMAT ERROR: unexpected character '0x1' found in a name "
+                 "field at position 4");
 }
 
 // Malformed extended key format, no key field

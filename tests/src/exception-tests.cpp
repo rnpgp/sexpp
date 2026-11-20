@@ -22,10 +22,19 @@
  */
 
 #include "sexp-tests.h"
+#include <clocale>
 
 using namespace sexp;
 
 namespace {
+class CTypeLocaleGuard {
+    std::string previous;
+
+  public:
+    CTypeLocaleGuard() : previous(std::setlocale(LC_CTYPE, nullptr)) {}
+    ~CTypeLocaleGuard() { std::setlocale(LC_CTYPE, previous.c_str()); }
+};
+
 class ExceptionTests : public testing::Test {
   protected:
     static void do_scan_with_exception(const char *str_in, const char *msg)
@@ -58,6 +67,25 @@ TEST_F(ExceptionTests, IllegalCharacter)
 {
     do_scan_with_exception("(This is a test ?)",
                            "SEXP ERROR: illegal character '?' (0x3f) at position 16");
+}
+
+TEST_F(ExceptionTests, IllegalCharacterUsesCLocale)
+{
+    CTypeLocaleGuard guard;
+    bool             found = false;
+    for (const char *locale : {"en_US.iso88591",
+                               "en_US.ISO8859-1",
+                               "en_US.ISO-8859-1",
+                               "English_United States.1252"}) {
+        if (std::setlocale(LC_CTYPE, locale) && std::isprint(0xa0)) {
+            found = true;
+            break;
+        }
+    }
+    if (!found) {
+        GTEST_SKIP() << "No single-byte locale with printable non-ASCII characters";
+    }
+    do_scan_with_exception("\xa0", "SEXP ERROR: illegal character 0xa0 at position 0");
 }
 
 TEST_F(ExceptionTests, UnexpectedEofAfterQuote)
