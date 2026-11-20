@@ -431,9 +431,9 @@ sexp_simple_string_t sexp_input_stream_t::scan_simple_string(void)
             scan_verbatim_string(ss, length);
             break;
         default: {
-            const char *const msg = (next_char == EOF) ? "unexpected end of file" :
-                                    isprint(next_char) ? "illegal character '%c' (0x%x)" :
-                                                         "illegal character 0x%x";
+            const char *const msg = (next_char == EOF)      ? "unexpected end of file" :
+                                    is_printable(next_char) ? "illegal character '%c' (0x%x)" :
+                                                              "illegal character 0x%x";
             sexp_error(sexp_exception_t::error, msg, next_char, next_char, count);
         }
         }
