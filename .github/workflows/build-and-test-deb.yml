@@ -52,6 +52,13 @@ jobs:
     steps:
       - name: Install packages
         run: |
+          if echo "${{ matrix.image }}" | grep -q "debian:11"; then
+            # bullseye has moved to the archive; the regular pools no longer
+            # serve the frozen package versions
+            sed -i 's|http://deb.debian.org|http://archive.debian.org|g; s|http://security.debian.org|http://archive.debian.org|g' /etc/apt/sources.list || true
+            sed -i '/bullseye-backports/d' /etc/apt/sources.list || true
+            apt-get -o Acquire::Check-Valid-Until=false update
+          fi
           apt-get update
           apt-get -y install sudo git wget build-essential libssl-dev software-properties-common
 

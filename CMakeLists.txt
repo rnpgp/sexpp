@@ -293,8 +293,11 @@ configure_file(
 )
 
 if (WIN32 AND BUILD_SHARED_LIBS)
-    install(TARGETS sexpp EXPORT sexpp-targets RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}")
-    install(TARGETS sexpp EXPORT sexpp-targets ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}")
+    # a target may appear in an export set only once, so the runtime and
+    # archive components go into a single install() call
+    install(TARGETS sexpp EXPORT sexpp-targets
+        RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
+        ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}")
 else(WIN32 AND BUILD_SHARED_LIBS)
     install(TARGETS sexpp EXPORT sexpp-targets DESTINATION "${CMAKE_INSTALL_LIBDIR}")
 endif(WIN32 AND BUILD_SHARED_LIBS)
