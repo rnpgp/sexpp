@@ -100,7 +100,7 @@ TEST_F(G23CompatTests, G23CorrectWithEmptyLine)
     scan_and_check_correct("correct_with_empty_line.key");
 }
 
-// Correct extended key format, witg windows line endings
+// Correct extended key format, with windows line endings
 TEST_F(G23CompatTests, G23CorrectWithWindowsEol)
 {
     scan_and_check_correct("correct_with_windows_eol.key");
