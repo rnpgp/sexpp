@@ -52,23 +52,19 @@ jobs:
     steps:
       - name: Install packages
         run: |
+          # the embedded docker DNS resolver is broken for emulated i386
+          # containers on recent runner images; point at public resolvers
+          # directly so apt can fetch package lists
+          echo 'nameserver 8.8.8.8' > /etc/resolv.conf
+          echo 'nameserver 1.1.1.1' >> /etc/resolv.conf
           if echo "${{ matrix.image }}" | grep -q "debian:11"; then
             # bullseye has moved to the archive; the regular pools no longer
             # serve the frozen package versions
             sed -i 's|http://deb.debian.org|http://archive.debian.org|g; s|http://security.debian.org|http://archive.debian.org|g' /etc/apt/sources.list || true
             sed -i '/bullseye-backports/d' /etc/apt/sources.list || true
-            # the archive mirror is DNS-flaky, especially under i386
-            # emulation; retry before giving up (the if-guard keeps the
-            # shell from aborting on the first failed update)
-            for i in 1 2 3 4 5; do
-              if apt-get -o Acquire::Check-Valid-Until=false update; then break; fi
-              sleep 5
-            done
+            apt-get -o Acquire::Check-Valid-Until=false update
           fi
-          for i in 1 2 3; do
-            if apt-get update; then break; fi
-            sleep 5
-          done
+          apt-get update
           apt-get -y install sudo git wget build-essential libssl-dev software-properties-common
 
       - name: Checkout
