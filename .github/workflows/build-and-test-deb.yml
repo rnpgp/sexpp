@@ -38,30 +38,28 @@ env:
 
 jobs:
   build-and-test:
-    name: ${{ matrix.image }}-${{ matrix.env.CC }} shared lib ${{ matrix.shared }}
-    runs-on: ${{ matrix.runs_on }}
+    name: ${{ matrix.image.name }}-${{ matrix.env.CC }} shared lib ${{ matrix.shared }}
+    runs-on: ${{ matrix.image.runs_on }}
     strategy:
       fail-fast: false
       matrix:
-        image: [ 'i386/debian:12', 'amd64/debian:12', 'i386/debian:11', 'amd64/debian:11' ]
+        # name resolution and networking are broken for emulated i386
+        # containers on the ubuntu-26.04 runner images (amd64 legs are
+        # unaffected), so the i386 legs stay on the previous image
+        image:
+          - { name: 'i386/debian:12', runs_on: ubuntu-24.04 }
+          - { name: 'amd64/debian:12', runs_on: ubuntu-latest }
+          - { name: 'i386/debian:11', runs_on: ubuntu-24.04 }
+          - { name: 'amd64/debian:11', runs_on: ubuntu-latest }
         env: [ {CC: gcc, CXX: g++}, {CC: clang, CXX: clang++} ]
         shared: [on, off]
-        runs_on: [ubuntu-latest]
-        include:
-          # name resolution and networking are broken for emulated i386
-          # containers on the ubuntu-26.04 runner images (amd64 legs are
-          # unaffected), so keep the i386 legs on the previous image
-          - image: 'i386/debian:12'
-            runs_on: ubuntu-24.04
-          - image: 'i386/debian:11'
-            runs_on: ubuntu-24.04
 
-    container: ${{ matrix.image }}
+    container: ${{ matrix.image.name }}
     env: ${{ matrix.env }}
     steps:
       - name: Install packages
         run: |
-          if echo "${{ matrix.image }}" | grep -q "debian:11"; then
+          if [[ "${{ matrix.image.name }}" == *"debian:11"* ]]; then
             # bullseye has moved to the archive; the regular pools no longer
             # serve the frozen package versions
             sed -i 's|http://deb.debian.org|http://archive.debian.org|g; s|http://security.debian.org|http://archive.debian.org|g' /etc/apt/sources.list || true
@@ -78,13 +76,13 @@ jobs:
           fetch-depth: 1
 
       - name: Install cmake/i386
-        if: startsWith(matrix.image, 'i386')
+        if: startsWith(matrix.image.name, 'i386')
         run: |
           wget -nv https://github.com/xpack-dev-tools/cmake-xpack/releases/download/v${{ env.CMAKE_VERSION }}/xpack-cmake-${{ env.CMAKE_VERSION }}-linux-ia32.tar.gz
           tar -zxf xpack-cmake-${{ env.CMAKE_VERSION }}-linux-ia32.tar.gz --directory /usr/local --strip-components=1 --skip-old-files
 
       - name: Install cmake/amd64
-        if: startsWith(matrix.image, 'amd64')
+        if: startsWith(matrix.image.name, 'amd64')
         run: |
           wget -nv https://github.com/xpack-dev-tools/cmake-xpack/releases/download/v${{ env.CMAKE_VERSION }}/xpack-cmake-${{ env.CMAKE_VERSION }}-linux-x64.tar.gz
           tar -zxf xpack-cmake-${{ env.CMAKE_VERSION }}-linux-x64.tar.gz --directory /usr/local --strip-components=1 --skip-old-files
@@ -113,7 +111,7 @@ jobs:
       - name: Checkout shell test framework/amd64 only
         # i386 supports actions/checkout@v1 only (no Node.js 32-bit binary)
         # and and actions/checkout@v1 has some issues with nested repositories
-        if: startsWith(matrix.image, 'amd64')
+        if: startsWith(matrix.image.name, 'amd64')
         uses: actions/checkout@v4
         with:
           repository: kward/shunit2
@@ -125,6 +123,6 @@ jobs:
 
       - name: Run additional tests
         # See above, just assume that in i386 config it was installed correctly
-        if: startsWith(matrix.image, 'amd64')
+        if: startsWith(matrix.image.name, 'amd64')
         shell: bash
         run: tests/scripts/tests.sh
