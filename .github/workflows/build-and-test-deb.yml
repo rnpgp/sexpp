@@ -39,24 +39,28 @@ env:
 jobs:
   build-and-test:
     name: ${{ matrix.image }}-${{ matrix.env.CC }} shared lib ${{ matrix.shared }}
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.runs_on }}
     strategy:
       fail-fast: false
       matrix:
         image: [ 'i386/debian:12', 'amd64/debian:12', 'i386/debian:11', 'amd64/debian:11' ]
         env: [ {CC: gcc, CXX: g++}, {CC: clang, CXX: clang++} ]
         shared: [on, off]
+        runs_on: [ubuntu-latest]
+        include:
+          # name resolution and networking are broken for emulated i386
+          # containers on the ubuntu-26.04 runner images (amd64 legs are
+          # unaffected), so keep the i386 legs on the previous image
+          - image: 'i386/debian:12'
+            runs_on: ubuntu-24.04
+          - image: 'i386/debian:11'
+            runs_on: ubuntu-24.04
 
     container: ${{ matrix.image }}
     env: ${{ matrix.env }}
     steps:
       - name: Install packages
         run: |
-          # the embedded docker DNS resolver is broken for emulated i386
-          # containers on recent runner images; point at public resolvers
-          # directly so apt can fetch package lists
-          echo 'nameserver 8.8.8.8' > /etc/resolv.conf
-          echo 'nameserver 1.1.1.1' >> /etc/resolv.conf
           if echo "${{ matrix.image }}" | grep -q "debian:11"; then
             # bullseye has moved to the archive; the regular pools no longer
             # serve the frozen package versions
