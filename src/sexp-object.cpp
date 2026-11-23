@@ -32,7 +32,7 @@ namespace sexp {
 
 /*
  * sexp_string_t::parse(sis)
- * Parses the strin from input stream
+ * Parses the string from input stream
  */
 
 void sexp_string_t::parse(sexp_input_stream_t *sis)
