@@ -58,14 +58,15 @@ jobs:
             sed -i 's|http://deb.debian.org|http://archive.debian.org|g; s|http://security.debian.org|http://archive.debian.org|g' /etc/apt/sources.list || true
             sed -i '/bullseye-backports/d' /etc/apt/sources.list || true
             # the archive mirror is DNS-flaky, especially under i386
-            # emulation; retry before giving up
+            # emulation; retry before giving up (the if-guard keeps the
+            # shell from aborting on the first failed update)
             for i in 1 2 3 4 5; do
-              apt-get -o Acquire::Check-Valid-Until=false update && break
+              if apt-get -o Acquire::Check-Valid-Until=false update; then break; fi
               sleep 5
             done
           fi
           for i in 1 2 3; do
-            apt-get update && break
+            if apt-get update; then break; fi
             sleep 5
           done
           apt-get -y install sudo git wget build-essential libssl-dev software-properties-common
