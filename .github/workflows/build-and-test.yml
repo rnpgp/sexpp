@@ -42,8 +42,11 @@ jobs:
       fail-fast: false
       matrix:
         # macos-13 and windows-2019 were retired upstream; their jobs sat
-        # queued for 24h and timed out on every pull request
-        os: [ ubuntu-22.04, ubuntu-24.04, macos-14, macos-15 ]
+        # queued for 24h and timed out on every pull request. macos-14
+        # receives runners so rarely that its jobs hung for hours and were
+        # cancelled before starting on every pull request, so macOS is
+        # covered by macos-15 alone.
+        os: [ ubuntu-22.04, ubuntu-24.04, macos-15 ]
         env: [ { } ]
         shared: [on, off]
         # on macos gcc is an alias to clang by default, so there is no real value in macos clang run
