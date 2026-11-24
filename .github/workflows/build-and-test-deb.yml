@@ -72,7 +72,14 @@ jobs:
             apt-get -o Acquire::Check-Valid-Until=false update
           fi
           apt-get update
-          apt-get -y install sudo git wget build-essential libssl-dev software-properties-common
+          # software-properties-common is Ubuntu tooling and was dropped
+          # from debian 13 and sid; older releases keep it for the llvm
+          # repository setup in the clang step
+          PKGS="sudo git wget build-essential libssl-dev"
+          if echo "${{ matrix.image.name }}" | grep -qE "debian:(11|12)"; then
+            PKGS="$PKGS software-properties-common"
+          fi
+          apt-get -y install $PKGS
 
       - name: Checkout
         # Because i386 support v1 only (no node run-time)
@@ -95,8 +102,12 @@ jobs:
       - name: Install clang
         if: matrix.env.CC == 'clang'
         run: |
-          wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key|sudo apt-key add -
-          apt-add-repository "deb http://apt.llvm.org/stretch/ llvm-toolchain-stretch main"
+          # debian 13 and sid ship a current clang in the base archive;
+          # only the older releases need the llvm repository
+          if echo "${{ matrix.image.name }}" | grep -qE "debian:(11|12)"; then
+            wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key|sudo apt-key add -
+            apt-add-repository "deb http://apt.llvm.org/stretch/ llvm-toolchain-stretch main"
+          fi
           apt-get install -y clang
 
       - name: Adjust environment
