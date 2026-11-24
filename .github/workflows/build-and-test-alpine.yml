@@ -1,0 +1,77 @@
+#
+# Copyright 2026 Ribose Inc. (https://www.ribose.com)
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy of
+# this software and associated documentation files (the "Software"), to deal in
+# the Software without restriction, including without limitation the rights to
+# use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+# the Software, and to permit persons to whom the Software is furnished to do so,
+# subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+#
+
+name: build-and-test-alpine
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: '${{ github.workflow }}-${{ github.job }}-${{ github.head_ref || github.ref_name }}'
+  cancel-in-progress: true
+
+env:
+  MAKEFLAGS: j4
+
+jobs:
+  build-and-test:
+    name: ${{ matrix.image }}-${{ matrix.env.CC }} shared lib ${{ matrix.shared }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # The alpine set mirrors the rnp alpine.yml configuration, which
+        # exercises sexpp on these releases.
+        image: [ 'alpine:latest', 'alpine:edge' ]
+        env: [ {CC: gcc, CXX: g++}, {CC: clang, CXX: clang++} ]
+        shared: [on, off]
+
+    container: ${{ matrix.image }}
+    env: ${{ matrix.env }}
+    steps:
+      - name: Install packages
+        run: apk add --no-cache build-base cmake clang git bash
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Adjust environment
+        run: |
+          echo "SEXP_INSTALL_PATH=$PWD/install" >> $GITHUB_ENV
+          echo "SHARED_LIB=${{ matrix.shared }}" >> $GITHUB_ENV
+
+      - name: Configure
+        run: cmake . -Bbuild -DCMAKE_INSTALL_PREFIX=${{ env.SEXP_INSTALL_PATH }} -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=${{ matrix.shared }}
+
+      - name: Build
+        run: cmake --build build --config Release
+
+      - name: Run tests
+        run: ctest --test-dir build --output-on-failure
+
+      - name: Install
+        run: cmake --install build

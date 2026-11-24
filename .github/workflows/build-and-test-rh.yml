@@ -41,7 +41,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        image: [ 'quay.io/centos/centos:stream9', 'fedora:39', 'fedora:40']
+        # fedora 39 is end of life and dropped; fedora 43 and 44 mirror
+        # the rnp centos-and-fedora.yml configuration, which exercises
+        # sexpp on these releases.
+        image: [ 'quay.io/centos/centos:stream9', 'fedora:40', 'fedora:43', 'fedora:44']
         env: [ {CC: gcc, CXX: g++}, {CC: clang, CXX: clang++} ]
         shared: [ on, off ]
     container: ${{ matrix.image }}

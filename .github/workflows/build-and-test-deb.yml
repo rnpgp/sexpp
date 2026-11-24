@@ -45,12 +45,17 @@ jobs:
       matrix:
         # name resolution and networking are broken for emulated i386
         # containers on the ubuntu-26.04 runner images (amd64 legs are
-        # unaffected), so the i386 legs stay on the previous image
+        # unaffected), so the i386 legs stay on the previous image.
+        # The debian set mirrors the rnp debian.yml configuration, which
+        # exercises sexpp on these releases.
         image:
+          - { name: 'i386/debian:13', runs_on: ubuntu-24.04 }
+          - { name: 'amd64/debian:13', runs_on: ubuntu-latest }
           - { name: 'i386/debian:12', runs_on: ubuntu-24.04 }
           - { name: 'amd64/debian:12', runs_on: ubuntu-latest }
           - { name: 'i386/debian:11', runs_on: ubuntu-24.04 }
           - { name: 'amd64/debian:11', runs_on: ubuntu-latest }
+          - { name: 'amd64/debian:sid', runs_on: ubuntu-latest }
         env: [ {CC: gcc, CXX: g++}, {CC: clang, CXX: clang++} ]
         shared: [on, off]
 
