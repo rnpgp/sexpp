@@ -41,12 +41,14 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # macos-13 and windows-2019 were retired upstream; their jobs sat
-        # queued for 24h and timed out on every pull request. macos-14
-        # receives runners so rarely that its jobs hung for hours and were
-        # cancelled before starting on every pull request, so macOS is
-        # covered by macos-15 alone.
-        os: [ ubuntu-22.04, ubuntu-24.04, macos-15 ]
+        # macos-13, windows-2019 and macos-14 were retired upstream; their
+        # jobs sat queued for 24h and timed out on every pull request.
+        # The macOS set mirrors the rnp macos.yml configuration, which
+        # exercises sexpp on these platforms: Intel continues through the
+        # -intel suffix labels and the current macOS 26 release.
+        os:
+          [ ubuntu-22.04, ubuntu-24.04,
+            macos-15, macos-15-intel, macos-26, macos-26-intel ]
         env: [ { } ]
         shared: [on, off]
         # on macos gcc is an alias to clang by default, so there is no real value in macos clang run
